@@ -12,17 +12,25 @@ namespace AspNetWebService.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
+        /// <summary>
+        /// Represents the application's database context.
+        /// </summary>
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Represents the logger instance for UserController.
+        /// </summary>
         private readonly ILogger<UserController> _logger;
 
         /// <summary>
-        /// Initializes a new instance of the UserController class.
+        /// Initializes a new instance of the UserController class with the provided application database context and logger.
         /// </summary>
         /// <param name="context">The application database context.</param>
-        public UserController(ApplicationDbContext context)
+        /// <param name="logger">The logger instance for UserController.</param>
+        public UserController(ApplicationDbContext context, ILogger<UserController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         /// <summary>
@@ -47,7 +55,7 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<User>> GetUserById(string id)
         {
-            if(string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(id))
             {
                 return BadRequest("ID parameter cannot be null or empty.");
             }
@@ -92,7 +100,7 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
-            if(user == null)
+            if (user == null)
             {
                 return BadRequest("user parameter cannot be null or empty.");
             }
@@ -115,7 +123,7 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateUser(string id, User user)
         {
-            if(user == null || id == null)
+            if (user == null || id == null)
             {
                 return BadRequest("user parameter and id cannot be null or empty.");
             }
@@ -157,7 +165,7 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            if(id == null)
+            if (id == null)
             {
                 return BadRequest("Id cannot be null or empty.");
             }
