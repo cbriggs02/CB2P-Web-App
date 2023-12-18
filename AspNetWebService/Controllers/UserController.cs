@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Data;
 using AspNetWebService.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,36 +13,36 @@ namespace AspNetWebService.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        /// <summary>
-        /// Represents the application's database context.
-        /// </summary>
         private readonly ApplicationDbContext _context;
-
-        /// <summary>
-        /// Represents the logger instance for UserController.
-        /// </summary>
         private readonly ILogger<UserController> _logger;
+        private readonly IMapper _mapper;
 
         /// <summary>
-        /// Initializes a new instance of the UserController class with the provided application database context and logger.
+        /// Initializes a new instance of the UserController class.
         /// </summary>
         /// <param name="context">The application database context.</param>
-        /// <param name="logger">The logger instance for UserController.</param>
-        public UserController(ApplicationDbContext context, ILogger<UserController> logger)
+        /// <param name="logger">The logger instance for logging.</param>
+        /// <param name="mapper">The AutoMapper instance for object mapping.</param>
+        public UserController(ApplicationDbContext context, ILogger<UserController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         /// <summary>
-        /// Retrieves all users from the database.
+        /// Retrieves all users from the database as DTOs.
         /// </summary>
-        /// <returns>A list of all users.</returns>
+        /// <returns>A list of user DTOs.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var userDTOs = await _context.Users
+              .Select(user => _mapper.Map<UserDTO>(user))
+              .ToListAsync();
+
+            return Ok(userDTOs);
         }
 
         /// <summary>

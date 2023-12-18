@@ -31,8 +31,16 @@ namespace AspNetWebService
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // Loads the configuration from the appsettings.json file into the application's configuration builder.
-            builder.Configuration.AddJsonFile("appsettings.json");
+            // Creates a ConfigurationBuilder to build configuration settings for the application.
+            var configuration = new ConfigurationBuilder()
+
+                // AddJsonFile specifies the JSON file to load configuration settings from.
+                // "appsettings.json" is the name of the JSON file containing the configuration.
+                // optional: false specifies that the file is required. If not found, an exception is thrown.
+                // reloadOnChange: true enables automatic reloading of the configuration if the file changes.
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
 
             // Retrieves the connection string named "DefaultConnection" from the loaded configuration.
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -70,6 +78,10 @@ namespace AspNetWebService
             // Use the SecretKeyGenerator to generate a secret key dynamically
             var secretKey = SecretKeyGenerator.GenerateRandomSecretKey(32);
 
+            // Read JwtSettings from appsettings.json
+            var validIssuer = configuration["JwtSettings:ValidIssuer"];
+            var validAudience = configuration["JwtSettings:ValidAudience"];
+
             // Configure JWT authentication services.
             builder.Services.AddAuthentication(options =>
             {
@@ -87,8 +99,8 @@ namespace AspNetWebService
 
                    // Use dynamically generated secret key
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                   ValidIssuer = "https://localhost:7234",
-                   ValidAudience = "https://localhost:3000"
+                   ValidIssuer = validIssuer,
+                   ValidAudience = validAudience
                };
            });
 
