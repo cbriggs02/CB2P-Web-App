@@ -9,16 +9,18 @@ namespace AspNetWebService.Models
     public class UserDTO
     {
         /// <summary>
-        /// Gets or sets the unique identifier for the user.
-        /// </summary>
-        [Required]
-        public string Id { get; set; }
-
-        /// <summary>
         /// Gets or sets the username of the user.
         /// </summary>
         [Required]
         public string UserName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the password of the user.
+        /// </summary>
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+
 
         /// <summary>
         /// Gets or sets the first name of the user.
@@ -36,6 +38,16 @@ namespace AspNetWebService.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets the birth date of the user.
+        /// </summary>
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
+        [PersonalData]
+        [Display(Name = "Birth Day")]
+        public DateTime BirthDate { get; set; }
+
         /// <summary>
         /// Gets or sets the email address of the user.
         /// </summary>
@@ -51,5 +63,14 @@ namespace AspNetWebService.Models
         [Phone]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
+
+        /// <summary>
+        /// Checks if the birth date has been set for the user.
+        /// </summary>
+        /// <returns>True if the birth date is set and valid, otherwise false.</returns>
+        public bool IsBirthDateSet()
+        {
+            return BirthDate > DateTime.MinValue;
+        }
     }
 }

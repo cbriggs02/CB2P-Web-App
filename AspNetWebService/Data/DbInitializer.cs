@@ -74,7 +74,7 @@ namespace AspNetWebService.Data
             foreach (var user in defaultUsers)
             {
                 // Set a default password
-                user.PasswordHash = passwordHasher.HashPassword(null, "Password123");
+                user.PasswordHash = passwordHasher.HashPassword(null, "P@s_s8w0rd!");
                 context.Users.Add(user);
             }
 

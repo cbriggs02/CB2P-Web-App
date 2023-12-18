@@ -1,6 +1,7 @@
 ﻿using AspNetWebService.Data;
 using AspNetWebService.Models;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ namespace AspNetWebService.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
         private readonly ILogger<UserController> _logger;
         private readonly IMapper _mapper;
 
@@ -21,11 +23,13 @@ namespace AspNetWebService.Controllers
         /// Initializes a new instance of the UserController class.
         /// </summary>
         /// <param name="context">The application database context.</param>
+        /// <param name="userManager">The UserManager for managing users.</param>
         /// <param name="logger">The logger instance for logging.</param>
-        /// <param name="mapper">The AutoMapper instance for object mapping.</param>
-        public UserController(ApplicationDbContext context, ILogger<UserController> logger, IMapper mapper)
+        /// <param name="mapper">The IMapper instance for object mapping.</param>
+        public UserController(ApplicationDbContext context, UserManager<User> userManager, ILogger<UserController> logger, IMapper mapper)
         {
             _context = context;
+            _userManager = userManager;
             _logger = logger;
             _mapper = mapper;
         }
@@ -75,7 +79,6 @@ namespace AspNetWebService.Controllers
                 // Create a DTO (Data Transfer Object) to limit exposed user information
                 var userDTO = new UserDTO
                 {
-                    Id = user.Id,
                     UserName = user.UserName,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
@@ -94,32 +97,83 @@ namespace AspNetWebService.Controllers
         }
 
         /// <summary>
-        /// Creates a new user.
+        /// Creates a new user using the provided UserDTO object.
         /// </summary>
-        /// <param name="user">The user object to create.</param>
-        /// <returns>The created user.</returns>
+        /// <param name="userDTO">The UserDTO object containing user information.</param>
+        /// <returns>
+        /// Returns a response indicating the creation status.
+        /// - If successful, returns a 201 Created response with the created user's details in a UserDTO format.
+        /// - If the userDTO is invalid or user creation fails, returns a 400 Bad Request response with error details.
+        /// </returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<User>> CreateUser(User user)
+        public async Task<ActionResult<User>> CreateUser(UserDTO userDTO)
         {
-            if (user == null)
+            if (userDTO == null)
             {
-                return BadRequest("user parameter cannot be null or empty.");
+                return BadRequest("User parameter cannot be null or empty.");
             }
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("The provided user object is invalid");
+            }
 
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            // Create new User with UserDTO data
+            var newUser = new User
+            {
+                UserName = userDTO.UserName,
+                FirstName = userDTO.FirstName,
+                LastName = userDTO.LastName,
+                BirthDate = userDTO.BirthDate,
+                Email = userDTO.Email,
+                PhoneNumber = userDTO.PhoneNumber,
+                LockoutEnd = DateTimeOffset.UtcNow
+            };
+
+            // Create the user with hashed password using UserManager
+            var result = await _userManager.CreateAsync(newUser, userDTO.Password);
+
+            if (result.Succeeded)
+            {
+                // Map the created User object back to a UserDTO
+                var createdUserDTO = new UserDTO
+                {
+                    UserName = newUser.UserName,
+                    Password = "",
+                    FirstName = newUser.FirstName,
+                    LastName = newUser.LastName,
+                    BirthDate = newUser.BirthDate,
+                    Email = newUser.Email,
+                    PhoneNumber = newUser.PhoneNumber
+                };
+
+                // User created successfully, return the UserDTO
+                return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, createdUserDTO);
+            }
+            else
+            {
+                // User creation failed, handle errors
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return BadRequest(ModelState);
+            }
         }
 
         /// <summary>
         /// Updates an existing user by ID.
         /// </summary>
         /// <param name="id">The ID of the user to update.</param>
-        /// <param name="user">The updated user object.</param>
-        /// <returns>An IActionResult representing the result of the operation.</returns>
+        /// <param name="userDTO">The updated UserDTO object.</param>
+        /// <returns>
+        /// An IActionResult representing the result of the operation.
+        /// - If the update is successful, returns a 204 NoContent response.
+        /// - If the provided user object or ID is invalid, returns a 400 BadRequest response.
+        /// - If the user to update is not found, returns a 404 NotFound response.
+        /// </returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -133,7 +187,12 @@ namespace AspNetWebService.Controllers
 
             if (id != user.Id)
             {
-                return BadRequest("Id Url header does not match Id of user object");
+                return BadRequest("Id URL parameter does not match the Id of the user object");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("The provided user object is invalid");
             }
 
             _context.Entry(user).State = EntityState.Modified;
