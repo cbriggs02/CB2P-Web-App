@@ -1,2 +1,2 @@
 # CB2P-Web-App
-Building a React.js Web Application that communicates with a ASP.NET Core Web API RESTful Web Service
+I have created an independent React application using TypeScript, prioritizing type safety throughout the development cycle. This React client interacts with an ASP.NET Core Web API service that I developed following RESTful architecture, complemented by Swagger documentation. The project is seamlessly integrated with a Microsoft SQL Server as its underlying database. Furthermore, the communication protocol between the client and web service is HTTPS, ensuring secure web communication.
