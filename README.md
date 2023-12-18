@@ -1,4 +1,2 @@
 # CB2P-Web-App
-Building a Independent React Application using Type Script to ensure type saftey during development.\
-Building a ASP.NET Core Web api Service following RESTfull archutecture with Swaggor documenttaion.
-This project uses a microsoft SQL Server.
+I developed an independent React application using TypeScript to ensure type safety throughout the development process. This React client communicates with an ASP.NET Core Web API service that I built following RESTful architecture, complete with Swagger documentation. The project integrates seamlessly with a Microsoft SQL Server, serving as its underlying database.
