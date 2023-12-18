@@ -1,6 +1,11 @@
+# Global Gitignore file
+
+# Ignore compiled code and build files
 **/bin/
 **/obj/
 **/.vs/
-**/Lab2_project_folder
 **appsettings.Development.json
 **appsettings.json
+
+# Ignore Node.js modules
+node_modules/
