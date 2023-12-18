@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
+using AutoMapper;
+using AspNetWebService.Mapping;
 
 namespace AspNetWebService
 {
@@ -96,6 +98,15 @@ namespace AspNetWebService
            });
 
             builder.Services.AddAuthorization();
+
+            // Manual registration of AutoMapper
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile<AutoMapperProfile>();
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            builder.Services.AddSingleton(mapper);
 
             var app = builder.Build();
 
