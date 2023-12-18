@@ -22,11 +22,9 @@ namespace AspNetWebService
         public static void Main(string[] args)
         {
 
-            // Set up the logger using Serilog
+            // Set up the logger using Serilog to write to console
             Log.Logger = new LoggerConfiguration()
-                // Write log events to the console
                 .WriteTo.Console()
-                // Create the logger instance
                 .CreateLogger();
 
             var builder = WebApplication.CreateBuilder(args);
@@ -41,14 +39,8 @@ namespace AspNetWebService
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-
-            // Retrieves the connection string named "DefaultConnection" from the loaded configuration.
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-
-            // Adds the ApplicationDbContext to the services with the specified SQL Server connection string.
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
-
-            // Add Controllers to the service container.
             builder.Services.AddControllers();
 
             // Add Swagger generation services to the service container.
@@ -61,13 +53,12 @@ namespace AspNetWebService
             // Configure and add ASP.NET Core Identity with custom User and Role classes, and password policies.
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
-                // Password options configuration
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireLowercase = true;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>(); // Use EF Core for storing Identity data
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
             // Configure options for password hashing compatibility mode.
             builder.Services.Configure<PasswordHasherOptions>(options =>
@@ -104,7 +95,6 @@ namespace AspNetWebService
                };
            });
 
-            // Configure authorization services
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
@@ -113,6 +103,7 @@ namespace AspNetWebService
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
@@ -142,16 +133,15 @@ namespace AspNetWebService
 
             app.UseRouting();
 
-            // Enable authentication and authorization middleware.
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers(); // Map controllers for handling requests
+                endpoints.MapControllers();
             });
 
-            app.Run(); // Start the application
+            app.Run();
         }
     }
 }

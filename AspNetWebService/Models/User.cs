@@ -14,6 +14,7 @@ namespace AspNetWebService.Models
         [Required(ErrorMessage = "First name is required")]
         [StringLength(50)]
         [PersonalData]
+        [Display(Name = "First Name")]
         public string FirstName { get; set; }
 
         /// <summary>
@@ -22,6 +23,7 @@ namespace AspNetWebService.Models
         [Required(ErrorMessage = "Last name is required")]
         [StringLength(50)]
         [PersonalData]
+        [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
         /// <summary>
@@ -29,6 +31,8 @@ namespace AspNetWebService.Models
         /// </summary>
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
+        [PersonalData]
+        [Display(Name = "Birth Day")]
         public DateTime BirthDate { get; set; }
 
         /// <summary>

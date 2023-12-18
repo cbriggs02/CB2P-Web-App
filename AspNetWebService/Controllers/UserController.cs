@@ -39,6 +39,8 @@ namespace AspNetWebService.Controllers
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             var userDTOs = await _context.Users
+
+              // Map users to DTO's (Data Transfer Objects) to limit exposed user information
               .Select(user => _mapper.Map<UserDTO>(user))
               .ToListAsync();
 
@@ -124,7 +126,7 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateUser(string id, User user)
         {
-            if (user == null || id == null)
+            if (string.IsNullOrWhiteSpace(id) || user == null)
             {
                 return BadRequest("user parameter and id cannot be null or empty.");
             }
@@ -166,7 +168,7 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            if (id == null)
+            if (string.IsNullOrWhiteSpace(id))
             {
                 return BadRequest("Id cannot be null or empty.");
             }
@@ -191,7 +193,7 @@ namespace AspNetWebService.Controllers
         /// <returns>True if the user exists; otherwise, false.</returns>
         private bool UserExists(string id)
         {
-            if (id == null)
+            if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentNullException(nameof(id), "ID cannot be null.");
             }
