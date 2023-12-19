@@ -1,5 +1,4 @@
-﻿using AspNetWebService.Data;
-using AspNetWebService.Models;
+﻿using AspNetWebService.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +13,6 @@ namespace AspNetWebService.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<UserController> _logger;
         private readonly IMapper _mapper;
@@ -22,13 +20,11 @@ namespace AspNetWebService.Controllers
         /// <summary>
         /// Initializes a new instance of the UserController class.
         /// </summary>
-        /// <param name="context">The application database context.</param>
         /// <param name="userManager">The UserManager for managing users.</param>
         /// <param name="logger">The logger instance for logging.</param>
         /// <param name="mapper">The IMapper instance for object mapping.</param>
-        public UserController(ApplicationDbContext context, UserManager<User> userManager, ILogger<UserController> logger, IMapper mapper)
+        public UserController(UserManager<User> userManager, ILogger<UserController> logger, IMapper mapper)
         {
-            _context = context;
             _userManager = userManager;
             _logger = logger;
             _mapper = mapper;
@@ -42,7 +38,7 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            var userDTOs = await _context.Users
+            var userDTOs = await _userManager.Users
 
               // Map users to DTO's (Data Transfer Objects) to limit exposed user information
               .Select(user => _mapper.Map<UserDTO>(user))
@@ -69,7 +65,7 @@ namespace AspNetWebService.Controllers
 
             try
             {
-                var user = await _context.Users.FindAsync(id);
+                var user = await _userManager.FindByIdAsync(id);
 
                 if (user == null)
                 {
@@ -132,88 +128,108 @@ namespace AspNetWebService.Controllers
                 LockoutEnd = DateTimeOffset.UtcNow
             };
 
-            // Create the user with hashed password using UserManager
-            var result = await _userManager.CreateAsync(newUser, userDTO.Password);
-
-            if (result.Succeeded)
+            try
             {
-                // Map the created User object back to a UserDTO
-                var createdUserDTO = new UserDTO
-                {
-                    UserName = newUser.UserName,
-                    Password = "",
-                    FirstName = newUser.FirstName,
-                    LastName = newUser.LastName,
-                    BirthDate = newUser.BirthDate,
-                    Email = newUser.Email,
-                    PhoneNumber = newUser.PhoneNumber
-                };
+                // Create the user with hashed password using UserManager
+                var result = await _userManager.CreateAsync(newUser, userDTO.Password);
 
-                // User created successfully, return the UserDTO
-                return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, createdUserDTO);
-            }
-            else
-            {
-                // User creation failed, handle errors
-                foreach (var error in result.Errors)
+                if (result.Succeeded)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    // Map the created User object back to a UserDTO
+                    var createdUserDTO = new UserDTO
+                    {
+                        UserName = newUser.UserName,
+                        Password = "",
+                        FirstName = newUser.FirstName,
+                        LastName = newUser.LastName,
+                        BirthDate = newUser.BirthDate,
+                        Email = newUser.Email,
+                        PhoneNumber = newUser.PhoneNumber
+                    };
+
+                    // User created successfully, return the UserDTO
+                    return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, createdUserDTO);
                 }
-                return BadRequest(ModelState);
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return BadRequest(ModelState);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while creating user with UserManager.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating user.");
             }
         }
 
         /// <summary>
-        /// Updates an existing user by ID.
+        /// Updates user information based on the provided user ID and UserDTO.
         /// </summary>
         /// <param name="id">The ID of the user to update.</param>
-        /// <param name="userDTO">The updated UserDTO object.</param>
+        /// <param name="userDTO">The UserDTO object containing updated user information.</param>
         /// <returns>
-        /// An IActionResult representing the result of the operation.
-        /// - If the update is successful, returns a 204 NoContent response.
-        /// - If the provided user object or ID is invalid, returns a 400 BadRequest response.
-        /// - If the user to update is not found, returns a 404 NotFound response.
+        /// Returns a NoContent result if the update is successful.
+        /// Returns BadRequest if the user parameter or ID is null or empty, or if IDs do not match.
+        /// Returns NotFound if the user with the given ID is not found.
+        /// Returns BadRequest with model state errors if there are issues during the update process.
+        /// Returns StatusCode 500 if an unexpected error occurs.
         /// </returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateUser(string id, User user)
+        public async Task<IActionResult> UpdateUser(string id, UserDTO userDTO)
         {
-            if (string.IsNullOrWhiteSpace(id) || user == null)
+            if (string.IsNullOrWhiteSpace(id) || userDTO == null)
             {
-                return BadRequest("user parameter and id cannot be null or empty.");
+                return BadRequest("User parameter and ID cannot be null or empty.");
             }
-
-            if (id != user.Id)
-            {
-                return BadRequest("Id URL parameter does not match the Id of the user object");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("The provided user object is invalid");
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
+                var existingUser = await _userManager.FindByIdAsync(id);
+
+                if (existingUser == null)
                 {
                     return NotFound();
                 }
+
+                if (id != existingUser.Id)
+                {
+                    return BadRequest("IDs do not match.");
+                }
+
+                // Update existing User with UserDTO data
+                existingUser.UserName = userDTO.UserName;
+                existingUser.FirstName = userDTO.FirstName;
+                existingUser.LastName = userDTO.LastName;
+                existingUser.Email = userDTO.Email;
+                existingUser.PhoneNumber = userDTO.PhoneNumber;
+
+                var result = await _userManager.UpdateAsync(existingUser);
+
+                if (result.Succeeded)
+                {
+                    return NoContent();
+                }
                 else
                 {
-                    throw;
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return BadRequest(ModelState);
                 }
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating user.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
         }
 
         /// <summary>
@@ -232,32 +248,53 @@ namespace AspNetWebService.Controllers
                 return BadRequest("Id cannot be null or empty.");
             }
 
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            try
             {
-                return NotFound();
+                var user = await _userManager.FindByIdAsync(id);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var result = await _userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return BadRequest(ModelState);
+                }
             }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting user.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
         }
 
         /// <summary>
-        /// Checks if a user exists by ID.
+        /// Checks the existence of a user based on the provided ID asynchronously.
         /// </summary>
         /// <param name="id">The ID of the user to check.</param>
-        /// <returns>True if the user exists; otherwise, false.</returns>
-        private bool UserExists(string id)
+        /// <returns>Returns a boolean value indicating whether a user with the specified ID exists.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the provided ID is null or empty.</exception>
+        private async Task<bool> UserExistsAsync(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentNullException(nameof(id), "ID cannot be null.");
             }
 
-            return _context.Users.Any(e => e.Id == id);
+            var userExists = await _userManager.FindByIdAsync(id) != null;
+
+            return userExists;
         }
     }
 }

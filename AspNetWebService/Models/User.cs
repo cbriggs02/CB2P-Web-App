@@ -11,28 +11,25 @@ namespace AspNetWebService.Models
         /// <summary>
         /// Gets or sets the first name of the user.
         /// </summary>
-        [Required(ErrorMessage = "First name is required")]
-        [StringLength(50)]
+        [Required]
         [PersonalData]
-        [Display(Name = "First Name")]
+        [StringLength(50)]
         public string FirstName { get; set; }
 
         /// <summary>
         /// Gets or sets the last name of the user.
         /// </summary>
-        [Required(ErrorMessage = "Last name is required")]
-        [StringLength(50)]
+        [Required]
         [PersonalData]
-        [Display(Name = "Last Name")]
+        [StringLength(50)]
         public string LastName { get; set; }
 
         /// <summary>
         /// Gets or sets the birth date of the user.
         /// </summary>
+        [PersonalData]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
-        [PersonalData]
-        [Display(Name = "Birth Day")]
         public DateTime BirthDate { get; set; }
 
         /// <summary>

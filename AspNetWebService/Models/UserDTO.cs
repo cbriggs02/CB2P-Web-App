@@ -11,13 +11,13 @@ namespace AspNetWebService.Models
         /// <summary>
         /// Gets or sets the username of the user.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "User name is required")]
         public string UserName { get; set; }
 
         /// <summary>
         /// Gets or sets the password of the user.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Password is required")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
@@ -25,7 +25,7 @@ namespace AspNetWebService.Models
         /// <summary>
         /// Gets or sets the first name of the user.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "First name is required")]
         [StringLength(50)]
         [Display(Name = "First Name")]
         public string FirstName { get; set; }
@@ -33,7 +33,7 @@ namespace AspNetWebService.Models
         /// <summary>
         /// Gets or sets the last name of the user.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Last name is required")]
         [StringLength(50)]
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
@@ -44,14 +44,13 @@ namespace AspNetWebService.Models
         /// </summary>
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
-        [PersonalData]
         [Display(Name = "Birth Day")]
         public DateTime BirthDate { get; set; }
 
         /// <summary>
         /// Gets or sets the email address of the user.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Email Address is required")]
         [EmailAddress]
         [StringLength(25)]
         public string Email { get; set; }
@@ -59,9 +58,10 @@ namespace AspNetWebService.Models
         /// <summary>
         /// Gets or sets the phone number of the user.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Phone Number is required")]
         [Phone]
         [Display(Name = "Phone Number")]
+        [RegularExpression(@"^\d{3}-\d{3}-\d{4}$", ErrorMessage = "Please enter a phone number in the format xxx-xxx-xxxx.")]
         public string PhoneNumber { get; set; }
 
         /// <summary>

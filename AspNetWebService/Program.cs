@@ -31,7 +31,6 @@ namespace AspNetWebService
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // Creates a ConfigurationBuilder to build configuration settings for the application.
             var configuration = new ConfigurationBuilder()
 
                 // AddJsonFile specifies the JSON file to load configuration settings from.
@@ -48,7 +47,6 @@ namespace AspNetWebService
             // Add Swagger generation services to the service container.
             builder.Services.AddSwaggerGen(c =>
             {
-                // Enable annotations (XML comments, attributes) to be reflected in the generated Swagger/OpenAPI document.
                 c.EnableAnnotations();
             });
 
@@ -134,11 +132,10 @@ namespace AspNetWebService
                 app.UseDeveloperExceptionPage();
             }
 
-            // Enable Swagger and Swagger UI for API documentation.
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Students API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "AspNetWebService API V1");
                 c.RoutePrefix = string.Empty;
             });
 
