@@ -40,6 +40,7 @@ namespace AspNetWebService.Controllers
         {
             var users = await _userManager.Users.ToListAsync();
             var userDTOs = users.Select(user => _mapper.Map<UserDTO>(user)).ToList();
+
             return Ok(userDTOs);
         }
 
@@ -64,10 +65,14 @@ namespace AspNetWebService.Controllers
             try
             {
                 var user = await _userManager.FindByIdAsync(id);
+
                 if (user == null)
+                {
                     return NotFound();
+                }
 
                 var userDTO = _mapper.Map<UserDTO>(user);
+
                 return Ok(userDTO);
             }
             catch (Exception ex)
@@ -128,8 +133,6 @@ namespace AspNetWebService.Controllers
         /// - If the user is successfully created, returns a response with a 201 Created status along with the created user's details in a UserDTO format.
         /// - If an error occurs during user creation, returns a 500 Internal Server Error response with an appropriate message.
         /// </returns>
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         private async Task<ActionResult<User>> CreateUserAsync(UserDTO userDTO)
         {
             if (userDTO == null)
@@ -172,7 +175,6 @@ namespace AspNetWebService.Controllers
         /// - If the user is successfully created, returns a response with a 201 Created status along with the created user's details in a UserDTO format.
         /// - If there are errors during user creation, returns a 400 Bad Request status with error details in the ModelState.
         /// </returns>
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private async Task<ActionResult<User>> HandleUserCreation(UserDTO userDTO, User newUser)
         {
             if (userDTO == null || newUser == null)
@@ -182,7 +184,7 @@ namespace AspNetWebService.Controllers
             }
 
             // Create the user with hashed password using UserManager
-            var result = await _userManager.CreateAsync(newUser, userDTO.Password);
+            var result = await _userManager.CreateAsync(newUser);
 
             if (result.Succeeded)
             {
@@ -228,14 +230,6 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateUser(string id, UserDTO userDTO)
         {
-            // look into removing the ability to update the password here and 
-            // create a new put action for strictly updating the password
-            // Make the action require the new password, old password and id
-            // the action will verify the id of the user and that the password matches
-            // before updating
-            // Should the values all be parameter routes , or the two passwords be body
-            // data and we create a new model to handle creating passwords
-
             if (string.IsNullOrWhiteSpace(id) || userDTO == null)
             {
                 ModelState.AddModelError(string.Empty, "User parameter and ID cannot be null or empty.");
@@ -245,8 +239,11 @@ namespace AspNetWebService.Controllers
             try
             {
                 var existingUser = await _userManager.FindByIdAsync(id);
+
                 if (existingUser == null)
+                {
                     return NotFound();
+                }
 
                 if (id != existingUser.Id)
                 {
@@ -290,8 +287,6 @@ namespace AspNetWebService.Controllers
         /// Returns a NoContent result if the update is successful.
         /// Returns BadRequest if there are issues with the provided user object or update process.
         /// </returns>
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private async Task<IActionResult> UpdateUserAsync(UserDTO userDTO, User existingUser)
         {
             // Update existing User with UserDTO data
@@ -330,15 +325,22 @@ namespace AspNetWebService.Controllers
         public async Task<IActionResult> DeleteUser(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                return BadRequest("Id cannot be null or empty.");
+            {
+                ModelState.AddModelError(string.Empty, "Id cannot be null or empty.");
+                return BadRequest(ModelState);
+            }
 
             try
             {
                 var user = await _userManager.FindByIdAsync(id);
+
                 if (user == null)
+                {
                     return NotFound();
+                }
 
                 var result = await _userManager.DeleteAsync(user);
+
                 if (result.Succeeded)
                 {
                     return NoContent();
@@ -360,6 +362,136 @@ namespace AspNetWebService.Controllers
         }
 
         /// <summary>
+        /// Updates the password for a user identified by the specified ID.
+        /// </summary>
+        /// <param name="id">The ID of the user whose password will be updated.</param>
+        /// <param name="password">The new password to be set.</param>
+        /// <param name="passwordConfirmed">Confirmation of the new password.</param>
+        /// <returns>
+        /// Returns an IActionResult indicating the result of the password update operation:
+        /// - 200 OK if the password has been successfully updated.
+        /// - 404 Not Found if the user with the given ID is not found.
+        /// - 400 Bad Request if the provided parameters are null or empty or if passwords do not match.
+        /// - 500 Internal Server Error if an unexpected error occurs during processing.
+        /// </returns>
+        [HttpPut("setPassword/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SetPassword(string id, string password, string passwordConfirmed)
+        {
+            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(passwordConfirmed))
+            {
+                ModelState.AddModelError(string.Empty, "Parameters cannot be null or empty.");
+                return BadRequest(ModelState);
+            }
+
+            if (!passwordConfirmed.Equals(password))
+            {
+                ModelState.AddModelError(string.Empty, "Passwords do not match");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var result = await _userManager.AddPasswordAsync(user, password);
+
+                if (result.Succeeded)
+                {
+                    return Ok("Password has been created");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return BadRequest(ModelState);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting user.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        /// <summary>
+        /// Updates the password for a user identified by the specified ID.
+        /// </summary>
+        /// <param name="id">The ID of the user whose password will be updated.</param>
+        /// <param name="currentPassword">The current password for authentication.</param>
+        /// <param name="newPassword">The new password to be set.</param>
+        /// <returns>
+        /// Returns an IActionResult indicating the result of the password update operation:
+        /// - 200 OK if the password has been successfully updated.
+        /// - 404 Not Found if the user with the given ID is not found.
+        /// - 400 Bad Request if the provided parameters are null or empty or if the current password is incorrect.
+        /// - 500 Internal Server Error if an unexpected error occurs during processing.
+        /// </returns>
+        [HttpPut("updatePassword/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdatePassword(string id, string currentPassword, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
+            {
+                ModelState.AddModelError(string.Empty, "Parameters cannot be null or empty.");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                // Verify the current password against the stored hash
+                var passwordIsValid = await _userManager.CheckPasswordAsync(user, currentPassword);
+
+                if (!passwordIsValid)
+                {
+                    ModelState.AddModelError(string.Empty, "Incorrect password");
+                    return BadRequest(ModelState);
+                }
+
+                var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
+                if (result.Succeeded)
+                {
+                    return Ok("Password has been updated");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return BadRequest(ModelState);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while updating password.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+
+        /// <summary>
         /// Checks the existence of a user based on the provided ID asynchronously.
         /// </summary>
         /// <param name="id">The ID of the user to check.</param>
@@ -368,8 +500,9 @@ namespace AspNetWebService.Controllers
         private async Task<bool> UserExists(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
+            {
                 throw new ArgumentNullException(nameof(id), "ID cannot be null.");
-
+            }
             // Check if a user with the provided id exists using UserManager
             return await _userManager.FindByIdAsync(id) != null;
         }
@@ -383,8 +516,9 @@ namespace AspNetWebService.Controllers
         private async Task<bool> UserNameExists(string userName)
         {
             if (string.IsNullOrWhiteSpace(userName))
+            {
                 throw new ArgumentNullException(nameof(userName), "User Name cannot be null.");
-
+            }
             // Check if a user with the provided user name exists using UserManager
             return await _userManager.FindByNameAsync(userName) != null;
         }
@@ -398,8 +532,9 @@ namespace AspNetWebService.Controllers
         private async Task<bool> EmailExists(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
+            {
                 throw new ArgumentNullException(nameof(email), "Email cannot be null.");
-
+            }
             // Check if a user with the provided email exists using UserManager
             return await _userManager.FindByEmailAsync(email) != null;
         }

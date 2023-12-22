@@ -14,14 +14,6 @@ namespace AspNetWebService.Models
         public string UserName { get; set; }
 
         /// <summary>
-        /// Gets or sets the password of the user.
-        /// </summary>
-        [Required(ErrorMessage = "Password is required")]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-
-
-        /// <summary>
         /// Gets or sets the first name of the user.
         /// </summary>
         [Required(ErrorMessage = "First name is required")]
