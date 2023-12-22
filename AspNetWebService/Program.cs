@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using AspNetWebService.Helpers;
 using AspNetWebService.Mapping;
 using AspNetWebService.Models;
@@ -47,6 +48,15 @@ namespace AspNetWebService
             // Add Swagger generation services to the service container.
             builder.Services.AddSwaggerGen(c =>
             {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AspNetWebService API", Version = "v1" });
+
+                // Define the security scheme
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme.",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer"
+                });
                 c.EnableAnnotations();
             });
 
@@ -95,7 +105,11 @@ namespace AspNetWebService
                };
            });
 
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
+            });
 
             // Manual registration of AutoMapper
             var mapperConfig = new MapperConfiguration(mc =>
@@ -137,6 +151,11 @@ namespace AspNetWebService
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AspNetWebService API V1");
                 c.RoutePrefix = string.Empty;
+
+                // Add JWT token for authorization in Swagger UI
+                c.OAuthClientId("swagger-ui");
+                c.OAuthAppName("Swagger UI");
+                c.OAuthUseBasicAuthenticationWithAccessCodeGrant();
             });
 
             app.UseRouting();
