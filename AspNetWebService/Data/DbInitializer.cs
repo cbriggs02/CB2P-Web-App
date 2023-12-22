@@ -1,6 +1,6 @@
-﻿using AspNetWebService.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AspNetWebService.Models;
 
 namespace AspNetWebService.Data
 {

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace AspNetWebService.Models
 {
@@ -13,14 +12,6 @@ namespace AspNetWebService.Models
         /// </summary>
         [Required(ErrorMessage = "User name is required")]
         public string UserName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the password of the user.
-        /// </summary>
-        [Required(ErrorMessage = "Password is required")]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-
 
         /// <summary>
         /// Gets or sets the first name of the user.

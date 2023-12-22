@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using AspNetWebService.Models;
+﻿using AspNetWebService.Models;
+using AutoMapper;
 
 namespace AspNetWebService.Mapping
 {

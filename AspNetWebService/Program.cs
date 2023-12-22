@@ -1,14 +1,14 @@
-using AspNetWebService.Data;
-using AspNetWebService.Models;
-using AspNetWebService.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Serilog;
-using AutoMapper;
+using AspNetWebService.Helpers;
 using AspNetWebService.Mapping;
+using AspNetWebService.Models;
+using AspNetWebService.Data;
+using System.Text;
+using AutoMapper;
+using Serilog;
 
 namespace AspNetWebService
 {
