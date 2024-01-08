@@ -21,12 +21,13 @@ namespace AspNetWebService.Controllers
         private readonly IMapper _mapper;
 
         /// <summary>
-        /// 
+        /// Constructor for the UserController class.
+        /// Initializes a new instance of the UserController with required services.
         /// </summary>
-        /// <param name="signInManager"></param>
-        /// <param name="userManager"></param>
-        /// <param name="logger"></param>
-        /// <param name="mapper"></param>
+        /// <param name="signInManager">The SignInManager for managing user sign-in operations.</param>
+        /// <param name="userManager">The UserManager for managing user-related operations.</param>
+        /// <param name="logger">The ILogger for logging within the UserController.</param>
+        /// <param name="mapper">The IMapper for object mapping within the UserController.</param>
         public UserController(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<UserController> logger, IMapper mapper)
         {
             _signInManager = signInManager;
@@ -35,11 +36,11 @@ namespace AspNetWebService.Controllers
             _mapper = mapper;
         }
 
+
         /// <summary>
         /// Retrieves all users from the database as DTOs.
         /// </summary>
         /// <returns>A list of user DTOs.</returns>
-        [Authorize(Roles = "Admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -56,7 +57,6 @@ namespace AspNetWebService.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to retrieve.</param>
         /// <returns>The specified user.</returns>
-        [Authorize]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -233,7 +233,6 @@ namespace AspNetWebService.Controllers
         /// Returns BadRequest with model state errors if there are issues during the update process.
         /// Returns StatusCode 500 if an unexpected error occurs.
         /// </returns>
-        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -258,8 +257,7 @@ namespace AspNetWebService.Controllers
 
                 if (id != existingUser.Id)
                 {
-                    ModelState.AddModelError(string.Empty, "IDs do not match.");
-                    return BadRequest(ModelState);
+                    return NotFound();
                 }
 
                 if (!ModelState.IsValid)
@@ -328,7 +326,6 @@ namespace AspNetWebService.Controllers
         /// </summary>
         /// <param name="id">The ID of the user to delete.</param>
         /// <returns>An IActionResult representing the result of the operation.</returns>
-        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -387,7 +384,6 @@ namespace AspNetWebService.Controllers
         /// - 400 Bad Request if the provided parameters are null or empty or if passwords do not match.
         /// - 500 Internal Server Error if an unexpected error occurs during processing.
         /// </returns>
-        [Authorize]
         [HttpPut("setPassword/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -452,7 +448,6 @@ namespace AspNetWebService.Controllers
         /// - 400 Bad Request if the provided parameters are null or empty or if the current password is incorrect.
         /// - 500 Internal Server Error if an unexpected error occurs during processing.
         /// </returns>
-        [Authorize]
         [HttpPut("updatePassword/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
