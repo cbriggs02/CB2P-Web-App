@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿//using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using AspNetWebService.Models;
 using AutoMapper;
+
 
 namespace AspNetWebService.Controllers
 {
@@ -13,22 +15,27 @@ namespace AspNetWebService.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
+        private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<UserController> _logger;
         private readonly IMapper _mapper;
 
         /// <summary>
-        /// Initializes a new instance of the UserController class.
+        /// Constructor for the UserController class.
+        /// Initializes a new instance of the UserController with required services.
         /// </summary>
-        /// <param name="userManager">The UserManager for managing users.</param>
-        /// <param name="logger">The logger instance for logging.</param>
-        /// <param name="mapper">The IMapper instance for object mapping.</param>
-        public UserController(UserManager<User> userManager, ILogger<UserController> logger, IMapper mapper)
+        /// <param name="signInManager">The SignInManager for managing user sign-in operations.</param>
+        /// <param name="userManager">The UserManager for managing user-related operations.</param>
+        /// <param name="logger">The ILogger for logging within the UserController.</param>
+        /// <param name="mapper">The IMapper for object mapping within the UserController.</param>
+        public UserController(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<UserController> logger, IMapper mapper)
         {
+            _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
             _mapper = mapper;
         }
+
 
         /// <summary>
         /// Retrieves all users from the database as DTOs.
@@ -36,6 +43,7 @@ namespace AspNetWebService.Controllers
         /// <returns>A list of user DTOs.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -51,8 +59,9 @@ namespace AspNetWebService.Controllers
         /// <returns>The specified user.</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<User>> GetUserById(string id)
         {
@@ -95,7 +104,7 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<User>> CreateUser(UserDTO userDTO)
+        public async Task<ActionResult<User>> RegisterUser(UserDTO userDTO)
         {
             if (userDTO == null)
             {
@@ -226,6 +235,7 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateUser(string id, UserDTO userDTO)
@@ -247,8 +257,7 @@ namespace AspNetWebService.Controllers
 
                 if (id != existingUser.Id)
                 {
-                    ModelState.AddModelError(string.Empty, "IDs do not match.");
-                    return BadRequest(ModelState);
+                    return NotFound();
                 }
 
                 if (!ModelState.IsValid)
@@ -319,8 +328,9 @@ namespace AspNetWebService.Controllers
         /// <returns>An IActionResult representing the result of the operation.</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteUser(string id)
         {
@@ -376,8 +386,9 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpPut("setPassword/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SetPassword(string id, string password, string passwordConfirmed)
         {
@@ -439,8 +450,9 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpPut("updatePassword/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdatePassword(string id, string currentPassword, string newPassword)
         {
@@ -490,6 +502,54 @@ namespace AspNetWebService.Controllers
             }
         }
 
+        /// <summary>
+        /// Logs in a user based on the provided login credentials.
+        /// </summary>
+        /// <param name="login">The login credentials containing username and password.</param>
+        /// <returns>
+        /// Returns an IActionResult indicating the login status.
+        /// - If successful, returns a 200 OK response with a success message.
+        /// - If the login object is invalid, returns a 400 Bad Request response with appropriate error details.
+        /// - If the user credentials are invalid, returns a 401 Unauthorized response.
+        /// - If an error occurs during the login process, returns appropriate error status codes.
+        /// </returns>
+        [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Login(Login login)
+        {
+            if (login == null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login object");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var user = await _userManager.FindByNameAsync(login.UserName);
+
+                if (user != null)
+                {
+                    var result = await _signInManager.CheckPasswordSignInAsync(user, login.Password, lockoutOnFailure: false);
+
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+
+                        return Ok(new { message = "Login Succesful" });
+                    }
+                }
+                return Unauthorized(new { message = "Invalid credentials" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while logging in.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
 
         /// <summary>
         /// Checks the existence of a user based on the provided ID asynchronously.
