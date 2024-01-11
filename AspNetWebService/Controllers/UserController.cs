@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using AspNetWebService.Models;
 using AutoMapper;
 
+// check if using the method UserNameExists is redundent and can be possibly just
+// replaced using the user manager mthod FindByName
+
 namespace AspNetWebService.Controllers
 {
     /// <summary>
@@ -42,6 +45,45 @@ namespace AspNetWebService.Controllers
             var userDTOs = users.Select(user => _mapper.Map<UserDTO>(user)).ToList();
 
             return Ok(userDTOs);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<User>> Login(string userName, string password)
+        {
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+            {
+                ModelState.AddModelError(string.Empty, "parameters cannot be null or empty.");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var exists = await _userManager.FindByNameAsync(userName);
+
+                if (exists == null)
+                {
+                    return NotFound();
+                }
+
+                // google how to handle logins using the user manager
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching user by User name.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
         }
 
         /// <summary>
