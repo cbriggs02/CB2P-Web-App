@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using AspNetWebService.Models;
 using AutoMapper;
 
-// check if using the method UserNameExists is redundent and can be possibly just
-// replaced using the user manager mthod FindByName
-
 namespace AspNetWebService.Controllers
 {
     /// <summary>
@@ -58,24 +55,26 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<User>> Login(string userName, string password)
+        public async Task<ActionResult<User>> Login(Login user)
         {
-            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+            if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "parameters cannot be null or empty.");
+                ModelState.AddModelError(string.Empty, "user login cannot be null or empty.");
                 return BadRequest(ModelState);
             }
 
             try
             {
-                var exists = await _userManager.FindByNameAsync(userName);
+                //var user = await _userManager.FindByNameAsync(u);
 
-                if (exists == null)
-                {
-                    return NotFound();
-                }
+                //if (user == null)
+                //{
+                //    return NotFound();
+                //}
 
                 // google how to handle logins using the user manager
+
+               // var login = await _userManager.AddLoginAsync(user, )
 
                 return Ok();
             }
