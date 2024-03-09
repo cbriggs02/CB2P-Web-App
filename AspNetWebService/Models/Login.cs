@@ -3,20 +3,22 @@
 namespace AspNetWebService.Models
 {
     /// <summary>
-    /// 
+    ///     Represents the model for user login credentials.
+    ///     @Author: Christian Briglio
     /// </summary>
     public class Login
     {
         /// <summary>
-        /// 
+        ///     Gets or sets the username for authentication.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Username is required.")]
         public string UserName { get; set; }
 
         /// <summary>
-        /// 
+        ///     Gets or sets the password for authentication.
         /// </summary>
-        [Required] 
-        public string Password { get;}
+        [Required(ErrorMessage = "Password is required.")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
     }
 }

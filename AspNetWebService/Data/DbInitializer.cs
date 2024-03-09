@@ -5,14 +5,17 @@ using AspNetWebService.Models;
 namespace AspNetWebService.Data
 {
     /// <summary>
-    /// Handles database initialization and seeding.
+    ///     Handles database initialization and seeding.
+    ///     @Author: Christian Briglio
     /// </summary>
     public static class DbInitializer
     {
         /// <summary>
-        /// Ensures the database is created and seeds initial data if necessary.
+        ///     Ensures the database is created and seeds initial data if necessary.
         /// </summary>
-        /// <param name="context">The application's database context.</param>
+        /// <param name="context">
+        ///     The application's database context.
+        /// </param>
         public static void Initialize(ApplicationDbContext context)
         {
             context.Database.Migrate();
@@ -24,9 +27,11 @@ namespace AspNetWebService.Data
         }
 
         /// <summary>
-        /// Seeds the database with default users if no users exist.
+        ///     Seeds the database with default users if no users exist.
         /// </summary>
-        /// <param name="context">The application's database context.</param>
+        /// <param name="context">
+        ///     The application's database context.
+        /// </param>
         private static void SeedDefaultUsers(ApplicationDbContext context)
         {
             var passwordHasher = new PasswordHasher<User>();

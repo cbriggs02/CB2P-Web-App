@@ -9,18 +9,24 @@ using AspNetWebService.Data;
 using System.Text;
 using AutoMapper;
 using Serilog;
+using AspNetWebService.Middleware;
 
 namespace AspNetWebService
 {
     /// <summary>
-    /// Entry point class for the ASP.NET Core application.
+    ///     Entry point class for the ASP.NET Core application.
+    ///     @Author: Christian Briglio
     /// </summary>
     public class Program
     {
         /// <summary>
-        /// Main method - entry point of the application.
+        ///     Main method - entry point of the application.
+        ///     This method defines the structure and overall design
+        ///     of the server hosting this ASP.NET Core Web API.
         /// </summary>
-        /// <param name="args">Command-line arguments.</param>
+        /// <param name="args">
+        ///     Command-line arguments.
+        /// </param>
         public static void Main(string[] args)
         {
 
@@ -30,7 +36,6 @@ namespace AspNetWebService
                 .CreateLogger();
 
             var builder = WebApplication.CreateBuilder(args);
-
             var configuration = new ConfigurationBuilder()
 
                 // AddJsonFile specifies the JSON file to load configuration settings from.
@@ -116,7 +121,11 @@ namespace AspNetWebService
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                    DbInitializer.Initialize(context); // Seed the database if necessary
+
+                    if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+                    {
+                        DbInitializer.Initialize(context);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -131,6 +140,14 @@ namespace AspNetWebService
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // Catch exceptions thrown at application level and log them globally
+            app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseHttpsRedirection();
+
+            // Log HTTPS request performance and metrics
+            app.UseMiddleware<PerformanceMonitor>();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
