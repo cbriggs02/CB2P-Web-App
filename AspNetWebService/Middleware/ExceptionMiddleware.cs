@@ -4,8 +4,10 @@ namespace AspNetWebService.Middleware
 {
     /// <summary>
     ///     Middleware for handling exceptions globally and providing a consistent error response.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;

@@ -4,8 +4,10 @@ namespace AspNetWebService.Models.DataTransferObjectModels
 {
     /// <summary>
     ///     Data Transfer Object (DTO) representing a user with essential information.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class UserDTO
     {
         /// <summary>

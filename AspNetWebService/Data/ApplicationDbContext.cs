@@ -6,8 +6,10 @@ namespace AspNetWebService.Data
 {
     /// <summary>
     ///     Represents the database context for the application.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class ApplicationDbContext : IdentityDbContext<User>
     {
         /// <summary>
@@ -18,7 +20,7 @@ namespace AspNetWebService.Data
         /// </param>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-            
+
         }
 
         /// <summary>

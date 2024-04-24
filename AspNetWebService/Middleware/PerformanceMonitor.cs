@@ -4,8 +4,10 @@ namespace AspNetWebService.Middleware
 {
     /// <summary>
     ///     Middleware for monitoring the performance of HTTP requests.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class PerformanceMonitor
     {
         private readonly RequestDelegate _next;

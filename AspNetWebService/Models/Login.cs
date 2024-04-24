@@ -4,8 +4,10 @@ namespace AspNetWebService.Models
 {
     /// <summary>
     ///     Represents the model for user login credentials.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class Login
     {
         /// <summary>

@@ -4,8 +4,10 @@ namespace AspNetWebService.Helpers
 {
     /// <summary>
     ///     Helper class responsible for generating random secret keys.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class SecretKeyGenerator
     {
         /// <summary>

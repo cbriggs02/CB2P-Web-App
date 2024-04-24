@@ -6,8 +6,10 @@ namespace AspNetWebService.Mapping
 {
     /// <summary>
     ///     AutoMapper profile to define mappings between entity classes and DTOs.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class AutoMapperProfile : Profile
     {
         /// <summary>
@@ -15,7 +17,6 @@ namespace AspNetWebService.Mapping
         /// </summary>
         public AutoMapperProfile()
         {
-            // Map Users to User Data Transfer Objects
             CreateMap<User, UserDTO>();
         }
     }

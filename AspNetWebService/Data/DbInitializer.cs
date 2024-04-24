@@ -6,8 +6,10 @@ namespace AspNetWebService.Data
 {
     /// <summary>
     ///     Handles database initialization and seeding.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public static class DbInitializer
     {
         /// <summary>
@@ -35,54 +37,30 @@ namespace AspNetWebService.Data
         private static void SeedDefaultUsers(ApplicationDbContext context)
         {
             var passwordHasher = new PasswordHasher<User>();
+            var defaultUsers = new List<User>();
 
-            var defaultUsers = new[]
+            for (int i = 0; i < 1000; i++)
             {
-                new User
+                var user = new User
                 {
-                    UserName = "adminTest",
-                    NormalizedUserName = "adminTest",
-                    FirstName = "Carson",
-                    LastName = "Alexander",
-                    Email = "adminTest@gmail.com",
-                    NormalizedEmail = "adminTest@gmail.com",
+                    UserName = $"userTest{i}",
+                    NormalizedUserName = $"userTest{i}",
+                    FirstName = $"FirstName{i}",
+                    LastName = $"LastName{i}",
+                    Email = $"userTest{i}@gmail.com",
+                    NormalizedEmail = $"userTest{i}@gmail.com",
                     BirthDate = new DateTime(1990, 1, 1),
                     PhoneNumber = "222-222-2222",
-                    LockoutEnd= DateTimeOffset.UtcNow
-                },
-                new User
-                {
-                    UserName = "admin2Test",
-                    NormalizedUserName = "admin2Test",
-                    FirstName = "Meredith",
-                    LastName = "Alonso",
-                    Email = "admin2@gmail.com",
-                    NormalizedEmail = "admin2@gmail.com",
-                    BirthDate = new DateTime(1985, 5, 15),
-                    PhoneNumber = "222-222-2222",
-                    LockoutEnd= DateTimeOffset.UtcNow
-                },
-                new User
-                {
-                    UserName = "admin3Test",
-                    NormalizedUserName = "admin3Test",
-                    FirstName = "Arturo",
-                    LastName = "Anand",
-                    Email = "admin3@gmail.com",
-                    NormalizedEmail = "admin3@gmail.com",
-                    BirthDate = new DateTime(1988, 9, 30),
-                    PhoneNumber = "222-222-2222",
-                    LockoutEnd= DateTimeOffset.UtcNow
-                }
-            };
+                    Country = "Canada",
+                    LockoutEnd = DateTimeOffset.UtcNow
+                };
 
-            foreach (var user in defaultUsers)
-            {
                 // Set a default password
                 user.PasswordHash = passwordHasher.HashPassword(null, "P@s_s8w0rd!");
-                context.Users.Add(user);
+                defaultUsers.Add(user);
             }
 
+            context.Users.AddRange(defaultUsers);
             context.SaveChanges();
         }
     }

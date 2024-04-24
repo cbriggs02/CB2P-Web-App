@@ -5,8 +5,10 @@ namespace AspNetWebService.Models
 {
     /// <summary>
     ///     Represents the user entity, extending the IdentityUser class from ASP.NET Core Identity.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class User : IdentityUser
     {
         /// <summary>

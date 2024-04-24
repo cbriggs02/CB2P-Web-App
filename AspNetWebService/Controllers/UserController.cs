@@ -1,6 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using AspNetWebService.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -11,17 +10,21 @@ using System.Text;
 using AspNetWebService.Models.DataTransferObjectModels;
 using Swashbuckle.AspNetCore.Annotations;
 using Newtonsoft.Json;
+using AspNetWebService.Interfaces;
 
 namespace AspNetWebService.Controllers
 {
     /// <summary>
     ///     Controller handling User-related API operations.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("AspNetWebService/api/[controller]")]
     public class UserController : ControllerBase
     {
+        private readonly IUserService _userService;
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<UserController> _logger;
@@ -31,6 +34,9 @@ namespace AspNetWebService.Controllers
         /// <summary>
         ///     Initializes a new instance of the <see cref="UserController"/> class with the specified dependencies.
         /// </summary>
+        /// <param name="userService">
+        ///     The user service used for all user operations.
+        /// </param>
         /// <param name="signInManager">
         ///     The sign-in manager used for user authentication.
         /// </param>
@@ -46,8 +52,9 @@ namespace AspNetWebService.Controllers
         /// <param name="mapper">
         ///     The mapper used for mapping objects between different types.
         /// </param>
-        public UserController(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<UserController> logger, IConfiguration configuration, IMapper mapper)
+        public UserController(IUserService userService, SignInManager<User> signInManager, UserManager<User> userManager, ILogger<UserController> logger, IConfiguration configuration, IMapper mapper)
         {
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -76,33 +83,18 @@ namespace AspNetWebService.Controllers
         {
             try
             {
-                var totalCount = await _userManager.Users.CountAsync();
+                // Call the service method to retrieve users
+                var result = await _userService.GetUsersAsync(page, pageSize);
 
-                var users = await _userManager.Users
-                    .OrderBy(user => user.LastName)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                if (users == null || users.Count == 0)
+                if (result.Users == null || result.Users.Count == 0)
                 {
                     return NotFound();
                 }
 
-                var userDTOs = users.Select(user => _mapper.Map<UserDTO>(user)).ToList();
+                // Set pagination metadata in response header
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(result.PaginationMetadata));
 
-                var paginationMetadata = new
-                {
-                    totalCount,
-                    pageSize,
-                    currentPage = page,
-                    totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
-                };
-
-                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(paginationMetadata));
-
-                return Ok(userDTOs);
+                return Ok(result.Users);
             }
             catch (Exception ex)
             {

@@ -10,13 +10,17 @@ using System.Text;
 using AutoMapper;
 using Serilog;
 using AspNetWebService.Middleware;
+using AspNetWebService.Interfaces;
+using AspNetWebService.Services;
 
 namespace AspNetWebService
 {
     /// <summary>
     ///     Entry point class for the ASP.NET Core application.
-    ///     @Author: Christian Briglio
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class Program
     {
         /// <summary>
@@ -48,6 +52,7 @@ namespace AspNetWebService
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
             builder.Services.AddControllers();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             // Add Swagger generation services to the service container.
             builder.Services.AddSwaggerGen(c =>
