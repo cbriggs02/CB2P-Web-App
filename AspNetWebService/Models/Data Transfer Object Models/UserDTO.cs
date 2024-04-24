@@ -37,7 +37,7 @@ namespace AspNetWebService.Models.DataTransferObjectModels
         ///     Gets or sets the birth date of the user.
         /// </summary>
         [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
+        [DisplayFormat(DataFormatString = "{yyyy-MM-dd}")]
         [Display(Name = "Birth Day")]
         public DateTime BirthDate { get; set; }
 

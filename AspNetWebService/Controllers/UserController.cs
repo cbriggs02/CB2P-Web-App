@@ -12,6 +12,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Newtonsoft.Json;
 using AspNetWebService.Interfaces;
 
+
 namespace AspNetWebService.Controllers
 {
     /// <summary>
@@ -61,6 +62,7 @@ namespace AspNetWebService.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
+
 
         /// <summary>
         ///     Retrieves all users from the database as DTOs.
@@ -114,8 +116,9 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Summary = "Gets a user by id")]
         public async Task<ActionResult<UserDTO>> GetUserById(string id)
@@ -302,6 +305,7 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Summary = "Updates a user by id")]
@@ -324,8 +328,7 @@ namespace AspNetWebService.Controllers
 
                 if (id != existingUser.Id)
                 {
-                    ModelState.AddModelError(string.Empty, "IDs do not match.");
-                    return BadRequest(ModelState);
+                    return NotFound();
                 }
 
                 if (!ModelState.IsValid)
@@ -405,7 +408,6 @@ namespace AspNetWebService.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Summary = "Deletes a user by id")]
         public async Task<IActionResult> DeleteUser(string id)
@@ -468,8 +470,9 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpPut("setPassword/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Summary = "Sets a password for a user by id")]
         public async Task<IActionResult> SetPassword(string id, [FromBody] string password, string passwordConfirmed)
@@ -538,8 +541,9 @@ namespace AspNetWebService.Controllers
         /// </returns>
         [HttpPut("updatePassword/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Summary = "Updates a password for a user by id")]
         public async Task<IActionResult> UpdatePassword(string id, [FromBody] string currentPassword, string newPassword)
