@@ -4,12 +4,15 @@ using Microsoft.AspNetCore.Identity;
 namespace AspNetWebService.Models
 {
     /// <summary>
-    /// Represents the user entity, extending the IdentityUser class from ASP.NET Core Identity.
+    ///     Represents the user entity, extending the IdentityUser class from ASP.NET Core Identity.
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class User : IdentityUser
     {
         /// <summary>
-        /// Gets or sets the first name of the user.
+        ///     Gets or sets the first name of the user.
         /// </summary>
         [Required]
         [PersonalData]
@@ -17,7 +20,7 @@ namespace AspNetWebService.Models
         public string FirstName { get; set; }
 
         /// <summary>
-        /// Gets or sets the last name of the user.
+        ///     Gets or sets the last name of the user.
         /// </summary>
         [Required]
         [PersonalData]
@@ -25,7 +28,7 @@ namespace AspNetWebService.Models
         public string LastName { get; set; }
 
         /// <summary>
-        /// Gets or sets the birth date of the user.
+        ///     Gets or sets the birth date of the user.
         /// </summary>
         [PersonalData]
         [DataType(DataType.Date)]
@@ -33,9 +36,23 @@ namespace AspNetWebService.Models
         public DateTime BirthDate { get; set; }
 
         /// <summary>
-        /// Checks if the birth date has been set for the user.
+        ///     Gets or sets the country of the user.
         /// </summary>
-        /// <returns>True if the birth date is set and valid, otherwise false.</returns>
+        [Required]
+        [StringLength(75)]
+        public string Country { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the account status of the user.
+        /// </summary>
+        public int AccountStatus { get; set; }
+
+        /// <summary>
+        ///     Checks if the birth date has been set for the user.
+        /// </summary>
+        /// <returns>
+        ///     True if the birth date is set and valid, otherwise false.
+        /// </returns>
         public bool IsBirthDateSet()
         {
             return BirthDate > DateTime.MinValue;
