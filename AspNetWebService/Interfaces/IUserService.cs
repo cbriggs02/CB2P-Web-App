@@ -1,4 +1,5 @@
 ﻿using AspNetWebService.Models.Data_Transfer_Object_Models;
+using AspNetWebService.Models.Result_Models;
 
 namespace AspNetWebService.Interfaces
 {
@@ -20,8 +21,19 @@ namespace AspNetWebService.Interfaces
         ///     The size of data to be returned per page.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns a UserResult object.
+        ///     A task representing the asynchronous operation that returns a UserListResult object.
         /// </returns>
-        Task<UserResult> GetUsersAsync(int page, int pageSize);
+        Task<UserListResult> GetUsersAsync(int page, int pageSize);
+
+        /// <summary>
+        ///     Retrieves a user DTO in the database who matches the provided id.
+        /// </summary>
+        /// <param name="id">
+        ///     Id of user to be retrieved.
+        /// </param>
+        /// <returns>
+        ///     A task representing the asynchronous operation that returns UserResult object.
+        /// </returns>
+        Task<UserResult> GetUserAsync(string id);
     }
 }

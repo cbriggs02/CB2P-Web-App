@@ -3,6 +3,7 @@ using AspNetWebService.Interfaces;
 using AspNetWebService.Models;
 using AspNetWebService.Models.Data_Transfer_Object_Models;
 using AspNetWebService.Models.DataTransferObjectModels;
+using AspNetWebService.Models.Result_Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -65,7 +66,7 @@ namespace AspNetWebService.Services
         /// <returns>
         ///     A task representing the asynchronous operation that returns a UserResult object.
         /// </returns>
-        public async Task<UserResult> GetUsersAsync(int page, int pageSize)
+        public async Task<UserListResult> GetUsersAsync(int page, int pageSize)
         {
             try
             {
@@ -90,11 +91,37 @@ namespace AspNetWebService.Services
                     TotalPages = totalPages
                 };
 
-                return new UserResult { Users = userDTOs, PaginationMetadata = paginationMetadata };
+                return new UserListResult { Users = userDTOs, PaginationMetadata = paginationMetadata };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching users.");
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Retrieves users from database who matches provided id.
+        /// </summary>
+        /// <param name="id">
+        ///     Id of user to retrieve in system.
+        /// </param>
+        /// <returns>
+        ///     User DTO repersentation of User who matches provided id.
+        /// </returns>
+        public async Task<UserResult> GetUserAsync(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                var userDTO = _mapper.Map<UserDTO>(user);
+
+                return new UserResult { User = userDTO };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occured while fetching user.");
                 throw;
             }
         }

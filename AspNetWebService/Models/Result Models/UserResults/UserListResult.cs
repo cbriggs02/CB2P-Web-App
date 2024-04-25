@@ -9,7 +9,7 @@ namespace AspNetWebService.Models.Data_Transfer_Object_Models
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    public class UserResult
+    public class UserListResult
     {
         /// <summary>
         ///     Gets or sets the list of users.

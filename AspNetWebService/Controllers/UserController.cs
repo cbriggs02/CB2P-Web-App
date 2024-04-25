@@ -63,7 +63,6 @@ namespace AspNetWebService.Controllers
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-
         /// <summary>
         ///     Retrieves all users from the database as DTOs.
         /// </summary>
@@ -85,7 +84,6 @@ namespace AspNetWebService.Controllers
         {
             try
             {
-                // Call the service method to retrieve users
                 var result = await _userService.GetUsersAsync(page, pageSize);
 
                 if (result.Users == null || result.Users.Count == 0)
@@ -93,7 +91,6 @@ namespace AspNetWebService.Controllers
                     return NotFound();
                 }
 
-                // Set pagination metadata in response header
                 Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(result.PaginationMetadata));
 
                 return Ok(result.Users);
@@ -117,7 +114,6 @@ namespace AspNetWebService.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Summary = "Gets a user by id")]
@@ -131,16 +127,14 @@ namespace AspNetWebService.Controllers
 
             try
             {
-                var user = await _userManager.FindByIdAsync(id);
+                var result = await _userService.GetUserAsync(id);
 
-                if (user == null)
+                if (result.User == null)
                 {
                     return NotFound();
                 }
 
-                var userDTO = _mapper.Map<UserDTO>(user);
-
-                return Ok(userDTO);
+                return Ok(result.User);
             }
             catch (Exception ex)
             {
