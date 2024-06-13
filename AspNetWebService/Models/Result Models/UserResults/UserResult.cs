@@ -14,5 +14,15 @@ namespace AspNetWebService.Models.Result_Models
         ///     Gets or sets the user DTO.
         /// </summary>
         public UserDTO User { get; set; }
+
+        /// <summary>
+        ///     Used to indetify sucsesful user operations.
+        /// </summary>
+        public bool Success { get; set; }
+
+        /// <summary>
+        ///     Used to note errors during user operations.
+        /// </summary>
+        public List<string> Errors { get; set; }
     }
 }

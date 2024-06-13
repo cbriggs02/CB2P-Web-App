@@ -55,7 +55,7 @@ namespace AspNetWebService.Services
         }
 
         /// <summary>
-        ///     Retrieves users with pagination metadata.
+        ///     
         /// </summary>
         /// <param name="page">
         ///     The page number.
@@ -66,7 +66,7 @@ namespace AspNetWebService.Services
         /// <returns>
         ///     A task representing the asynchronous operation that returns a UserResult object.
         /// </returns>
-        public async Task<UserListResult> GetUsersAsync(int page, int pageSize)
+        public async Task<UserListResult> GetUsers(int page, int pageSize)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace AspNetWebService.Services
         }
 
         /// <summary>
-        ///     Retrieves users from database who matches provided id.
+        ///    
         /// </summary>
         /// <param name="id">
         ///     Id of user to retrieve in system.
@@ -109,7 +109,7 @@ namespace AspNetWebService.Services
         /// <returns>
         ///     User DTO repersentation of User who matches provided id.
         /// </returns>
-        public async Task<UserResult> GetUserAsync(string id)
+        public async Task<UserResult> GetUser(string id)
         {
             try
             {
@@ -124,6 +124,268 @@ namespace AspNetWebService.Services
                 _logger.LogError(ex, "An error occured while fetching user.");
                 throw;
             }
+        }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        /// <param name="user">
+        ///     The UserDTO object containing user information.
+        /// </param>
+        /// <returns>
+        ///     Returns a UserResult object indicating the creation status.
+        ///     - If successful, returns a UserResult with Success set to true and the created user's details.
+        ///     - If the userDTO is null, returns a UserResult with Success set to false and an error message.
+        ///     - If the provided username or email already exists, returns a UserResult with Success set to false and an error message.
+        ///     - If an error occurs during user creation, returns a UserResult with Success set to false and an error message.
+        /// </returns>
+        public async Task<UserResult> CreateUser(UserDTO user)
+        {
+            var validationResult = await UserValidation(user);
+
+            if (!validationResult.Success)
+            {
+                return validationResult;
+            }
+
+            try
+            {
+                var newUser = new User
+                {
+                    UserName = user.UserName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Country = user.Country,
+                    LockoutEnd = DateTimeOffset.UtcNow
+                };
+
+                var result = await _userManager.CreateAsync(newUser);
+
+                if (result.Succeeded)
+                {
+                    var returnObject = new UserDTO
+                    {
+                        UserName = newUser.UserName,
+                        FirstName = newUser.FirstName,
+                        LastName = newUser.LastName,
+                        Email = newUser.Email,
+                        PhoneNumber = newUser.PhoneNumber,
+                        Country = newUser.Country
+                    };
+
+                    return new UserResult 
+                    {
+                        User = returnObject,
+                        Success = true 
+                    };
+                }
+                else
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating user.");
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "An error occurred while creating the user." }
+                };
+            }
+        }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        /// <param name="id">
+        ///     Id used to locate user to be updated inside the system.
+        /// </param>
+        /// <param name="user">
+        ///     user information required to change the located user model object inside the system.
+        /// </param>
+        /// <returns>
+        ///     Returns a UserResult object indicating the update status.
+        ///     - If successful, returns a UserResult with Success set to true.
+        ///     - If the provided username or email already exists, returns a UserResult with Success set to false and an error message.
+        ///     - If an error occurs during the update, returns a UserResult with Success set to false and an error message.
+        /// </returns>
+        public async Task<UserResult> UpdateUser(string id, UserDTO user)
+        {
+            var validationResult = await UserValidation(user);
+
+            if (!validationResult.Success)
+            {
+                return validationResult;
+            }
+
+            try
+            {
+                var existingUser = await _userManager.FindByIdAsync(id);
+
+                if(existingUser == null)
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = new List<string> { "User not found." }
+                    };
+                }
+
+                existingUser.UserName = user.UserName;
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.Email = user.Email;
+                existingUser.PhoneNumber = user.PhoneNumber;
+                existingUser.Country = user.Country;
+
+                var result = await _userManager.UpdateAsync(existingUser);
+
+                if (result.Succeeded)
+                {
+                    return new UserResult { Success = true };
+                }
+                else
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating user.");
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "An error occurred while updaiting the user." }
+                };
+            }
+        }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        /// <param name="id">
+        ///     Id used to repersent the user to be located and deleted inside the system.
+        /// </param>
+        /// <returns>
+        ///     Returns a UserResult Object indicating the delete status.
+        ///     - If successful, returns a UserResult with success set to true.
+        ///     - If the provided id could not be located in the system returns a error message.
+        ///     - If an error occurs during deletion, returns UserResult with error message.
+        /// </returns>
+        public async Task<UserResult> DeleteUser(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                if(user == null)
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = new List<string> { "User not found." }
+                    };
+                }
+
+                var result = await _userManager.DeleteAsync(user);
+
+                if(result.Succeeded)
+                {
+                    return new UserResult
+                    {
+                        Success = true,
+                    };
+                }
+                else
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting user.");
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "An error occurred while deleting the user." }
+                };
+            }
+        }
+
+        /// <summary>
+        ///     Recieves a user DTO model to be validated for duplicates inside database.
+        /// </summary>
+        /// <param name="user">
+        ///     user model object to be validated for duplicates inside system.
+        /// </param>
+        /// <returns>
+        ///     Returns a result indicating duplicates were found for either userName or email
+        ///     or that the validation check was succesful.
+        /// </returns>
+        private async Task<UserResult> UserValidation(UserDTO user)
+        {
+            var result = new UserResult
+            {
+                Success = true,
+                Errors = new List<string>()
+            };
+
+            if (await UserNameExists(user.UserName))
+            {
+                result.Success = false;
+                result.Errors.Add("The provided username must be unique.");
+            }
+
+            if (await EmailExists(user.Email))
+            {
+                result.Success = false;
+                result.Errors.Add("The provided email is already being used.");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     Checks if a username already exists in the system.
+        /// </summary>
+        /// <param name="userName">
+        ///     The username to check for existence.
+        /// </param>
+        /// <returns>
+        ///     Returns true if the username exists, otherwise false.
+        /// </returns>
+        private async Task<bool> UserNameExists(string userName)
+        {
+            return await _userManager.FindByNameAsync(userName) != null;
+        }
+
+        /// <summary>
+        ///     Checks if an email already exists in the system.
+        /// </summary>
+        /// <param name="email">
+        ///     The email to check for existence.
+        /// </param>
+        /// <returns>
+        ///     Returns true if the email exists, otherwise false.
+        /// </returns>
+        private async Task<bool> EmailExists(string email)
+        {
+            return await _userManager.FindByEmailAsync(email) != null;
         }
     }
 }

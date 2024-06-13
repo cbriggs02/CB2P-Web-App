@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using AspNetWebService.Helpers;
 using AspNetWebService.Mapping;
 using AspNetWebService.Models;
@@ -58,15 +57,6 @@ namespace AspNetWebService
             // Add Swagger generation services to the service container.
             builder.Services.AddSwaggerGen(c =>
             {
-                //c.SwaggerDoc("v1", new OpenApiInfo { Title = "AspNetWebService API", Version = "v1" });
-
-                // Define the security scheme
-                //c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                //{
-                //    Description = "JWT Authorization header using the Bearer scheme.",
-                //    Type = SecuritySchemeType.Http,
-                //    Scheme = "bearer"
-                //});
                 c.EnableAnnotations();
             });
 
@@ -103,10 +93,10 @@ namespace AspNetWebService
            {
                options.TokenValidationParameters = new TokenValidationParameters
                {
-                   ValidateIssuer = true, // Validate the issuer of the token
-                   ValidateAudience = true, // Validate the audience of the token
-                   ValidateLifetime = true, // Validate the lifetime of the token
-                   ValidateIssuerSigningKey = true, // Validate the security key used to sign the token
+                   ValidateIssuer = true,
+                   ValidateAudience = true,
+                   ValidateLifetime = true,
+                   ValidateIssuerSigningKey = true,
 
                    // Use dynamically generated secret key
                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
@@ -114,12 +104,6 @@ namespace AspNetWebService
                    ValidAudience = validAudience
                };
            });
-
-            //builder.Services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-            //    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
-            //});
 
             // Manual registration of AutoMapper
             var mapperConfig = new MapperConfiguration(mc =>
@@ -153,19 +137,15 @@ namespace AspNetWebService
                 }
             }
 
-            // Configure the HTTP request pipeline.
-
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            // Catch exceptions thrown at application level and log them globally
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
-            // Log HTTPS request performance and metrics
             app.UseMiddleware<PerformanceMonitor>();
 
             app.UseSwagger();
@@ -173,11 +153,6 @@ namespace AspNetWebService
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AspNetWebService API V1");
                 c.RoutePrefix = string.Empty;
-
-                // Add JWT token for authorization in Swagger UI
-                //c.OAuthClientId("swagger-ui");
-                //c.OAuthAppName("Swagger UI");
-                //c.OAuthUseBasicAuthenticationWithAccessCodeGrant();
             });
 
             app.UseRouting();
