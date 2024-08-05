@@ -33,7 +33,7 @@ namespace AspNetWebService.Models
         [PersonalData]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         /// <summary>
         ///     Gets or sets the country of the user.
@@ -48,14 +48,29 @@ namespace AspNetWebService.Models
         public int AccountStatus { get; set; }
 
         /// <summary>
+        ///     Gets or sets the datetime this user was created at.
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the datetime this user was last updated at.
+        /// </summary>
+        public DateTime UpdatedAt { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a list of previous passwords used by this user.
+        /// </summary>
+        public virtual ICollection<PasswordHistory> Passwords { get; set; }
+
+        /// <summary>
         ///     Checks if the birth date has been set for the user.
         /// </summary>
         /// <returns>
-        ///     True if the birth date is set and valid, otherwise false.
+        ///     True if the birth date is set, otherwise false.
         /// </returns>
         public bool IsBirthDateSet()
         {
-            return BirthDate > DateTime.MinValue;
+            return BirthDate.HasValue;
         }
     }
 }

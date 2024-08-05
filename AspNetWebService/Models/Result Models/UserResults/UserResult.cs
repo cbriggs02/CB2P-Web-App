@@ -3,7 +3,7 @@
 namespace AspNetWebService.Models.Result_Models
 {
     /// <summary>
-    ///     Repersents the result of a user-related operation, including a user DTO.
+    ///     Represents the result of a user-related operation, including a user DTO.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
@@ -16,7 +16,7 @@ namespace AspNetWebService.Models.Result_Models
         public UserDTO User { get; set; }
 
         /// <summary>
-        ///     Used to indetify sucsesful user operations.
+        ///     Used to identify successful user operations.
         /// </summary>
         public bool Success { get; set; }
 
@@ -24,5 +24,10 @@ namespace AspNetWebService.Models.Result_Models
         ///     Used to note errors during user operations.
         /// </summary>
         public List<string> Errors { get; set; }
+
+        /// <summary>
+        ///     Used as token generated when user logs in.
+        /// </summary>
+        public string Token { get; set; }
     }
 }

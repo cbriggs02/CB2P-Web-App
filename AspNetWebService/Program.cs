@@ -51,8 +51,14 @@ namespace AspNetWebService
 
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection));
+
             builder.Services.AddControllers();
+
+            // Register services
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IPasswordService, PasswordService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
 
             // Add Swagger generation services to the service container.
             builder.Services.AddSwaggerGen(c =>
@@ -63,10 +69,19 @@ namespace AspNetWebService
             // Configure and add ASP.NET Core Identity with custom User and Role classes, and password policies.
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
+                // Password settings
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
                 options.Password.RequireUppercase = true;
                 options.Password.RequireLowercase = true;
+
+                // Lockout settings
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings
+                options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>();
 

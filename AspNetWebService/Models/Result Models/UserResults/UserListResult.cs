@@ -1,5 +1,4 @@
-﻿using AspNetWebService.Models.Data_Transfer_Object_Models;
-using AspNetWebService.Models.DataTransferObjectModels;
+﻿using AspNetWebService.Models.DataTransferObjectModels;
 
 namespace AspNetWebService.Models.Data_Transfer_Object_Models
 {

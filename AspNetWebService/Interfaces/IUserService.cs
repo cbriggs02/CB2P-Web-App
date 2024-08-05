@@ -1,5 +1,4 @@
-﻿using AspNetWebService.Models;
-using AspNetWebService.Models.Data_Transfer_Object_Models;
+﻿using AspNetWebService.Models.Data_Transfer_Object_Models;
 using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.Result_Models;
 
@@ -14,7 +13,7 @@ namespace AspNetWebService.Interfaces
     public interface IUserService
     {
         /// <summary>
-        ///     
+        ///     Definition of a task used for retrieving list of users in system.
         /// </summary>
         /// <param name="page">
         ///     The page number.
@@ -27,8 +26,9 @@ namespace AspNetWebService.Interfaces
         /// </returns>
         Task<UserListResult> GetUsers(int page, int pageSize);
 
+
         /// <summary>
-        ///     
+        ///     Definition of a task used for retrieving a user by id in the system.
         /// </summary>
         /// <param name="id">
         ///     Id of user to be retrieved.
@@ -38,19 +38,21 @@ namespace AspNetWebService.Interfaces
         /// </returns>
         Task<UserResult> GetUser(string id);
 
+
         /// <summary>
-        ///     
+        ///     Definition of a task used for creating a new user in the system using user object.
         /// </summary>
         /// <param name="userDTO">
-        ///     Data transfur object containing information used in user creation.
+        ///     Data transfer object containing information used in user creation.
         /// </param>
         /// <returns>
         ///      A task representing the asynchronous operation that returns UserResult object.
         /// </returns>
         Task<UserResult> CreateUser(UserDTO userDTO);
 
+
         /// <summary>
-        ///     
+        ///     Definition of a task used for updating a user in the system by id using user object.
         /// </summary>
         /// <param name="id">
         ///     Id used to locate user in system to be updated.
@@ -63,15 +65,40 @@ namespace AspNetWebService.Interfaces
         /// </returns>
         Task<UserResult> UpdateUser(string id, UserDTO userDTO);
 
+
         /// <summary>
-        ///     
+        ///     Definition of a task used for deleting a user in the system by id.
         /// </summary>
         /// <param name="id">
-        ///     id used to locate user to be deleted in system.
+        ///     Id used to locate user to be deleted in system.
         /// </param>
         /// <returns>
         ///     A task representing the asynchronous operation that returns UserResult object.
         /// </returns>
         Task<UserResult> DeleteUser(string id);
+
+
+        /// <summary>
+        ///     Definition of a task used for activating a user in the system by id.
+        /// </summary>
+        /// <param name="id">
+        ///     Id to identify user to be activated inside the system.
+        /// </param>
+        /// <returns>
+        ///     A task representing the asynchronous operation that returns UserResult object.
+        /// </returns>
+        Task<UserResult> ActivateUser(string id);
+
+
+        /// <summary>
+        ///     Definition of a task used for deactivating a user in the system by id.
+        /// </summary>
+        /// <param name="id">
+        ///     Id of user who is being deactivated inside the system.
+        /// </param>
+        /// <returns>
+        ///     A task representing the asynchronous operation that returns UserResult object.
+        /// </returns>
+        Task<UserResult> DeactivateUser(string id);
     }
 }

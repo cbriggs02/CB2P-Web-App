@@ -12,6 +12,8 @@ namespace AspNetWebService.Data
     /// </remarks>
     public class ApplicationDbContext : IdentityDbContext<User>
     {
+        public DbSet<PasswordHistory> PasswordHistories { get; set; }
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="ApplicationDbContext"/> class.
         /// </summary>
@@ -36,6 +38,15 @@ namespace AspNetWebService.Data
             modelBuilder.Entity<User>()
                 .ToTable("Users")
                 .HasKey(x => x.Id);
+
+            modelBuilder.Entity<PasswordHistory>()
+                .ToTable("Password_history")
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<PasswordHistory>()
+                .HasOne(x => x.User)
+                .WithMany(x => x.Passwords)
+                .HasForeignKey(x => x.UserId);
         }
     }
 }

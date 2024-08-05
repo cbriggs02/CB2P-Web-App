@@ -28,6 +28,7 @@ namespace AspNetWebService.Data
             }
         }
 
+
         /// <summary>
         ///     Seeds the database with default users if no users exist.
         /// </summary>
@@ -39,27 +40,23 @@ namespace AspNetWebService.Data
             var passwordHasher = new PasswordHasher<User>();
             var defaultUsers = new List<User>();
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 5000; i++)
             {
                 var user = new User
                 {
                     UserName = $"userTest{i}",
-                    NormalizedUserName = $"userTest{i}",
                     FirstName = $"FirstName{i}",
                     LastName = $"LastName{i}",
                     Email = $"userTest{i}@gmail.com",
-                    NormalizedEmail = $"userTest{i}@gmail.com",
                     BirthDate = new DateTime(1990, 1, 1),
                     PhoneNumber = "222-222-2222",
                     Country = "Canada",
-                    LockoutEnd = DateTimeOffset.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    PasswordHash = passwordHasher.HashPassword(null, "P@s_s8w0rd!")
                 };
-
-                // Set a default password
-                user.PasswordHash = passwordHasher.HashPassword(null, "P@s_s8w0rd!");
                 defaultUsers.Add(user);
             }
-
             context.Users.AddRange(defaultUsers);
             context.SaveChanges();
         }

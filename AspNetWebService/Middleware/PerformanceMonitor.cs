@@ -28,6 +28,7 @@ namespace AspNetWebService.Middleware
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+
         /// <summary>
         ///     Invokes the performance monitoring middleware.
         /// </summary>

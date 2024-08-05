@@ -32,14 +32,13 @@ namespace AspNetWebService.Models.DataTransferObjectModels
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
-
         /// <summary>
         ///     Gets or sets the birth date of the user.
         /// </summary>
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{yyyy-MM-dd}")]
         [Display(Name = "Birth Day")]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
 
         /// <summary>
         ///     Gets or sets the email address of the user.
@@ -64,16 +63,5 @@ namespace AspNetWebService.Models.DataTransferObjectModels
         [Required(ErrorMessage = "Country is required")]
         [StringLength(75)]
         public string Country { get; set; }
-
-        /// <summary>
-        ///     Checks if the birth date has been set for the user.
-        /// </summary>
-        /// <returns>
-        ///     True if the birth date is set and valid, otherwise false.
-        /// </returns>
-        public bool IsBirthDateSet()
-        {
-            return BirthDate > DateTime.MinValue;
-        }
     }
 }

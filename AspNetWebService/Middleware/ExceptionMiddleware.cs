@@ -28,6 +28,7 @@ namespace AspNetWebService.Middleware
             _logger = logger;
         }
 
+
         /// <summary>
         ///     Invokes the exception handling middleware.
         /// </summary>

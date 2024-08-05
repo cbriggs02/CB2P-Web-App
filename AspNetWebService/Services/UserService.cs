@@ -1,5 +1,4 @@
-﻿using AspNetWebService.Controllers;
-using AspNetWebService.Interfaces;
+﻿using AspNetWebService.Interfaces;
 using AspNetWebService.Models;
 using AspNetWebService.Models.Data_Transfer_Object_Models;
 using AspNetWebService.Models.DataTransferObjectModels;
@@ -18,26 +17,18 @@ namespace AspNetWebService.Services
     /// </remarks>
     public class UserService : IUserService
     {
-        private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
-        private readonly ILogger<UserController> _logger;
-        private readonly IConfiguration _configuration;
+        private readonly ILogger<UserService> _logger;
         private readonly IMapper _mapper;
 
         /// <summary>
-        ///     Constructor for UserService class.
+        ///     Constructor for the <see cref="UserService"/> class.
         /// </summary>
-        /// <param name="signInManager">
-        ///     The sign-in manager used for user authentication.
-        /// </param>
         /// <param name="userManager">
         ///     The user manager used for managing user-related operations.
         /// </param>
         /// <param name="logger">
-        ///     The logger used for logging in the user controller.
-        /// </param>
-        /// <param name="configuration">
-        ///     The configuration used for accessing app settings, including JWT settings.
+        ///     The logger used for logging in the user service.
         /// </param>
         /// <param name="mapper">
         ///     The mapper used for mapping objects between different types.
@@ -45,17 +36,16 @@ namespace AspNetWebService.Services
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public UserService(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<UserController> logger, IConfiguration configuration, IMapper mapper)
+        public UserService(UserManager<User> userManager, ILogger<UserService> logger, IMapper mapper)
         {
-            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+
         /// <summary>
-        ///     
+        ///     Retrieves all users from database by page number and page size.
         /// </summary>
         /// <param name="page">
         ///     The page number.
@@ -100,14 +90,15 @@ namespace AspNetWebService.Services
             }
         }
 
+
         /// <summary>
-        ///    
+        ///    Retrieves a user from database based on provided user id.
         /// </summary>
         /// <param name="id">
         ///     Id of user to retrieve in system.
         /// </param>
         /// <returns>
-        ///     User DTO repersentation of User who matches provided id.
+        ///     User DTO representation of User who matches provided id.
         /// </returns>
         public async Task<UserResult> GetUser(string id)
         {
@@ -121,13 +112,14 @@ namespace AspNetWebService.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occured while fetching user.");
+                _logger.LogError(ex, "An error occurred while fetching user.");
                 throw;
             }
         }
 
+
         /// <summary>
-        ///     
+        ///     Creates a user in the database.
         /// </summary>
         /// <param name="user">
         ///     The UserDTO object containing user information.
@@ -141,7 +133,7 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> CreateUser(UserDTO user)
         {
-            var validationResult = await UserValidation(user);
+            var validationResult = BirthdayValidation(user);
 
             if (!validationResult.Success)
             {
@@ -155,10 +147,12 @@ namespace AspNetWebService.Services
                     UserName = user.UserName,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
+                    BirthDate = user.BirthDate,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     Country = user.Country,
-                    LockoutEnd = DateTimeOffset.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
                 };
 
                 var result = await _userManager.CreateAsync(newUser);
@@ -170,15 +164,16 @@ namespace AspNetWebService.Services
                         UserName = newUser.UserName,
                         FirstName = newUser.FirstName,
                         LastName = newUser.LastName,
+                        BirthDate = newUser.BirthDate,
                         Email = newUser.Email,
                         PhoneNumber = newUser.PhoneNumber,
                         Country = newUser.Country
                     };
 
-                    return new UserResult 
+                    return new UserResult
                     {
                         User = returnObject,
-                        Success = true 
+                        Success = true
                     };
                 }
                 else
@@ -201,8 +196,9 @@ namespace AspNetWebService.Services
             }
         }
 
+
         /// <summary>
-        ///     
+        ///     Updates a user in the database based on provided id and new information in model object.
         /// </summary>
         /// <param name="id">
         ///     Id used to locate user to be updated inside the system.
@@ -218,7 +214,7 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> UpdateUser(string id, UserDTO user)
         {
-            var validationResult = await UserValidation(user);
+            var validationResult = BirthdayValidation(user);
 
             if (!validationResult.Success)
             {
@@ -229,7 +225,7 @@ namespace AspNetWebService.Services
             {
                 var existingUser = await _userManager.FindByIdAsync(id);
 
-                if(existingUser == null)
+                if (existingUser == null)
                 {
                     return new UserResult
                     {
@@ -241,9 +237,11 @@ namespace AspNetWebService.Services
                 existingUser.UserName = user.UserName;
                 existingUser.FirstName = user.FirstName;
                 existingUser.LastName = user.LastName;
+                existingUser.BirthDate = user.BirthDate;
                 existingUser.Email = user.Email;
                 existingUser.PhoneNumber = user.PhoneNumber;
                 existingUser.Country = user.Country;
+                existingUser.UpdatedAt = DateTime.UtcNow;
 
                 var result = await _userManager.UpdateAsync(existingUser);
 
@@ -266,16 +264,17 @@ namespace AspNetWebService.Services
                 return new UserResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while updaiting the user." }
+                    Errors = new List<string> { "An error occurred while updating the user." }
                 };
             }
         }
 
+
         /// <summary>
-        ///     
+        ///     Deletes a user in the database based on provided id.
         /// </summary>
         /// <param name="id">
-        ///     Id used to repersent the user to be located and deleted inside the system.
+        ///     Id used to represent the user to be located and deleted inside the system.
         /// </param>
         /// <returns>
         ///     Returns a UserResult Object indicating the delete status.
@@ -289,7 +288,7 @@ namespace AspNetWebService.Services
             {
                 var user = await _userManager.FindByIdAsync(id);
 
-                if(user == null)
+                if (user == null)
                 {
                     return new UserResult
                     {
@@ -300,7 +299,7 @@ namespace AspNetWebService.Services
 
                 var result = await _userManager.DeleteAsync(user);
 
-                if(result.Succeeded)
+                if (result.Succeeded)
                 {
                     return new UserResult
                     {
@@ -327,17 +326,155 @@ namespace AspNetWebService.Services
             }
         }
 
+
         /// <summary>
-        ///     Recieves a user DTO model to be validated for duplicates inside database.
+        ///     Activates a user in database by changing flag based on provided id.
         /// </summary>
-        /// <param name="user">
-        ///     user model object to be validated for duplicates inside system.
+        /// <param name="id">
+        ///     Id to identify user inside system to be activated during request.
         /// </param>
         /// <returns>
-        ///     Returns a result indicating duplicates were found for either userName or email
-        ///     or that the validation check was succesful.
+        ///     Returns a UserResult Object indicating the activate user status.
+        ///     - If successful, returns a UserResult with success set to true.
+        ///     - If the provided id could not be located in the system returns a error message.
+        ///     - If the located user is already activated, returns a error message.
+        ///     - If an error occurs during activation, returns UserResult with error message.
         /// </returns>
-        private async Task<UserResult> UserValidation(UserDTO user)
+        public async Task<UserResult> ActivateUser(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                if (user == null)
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = new List<string> { "User not found." }
+                    };
+                }
+
+                if (user.AccountStatus == 1)
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = new List<string> { "User already activated inside the system." }
+                    };
+                }
+
+                user.AccountStatus = 1;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return new UserResult
+                    {
+                        Success = true
+                    };
+                }
+                else
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while activating user.");
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "An error occurred while activating user." }
+                };
+            }
+        }
+
+
+        /// <summary>
+        ///     Deactivates a user in database by changing flag based on provided id.
+        /// </summary>
+        /// <param name="id">
+        ///     Id used to identify user who is being deactivated inside the system.
+        /// </param>
+        /// <returns>
+        ///     Returns a UserResult Object indicating the deactivate user status.
+        ///     - If successful, returns a UserResult with success set to true.
+        ///     - If the provided id could not be located in the system returns a error message.
+        ///     - If the located user is already deactivated, returns a error message.
+        ///     - If an error occurs during deactivation, returns UserResult with error message.
+        /// </returns>
+        public async Task<UserResult> DeactivateUser(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                if (user == null)
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = new List<string> { "User not found." }
+                    };
+                }
+
+                if (user.AccountStatus == 0)
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = new List<string> { "User has not been activated in the system." }
+                    };
+                }
+
+                user.AccountStatus = 0;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    return new UserResult
+                    {
+                        Success = true
+                    };
+                }
+                else
+                {
+                    return new UserResult
+                    {
+                        Success = false,
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deactivating user.");
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "An error occurred while deactivating user." }
+                };
+            }
+        }
+
+
+        /// <summary>
+        ///     Receives a user DTO model to be validated for invalid birthday values.
+        /// </summary>
+        /// <param name="user">
+        ///     user model object to be validated for invalid birthday information.
+        /// </param>
+        /// <returns>
+        ///     Returns a result indicating that birthday validation failed or that the validation check was successful.
+        /// </returns>
+        private static UserResult BirthdayValidation(UserDTO user)
         {
             var result = new UserResult
             {
@@ -345,47 +482,13 @@ namespace AspNetWebService.Services
                 Errors = new List<string>()
             };
 
-            if (await UserNameExists(user.UserName))
+            if (user.BirthDate > DateTime.UtcNow)
             {
                 result.Success = false;
-                result.Errors.Add("The provided username must be unique.");
-            }
-
-            if (await EmailExists(user.Email))
-            {
-                result.Success = false;
-                result.Errors.Add("The provided email is already being used.");
+                result.Errors.Add("The provided birthday exceeds todays date.");
             }
 
             return result;
-        }
-
-        /// <summary>
-        ///     Checks if a username already exists in the system.
-        /// </summary>
-        /// <param name="userName">
-        ///     The username to check for existence.
-        /// </param>
-        /// <returns>
-        ///     Returns true if the username exists, otherwise false.
-        /// </returns>
-        private async Task<bool> UserNameExists(string userName)
-        {
-            return await _userManager.FindByNameAsync(userName) != null;
-        }
-
-        /// <summary>
-        ///     Checks if an email already exists in the system.
-        /// </summary>
-        /// <param name="email">
-        ///     The email to check for existence.
-        /// </param>
-        /// <returns>
-        ///     Returns true if the email exists, otherwise false.
-        /// </returns>
-        private async Task<bool> EmailExists(string email)
-        {
-            return await _userManager.FindByEmailAsync(email) != null;
         }
     }
 }

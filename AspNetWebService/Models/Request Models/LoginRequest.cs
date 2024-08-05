@@ -8,7 +8,7 @@ namespace AspNetWebService.Models
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    public class Login
+    public class LoginRequest
     {
         /// <summary>
         ///     Gets or sets the username for authentication.
