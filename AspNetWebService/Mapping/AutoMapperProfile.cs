@@ -1,5 +1,5 @@
-﻿using AspNetWebService.Models;
-using AspNetWebService.Models.DataTransferObjectModels;
+﻿using AspNetWebService.Models.DataTransferObjectModels;
+using AspNetWebService.Models.Entities;
 using AutoMapper;
 
 namespace AspNetWebService.Mapping

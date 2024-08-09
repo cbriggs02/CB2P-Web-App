@@ -1,5 +1,5 @@
-﻿using AspNetWebService.Models.Result_Models;
-using AspNetWebService.Models;
+﻿using AspNetWebService.Models;
+using AspNetWebService.Models.Result_Models.Auth_Results;
 
 namespace AspNetWebService.Interfaces
 {
@@ -14,21 +14,21 @@ namespace AspNetWebService.Interfaces
         /// <summary>
         ///     Definition of a task used for logging in a user in the system using credentials.
         /// </summary>
-        /// <param name="login">
+        /// <param name="credentials">
         ///     A model object that contains information required for authentication, this includes a username and password.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns UserResult object.
+        ///     A task representing the asynchronous operation that returns AuthResult object.
         /// </returns>
-        Task<UserResult> Login(LoginRequest login);
+        Task<AuthResult> Login(LoginRequest credentials);
 
 
         /// <summary>
         ///     Definition of a task used for logging out a user in the system.
         /// </summary>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns UserResult object.
+        ///     A task representing the asynchronous operation that returns AuthResult object.
         /// </returns>
-        Task<UserResult> Logout();
+        Task<AuthResult> Logout();
     }
 }

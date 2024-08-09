@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
-namespace AspNetWebService.Models
+namespace AspNetWebService.Models.Entities
 {
     /// <summary>
     ///     Represents the user entity, extending the IdentityUser class from ASP.NET Core Identity.

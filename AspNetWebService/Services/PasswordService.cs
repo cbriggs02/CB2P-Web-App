@@ -1,7 +1,7 @@
 ﻿using AspNetWebService.Interfaces;
-using AspNetWebService.Models;
+using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.Request_Models;
-using AspNetWebService.Models.Result_Models;
+using AspNetWebService.Models.Result_Models.Password_Results;
 using Microsoft.AspNetCore.Identity;
 
 namespace AspNetWebService.Services
@@ -15,9 +15,7 @@ namespace AspNetWebService.Services
     public class PasswordService : IPasswordService
     {
         private readonly UserManager<User> _userManager;
-        private readonly ILogger<PasswordService> _logger;
         private readonly IPasswordHistoryService _historyService;
-
 
         /// <summary>
         ///     Constructor for the <see cref="PasswordService"/> class.
@@ -25,19 +23,15 @@ namespace AspNetWebService.Services
         /// <param name="userManager">
         ///     The user manager used for managing user-related operations.
         /// </param>
-        /// <param name="logger">
-        ///     The logger used for logging in the password service.
-        /// </param>
         /// <param name="historyService">
         ///     The service responsible for managing password history.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public PasswordService(UserManager<User> userManager, ILogger<PasswordService> logger, IPasswordHistoryService historyService)
+        public PasswordService(UserManager<User> userManager, IPasswordHistoryService historyService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _historyService = historyService ?? throw new ArgumentNullException(nameof(historyService));
         }
 
@@ -52,71 +46,60 @@ namespace AspNetWebService.Services
         ///     A model object that contains information required for setting password, this includes the password and the confirmed password.
         /// </param>
         /// <returns>
-        ///     Returns a UserResult Object indicating the set password status.
-        ///     - If successful, returns a UserResult with success set to true.
+        ///     Returns a PasswordResult Object indicating the set password status.
+        ///     - If successful, returns a PasswordResult with success set to true.
         ///     - If the provided id could not be located in the system returns a error message.
         ///     - If an error occurs during setup, returns UserResult with error message.
         /// </returns>
-        public async Task<UserResult> SetPassword(string id, SetPasswordRequest request)
+        public async Task<PasswordResult> SetPassword(string id, SetPasswordRequest request)
         {
             if (!request.PasswordConfirmed.Equals(request.Password))
             {
-                return new UserResult
+                return new PasswordResult
                 {
                     Success = false,
                     Errors = new List<string> { "Passwords do not match." }
                 };
             }
 
-            try
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
             {
-                var user = await _userManager.FindByIdAsync(id);
-
-                if (user == null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User not found." }
-                    };
-                }
-
-                if (user.PasswordHash != null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "Password has already been set." }
-                    };
-                }
-
-                var result = await _userManager.AddPasswordAsync(user, request.Password);
-
-                if (result.Succeeded)
-                {
-                    await CreatePasswordHistory(user);
-
-                    return new UserResult
-                    {
-                        Success = true
-                    };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = result.Errors.Select(e => e.Description).ToList()
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while setting password.");
-                return new UserResult
+                return new PasswordResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while setting the password." }
+                    Errors = new List<string> { "User not found." }
+                };
+            }
+
+            if (user.PasswordHash != null)
+            {
+                return new PasswordResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "Password has already been set." }
+                };
+            }
+
+            var result = await _userManager.AddPasswordAsync(user, request.Password);
+
+            if (result.Succeeded)
+            {
+                await CreatePasswordHistory(user);
+
+                return new PasswordResult
+                {
+                    Success = true
+                };
+            }
+            else
+            {
+                return new PasswordResult
+                {
+                    Success = false,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
         }
@@ -132,77 +115,67 @@ namespace AspNetWebService.Services
         ///     A model object that contains information required for updating password, this includes current and new password.
         /// </param>
         /// <returns>
-        ///     Returns a UserResult Object indicating the update password status.
-        ///     - If successful, returns a UserResult with success set to true.
+        ///     Returns a PasswordResult Object indicating the update password status.
+        ///     - If successful, returns a PasswordResult with success set to true.
         ///     - If the provided id could not be located in the system returns a error message.
         ///     - If an error occurs during update, returns UserResult with error message.
         /// </returns>
-        public async Task<UserResult> UpdatePassword(string id, UpdatePasswordRequest request)
+        public async Task<PasswordResult> UpdatePassword(string id, UpdatePasswordRequest request)
         {
-            try
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null || user.PasswordHash == null)
             {
-                var user = await _userManager.FindByIdAsync(id);
-
-                if (user == null || user.PasswordHash == null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "Invalid credentials." }
-                    };
-                }
-
-                var passwordIsValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
-
-                if (!passwordIsValid)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "Invalid credentials." }
-                    };
-                }
-
-                var newPasswordHash = HashPassword(request.NewPassword, user);
-
-                var isPasswordReused = await IsPasswordReused(user.Id, newPasswordHash);
-
-                if (isPasswordReused)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "Cannot re-use passwords. Please choose new password." }
-                    };
-                }
-
-                var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-
-                if (result.Succeeded)
-                {
-                    await CreatePasswordHistory(user);
-
-                    return new UserResult
-                    {
-                        Success = true
-                    };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = result.Errors.Select(e => e.Description).ToList()
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while updating password.");
-                return new UserResult
+                return new PasswordResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while updating the password." }
+                    Errors = new List<string> { "Invalid credentials." }
+                };
+            }
+
+            var passwordIsValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+
+            if (!passwordIsValid)
+            {
+                return new PasswordResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "Invalid credentials." }
+                };
+            }
+
+            // Hash password
+            var newPasswordHash = HashPassword(request.NewPassword, user);
+
+            // Send hash password to be checked against users history for re-use errors
+            var isPasswordReused = await IsPasswordReused(user.Id, newPasswordHash);
+
+            if (isPasswordReused)
+            {
+                return new PasswordResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "Cannot re-use passwords. Please choose new password." }
+                };
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+
+            if (result.Succeeded)
+            {
+                await CreatePasswordHistory(user);
+
+                return new PasswordResult
+                {
+                    Success = true
+                };
+            }
+            else
+            {
+                return new PasswordResult
+                {
+                    Success = false,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
         }

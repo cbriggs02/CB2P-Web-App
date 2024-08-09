@@ -1,6 +1,6 @@
 ﻿using AspNetWebService.Data;
 using AspNetWebService.Interfaces;
-using AspNetWebService.Models;
+using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.Request_Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -87,18 +87,18 @@ namespace AspNetWebService.Services
         /// <summary>
         ///     Removes old password entries for a user, keeping only the most recent 5.
         /// </summary>
-        /// <param name="userId">
+        /// <param name="id">
         ///     The ID of the user whose password history is being cleaned up.
         /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation of removing old password histories.
         /// </returns>
-        public async Task RemoveOldPasswordHistories(string userId)
+        private async Task RemoveOldPasswordHistories(string id)
         {
             var oldPasswordHistories = await _context.PasswordHistories
-                .Where(x => x.UserId == userId)
+                .Where(x => x.UserId == id)
                 .OrderBy(x => x.CreatedDate)
-                .Take(await _context.PasswordHistories.CountAsync(x => x.UserId == userId) - 5)
+                .Take(await _context.PasswordHistories.CountAsync(x => x.UserId == id) - 5)
                 .Select(x => x.Id)
                 .AsNoTracking()
                 .ToListAsync();

@@ -1,5 +1,4 @@
-﻿using AspNetWebService.Models;
-using AspNetWebService.Models.Request_Models;
+﻿using AspNetWebService.Models.Request_Models;
 
 namespace AspNetWebService.Interfaces
 {
@@ -37,20 +36,5 @@ namespace AspNetWebService.Interfaces
         ///     - <c>false</c> if the password hash is not found in the user's history, indicating that the password is not a re-used one.
         /// </returns>
         Task<bool> FindPasswordHash(PasswordHistoryRequest request);
-
-
-        /// <summary>
-        ///     Definition of a service method that deletes passwords kept in history as new ones are added to ensure every user only has 
-        ///     their most recent 5 passwords stored in history.
-        /// </summary>
-        /// <param name="UserId">
-        ///     Id of user whose passwords older then most recent 5 are being deleted from history.
-        /// </param>
-        /// <returns>
-        ///     A task that represents the asynchronous operation of deleting password history
-        ///     records in the database. The task completes when the record has been successfully
-        ///     deleted, verified or an error occurs.
-        /// </returns>
-        Task RemoveOldPasswordHistories(string UserId);
     }
 }

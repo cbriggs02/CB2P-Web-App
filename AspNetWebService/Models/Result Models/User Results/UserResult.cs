@@ -24,10 +24,5 @@ namespace AspNetWebService.Models.Result_Models
         ///     Used to note errors during user operations.
         /// </summary>
         public List<string> Errors { get; set; }
-
-        /// <summary>
-        ///     Used as token generated when user logs in.
-        /// </summary>
-        public string Token { get; set; }
     }
 }

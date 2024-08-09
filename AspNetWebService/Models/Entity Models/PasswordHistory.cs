@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AspNetWebService.Models
+namespace AspNetWebService.Models.Entities
 {
     /// <summary>
     ///     Represents the password history entity, used to keep history of user passwords.

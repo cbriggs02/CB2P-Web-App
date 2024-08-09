@@ -1,5 +1,5 @@
 ﻿using AspNetWebService.Models.Request_Models;
-using AspNetWebService.Models.Result_Models;
+using AspNetWebService.Models.Result_Models.Password_Results;
 
 namespace AspNetWebService.Interfaces
 {
@@ -21,9 +21,9 @@ namespace AspNetWebService.Interfaces
         ///     A model object that contains information required for setting password, this includes the password and the confirmed password.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns UserResult object.
+        ///     A task representing the asynchronous operation that returns PasswordResult object.
         /// </returns>
-        Task<UserResult> SetPassword(string id, SetPasswordRequest request);
+        Task<PasswordResult> SetPassword(string id, SetPasswordRequest request);
 
 
         /// <summary>
@@ -36,8 +36,8 @@ namespace AspNetWebService.Interfaces
         ///     A model object that contains information required for updating password, this includes current and new password.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns UserResult object.
+        ///     A task representing the asynchronous operation that returns PasswordResult object.
         /// </returns>
-        Task<UserResult> UpdatePassword(string id, UpdatePasswordRequest request);
+        Task<PasswordResult> UpdatePassword(string id, UpdatePasswordRequest request);
     }
 }

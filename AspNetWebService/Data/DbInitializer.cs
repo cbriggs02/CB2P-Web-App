@@ -1,41 +1,97 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AspNetWebService.Models;
+using AspNetWebService.Models.Entities;
 
 namespace AspNetWebService.Data
 {
     /// <summary>
-    ///     Handles database initialization and seeding.
+    ///     Provides functionality for database initialization and seeding.
+    ///     This class ensures that the database schema is up-to-date and 
+    ///     seeds it with initial data if necessary.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    public static class DbInitializer
+    public class DbInitializer
     {
-        /// <summary>
-        ///     Ensures the database is created and seeds initial data if necessary.
-        /// </summary>
-        /// <param name="context">
-        ///     The application's database context.
-        /// </param>
-        public static void Initialize(ApplicationDbContext context)
-        {
-            context.Database.Migrate();
+        private readonly ILogger<DbInitializer> _logger;
 
-            if (!context.Users.Any())
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="DbInitializer"/> class.
+        ///     This constructor injects the <see cref="ILogger{DbInitializer}"/> 
+        ///     for logging.
+        /// </summary>
+        /// <param name="logger">
+        ///     The logger used for logging messages.
+        /// </param>
+        public DbInitializer(ILogger<DbInitializer> logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        /// <summary>
+        ///     Initializes the database and performs seeding if necessary.
+        ///     This method is called during the application startup.
+        /// </summary>
+        /// <param name="app">
+        ///     The <see cref="WebApplication"/> instance used to access the service provider.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        public async Task InitializeDatabase(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            try
             {
-                SeedDefaultUsers(context);
+                var context = services.GetRequiredService<ApplicationDbContext>();
+
+                if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+                {
+                    await Initialize(context);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while seeding the database.");
             }
         }
 
 
         /// <summary>
-        ///     Seeds the database with default users if no users exist.
+        ///     Applies pending migrations to the database and performs seeding
+        ///     if no users are present in the database.
         /// </summary>
         /// <param name="context">
-        ///     The application's database context.
+        ///     The <see cref="ApplicationDbContext"/> instance used to interact with the database.
         /// </param>
-        private static void SeedDefaultUsers(ApplicationDbContext context)
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        private static async Task Initialize(ApplicationDbContext context)
+        {
+            context.Database.Migrate();
+
+            if (!context.Users.Any())
+            {
+                await SeedDefaultUsers(context);
+            }
+        }
+
+
+        /// <summary>
+        ///     Seeds the database with a list of default users if no users exist.
+        ///     This method creates a set of default user accounts and adds them to the database.
+        /// </summary>
+        /// <param name="context">
+        ///     The <see cref="ApplicationDbContext"/> instance used to interact with the database.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        private static async Task SeedDefaultUsers(ApplicationDbContext context)
         {
             var passwordHasher = new PasswordHasher<User>();
             var defaultUsers = new List<User>();
@@ -57,8 +113,9 @@ namespace AspNetWebService.Data
                 };
                 defaultUsers.Add(user);
             }
-            context.Users.AddRange(defaultUsers);
-            context.SaveChanges();
+
+            await context.Users.AddRangeAsync(defaultUsers);
+            await context.SaveChangesAsync();
         }
     }
 }

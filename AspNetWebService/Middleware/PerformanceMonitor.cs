@@ -41,28 +41,20 @@ namespace AspNetWebService.Middleware
         public async Task Invoke(HttpContext context)
         {
             var stopwatch = Stopwatch.StartNew();
+            var requestId = Guid.NewGuid().ToString();
 
-            try
-            {
-                await _next(context);
-            }
-            finally
-            {
-                stopwatch.Stop();
+            await _next(context);
 
-                using (var currentProcess = Process.GetCurrentProcess())
-                {
-                    double cpuUsage = currentProcess.TotalProcessorTime.TotalMilliseconds;
+            stopwatch.Stop();
+            var cpuUsage = Process.GetCurrentProcess().TotalProcessorTime.TotalMilliseconds;
 
-                    _logger.LogInformation($"CPU usage: {cpuUsage} milliseconds");
-                }
-
-                _logger.LogInformation($"Request Path: {context.Request.Path}");
-
-                _logger.LogInformation($"Response Status Code: {context.Response.StatusCode}");
-
-                _logger.LogInformation($"Request Duration: executed in {stopwatch.ElapsedMilliseconds} ms");
-            }
+            _logger.LogInformation(
+                $"Request ID: {requestId}, " +
+                $"Request Path: {context.Request.Path}, " +
+                $"Response Status Code: {context.Response.StatusCode}, " +
+                $"Request Duration: {stopwatch.ElapsedMilliseconds} ms, " +
+                $"CPU Usage: {cpuUsage} ms"
+            );
         }
     }
 }

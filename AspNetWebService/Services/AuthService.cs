@@ -1,8 +1,8 @@
-﻿using AspNetWebService.Data;
-using AspNetWebService.Helpers;
+﻿using AspNetWebService.Helpers;
 using AspNetWebService.Interfaces;
 using AspNetWebService.Models;
-using AspNetWebService.Models.Result_Models;
+using AspNetWebService.Models.Entities;
+using AspNetWebService.Models.Result_Models.Auth_Results;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,7 +15,6 @@ namespace AspNetWebService.Services
     {
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
-        private readonly ILogger<AuthService> _logger;
         private readonly IConfiguration _configuration;
 
         /// <summary>
@@ -27,89 +26,73 @@ namespace AspNetWebService.Services
         /// <param name="userManager">
         ///     The user manager used for managing user-related operations.
         /// </param>
-        /// <param name="logger">
-        ///     The logger used for logging in the authentication service.
-        /// </param>
         /// <param name="configuration">
         ///     The configuration used for accessing app settings, including JWT settings.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public AuthService(SignInManager<User> signInManager, UserManager<User> userManager, ApplicationDbContext context, ILogger<AuthService> logger, IConfiguration configuration)
+        public AuthService(SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration)
         {
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
 
         /// <summary>
         ///     Logs in a user in system using sign in manager based on user credentials.
         /// </summary>
-        /// <param name="login">
+        /// <param name="credentials">
         ///     Required information used to authenticate a user inside the system upon logging in.
         /// </param>
         /// <returns>
-        ///     Returns a UserResult Object indicating the login status.
-        ///     - If successful, returns a UserResult with success set to true.
+        ///     Returns a AuthResult Object indicating the login status.
+        ///     - If successful, returns a AuthResult with success set to true.
         ///     - If the provided username could not be located in the system returns a error message.
         ///     - If the provided password does not match the located user in the system returns a error message.
-        ///     - If an error occurs during login, returns UserResult with error message.
+        ///     - If an error occurs during login, returns AuthResult with error message.
         /// </returns>
-        public async Task<UserResult> Login(LoginRequest login)
+        public async Task<AuthResult> Login(LoginRequest credentials)
         {
-            try
+            var user = await _userManager.FindByNameAsync(credentials.UserName);
+
+            if (user == null)
             {
-                var user = await _userManager.FindByNameAsync(login.UserName);
-
-                if (user == null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User not found." }
-                    };
-                }
-
-                if (user.AccountStatus == 0)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "This user account has not been activated inside the system yet." }
-                    };
-                }
-
-                var result = await _signInManager.PasswordSignInAsync(user, login.Password, false, true);
-
-                if (result.Succeeded)
-                {
-                    var token = GenerateJwtToken(user);
-
-                    return new UserResult
-                    {
-                        Success = true,
-                        Token = token,
-                    };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "Invalid password." }
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during login.");
-                return new UserResult
+                return new AuthResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred during login." }
+                    Errors = new List<string> { "User not found." }
+                };
+            }
+
+            if (user.AccountStatus == 0)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "This user account has not been activated inside the system yet." }
+                };
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user, credentials.Password, false, true);
+
+            if (result.Succeeded)
+            {
+                var token = GenerateJwtToken(user);
+
+                return new AuthResult
+                {
+                    Success = true,
+                    Token = token,
+                };
+            }
+            else
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "Invalid password." }
                 };
             }
         }
@@ -119,31 +102,17 @@ namespace AspNetWebService.Services
         ///     Logs out a user in system using sign in manager.
         /// </summary>
         /// <returns>
-        ///     Returns a UserResult Object indicating the logout status.
-        ///     - If successful, returns a UserResult with success set to true.
-        ///     - If no user is logged in, returns a UserResult with error message.
-        ///     - If an error occurs during login, returns UserResult with error message.
+        ///     Returns a AuthResult Object indicating the logout status.
+        ///     - If successful, returns a AuthResult with success set to true.
         /// </returns>
-        public async Task<UserResult> Logout()
+        public async Task<AuthResult> Logout()
         {
-            try
-            {
-                await _signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();
 
-                return new UserResult
-                {
-                    Success = true
-                };
-            }
-            catch (Exception ex)
+            return new AuthResult
             {
-                _logger.LogError(ex, "An error occurred during logout.");
-                return new UserResult
-                {
-                    Success = false,
-                    Errors = new List<string> { "An error occurred during logout." }
-                };
-            }
+                Success = true
+            };
         }
 
 

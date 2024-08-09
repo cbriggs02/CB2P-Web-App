@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AspNetWebService.Models;
 using AspNetWebService.Models.DataTransferObjectModels;
 using Swashbuckle.AspNetCore.Annotations;
 using Newtonsoft.Json;
 using AspNetWebService.Interfaces;
+using System.ComponentModel.DataAnnotations;
+using AspNetWebService.Models.Request_Models.UserRequests;
+using AspNetWebService.Models.Entities;
 
 namespace AspNetWebService.Controllers
 {
@@ -37,23 +39,21 @@ namespace AspNetWebService.Controllers
         /// <summary>
         ///     Process all requests for retrieving list of users in system by page number and size to required service.
         /// </summary>
-        /// <param name="page">
-        ///     The page of data to be returned.
-        /// </param>
-        /// <param name="pageSize">
-        ///     The size of data to be returned per page.
+        /// <param name="request">
+        ///     A model containing information used in request, such as a page number and page size.
         /// </param>
         /// <returns>
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) if retrieving the list of users was successful 
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the list is empty.
         /// </returns>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Gets a list of users using page number and size in system.")]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers(int page, int pageSize)
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers([FromQuery] UserListRequest request)
         {
-            var result = await _userService.GetUsers(page, pageSize);
+            var result = await _userService.GetUsers(request);
 
             if (result.Users == null || result.Users.Count == 0)
             {
@@ -75,21 +75,14 @@ namespace AspNetWebService.Controllers
         /// <returns>
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) if retrieving the user was successful 
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
-        ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the user retrieval attempt is unsuccessful or the id was not provided.
         /// </returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Gets a user by id in system.")]
-        public async Task<ActionResult<UserDTO>> GetUserById(string id)
+        public async Task<ActionResult<UserDTO>> GetUserById([FromRoute][Required] string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                ModelState.AddModelError(string.Empty, "ID parameter cannot be null or empty.");
-                return BadRequest(ModelState);
-            }
-
             var result = await _userService.GetUser(id);
 
             if (result.User == null)
@@ -108,21 +101,16 @@ namespace AspNetWebService.Controllers
         ///     The UserDTO object containing user information.
         /// </param>
         /// <returns>
-        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if creating the user was successful 
+        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if creating the user was successful.
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the user creation attempt is unsuccessful or user object has not been provided.
         /// </returns>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [SwaggerOperation(Summary = "Creates a new user in system.")]
-        public async Task<ActionResult<User>> CreateUser([FromBody] UserDTO user)
+        public async Task<ActionResult<UserDTO>> CreateUser([FromBody] UserDTO user)
         {
-            if (user == null)
-            {
-                ModelState.AddModelError(string.Empty, "User parameter cannot be null or empty.");
-                return BadRequest(ModelState);
-            }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -155,23 +143,18 @@ namespace AspNetWebService.Controllers
         ///     The UserDTO object containing updated user information.
         /// </param>
         /// <returns>
-        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if updating the user was successful 
-        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
+        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if updating the user was successful.
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the user update attempt is unsuccessful or any parameters are missing.
+        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
         [HttpPut("{id}")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Updates a user by id in system.")]
-        public async Task<IActionResult> UpdateUser(string id, [FromBody] UserDTO user)
+        public async Task<IActionResult> UpdateUser([FromRoute][Required] string id, [FromBody] UserDTO user)
         {
-            if (string.IsNullOrWhiteSpace(id) || user == null)
-            {
-                ModelState.AddModelError(string.Empty, "User parameter and ID cannot be null or empty.");
-                return BadRequest(ModelState);
-            }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -190,7 +173,6 @@ namespace AspNetWebService.Controllers
                     return NotFound();
                 }
 
-
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error);
@@ -207,23 +189,18 @@ namespace AspNetWebService.Controllers
         ///     The ID of the user to delete.
         /// </param>
         /// <returns>
-        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the user deletion was successful 
-        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
+        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the user deletion was successful.
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the user deletion attempt is unsuccessful or id was not provided.
+        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
         [HttpDelete("{id}")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Deletes a user by id in system.")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser([FromRoute][Required] string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                ModelState.AddModelError(string.Empty, "Id cannot be null or empty.");
-                return BadRequest(ModelState);
-            }
-
             var result = await _userService.DeleteUser(id);
 
             if (result.Success)
@@ -253,23 +230,18 @@ namespace AspNetWebService.Controllers
         ///     The user's identifier.
         /// </param>
         /// <returns>
-        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the activation was successful 
-        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
+        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the activation was successful.
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the activation attempt is unsuccessful or id is not provided.
+        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
         [HttpPut("activateUser/{id}")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Activates a user by id in system.")]
-        public async Task<IActionResult> ActivateUser(string id)
+        public async Task<IActionResult> ActivateUser([FromRoute][Required] string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                ModelState.AddModelError(string.Empty, "Id Parameter cannot be null or empty.");
-                return BadRequest(ModelState);
-            }
-
             var result = await _userService.ActivateUser(id);
 
             if (result.Success)
@@ -299,23 +271,18 @@ namespace AspNetWebService.Controllers
         ///     The unique identifier of the user to deactivate.
         /// </param>
         /// <returns>
-        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the deactivation was successful 
+        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the deactivation was successful.
+        ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the deactivation attempt is unsuccessful or id is not provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
-        ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the deactivation attempt is unsuccessful or id is not provided..
         /// </returns>
         [HttpPut("deactivateUser/{id}")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Deactivates a user by id in system.")]
-        public async Task<IActionResult> DeactivateUser(string id)
+        public async Task<IActionResult> DeactivateUser([FromRoute][Required] string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                ModelState.AddModelError(string.Empty, "Id Parameter cannot be null or empty.");
-                return BadRequest(ModelState);
-            }
-
             var result = await _userService.DeactivateUser(id);
 
             if (result.Success)

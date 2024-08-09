@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Models.Data_Transfer_Object_Models;
 using AspNetWebService.Models.DataTransferObjectModels;
+using AspNetWebService.Models.Request_Models.UserRequests;
 using AspNetWebService.Models.Result_Models;
 
 namespace AspNetWebService.Interfaces
@@ -15,16 +16,13 @@ namespace AspNetWebService.Interfaces
         /// <summary>
         ///     Definition of a task used for retrieving list of users in system.
         /// </summary>
-        /// <param name="page">
-        ///     The page number.
-        /// </param>
-        /// <param name="pageSize">
-        ///     The size of data to be returned per page.
+        /// <param name="request">
+        ///     A model containing information used in request, such as a page number and page size.
         /// </param>
         /// <returns>
         ///     A task representing the asynchronous operation that returns a UserListResult object.
         /// </returns>
-        Task<UserListResult> GetUsers(int page, int pageSize);
+        Task<UserListResult> GetUsers(UserListRequest request);
 
 
         /// <summary>

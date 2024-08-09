@@ -1,7 +1,8 @@
 ﻿using AspNetWebService.Interfaces;
-using AspNetWebService.Models;
 using AspNetWebService.Models.Data_Transfer_Object_Models;
 using AspNetWebService.Models.DataTransferObjectModels;
+using AspNetWebService.Models.Entities;
+using AspNetWebService.Models.Request_Models.UserRequests;
 using AspNetWebService.Models.Result_Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
@@ -18,7 +19,6 @@ namespace AspNetWebService.Services
     public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
-        private readonly ILogger<UserService> _logger;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -27,19 +27,15 @@ namespace AspNetWebService.Services
         /// <param name="userManager">
         ///     The user manager used for managing user-related operations.
         /// </param>
-        /// <param name="logger">
-        ///     The logger used for logging in the user service.
-        /// </param>
         /// <param name="mapper">
         ///     The mapper used for mapping objects between different types.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public UserService(UserManager<User> userManager, ILogger<UserService> logger, IMapper mapper)
+        public UserService(UserManager<User> userManager, IMapper mapper)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -47,47 +43,36 @@ namespace AspNetWebService.Services
         /// <summary>
         ///     Retrieves all users from database by page number and page size.
         /// </summary>
-        /// <param name="page">
-        ///     The page number.
-        /// </param>
-        /// <param name="pageSize">
-        ///     The size of data to be returned per page.
+        /// <param name="request">
+        ///     A model containing information used in request, such as a page number and page size.
         /// </param>
         /// <returns>
         ///     A task representing the asynchronous operation that returns a UserResult object.
         /// </returns>
-        public async Task<UserListResult> GetUsers(int page, int pageSize)
+        public async Task<UserListResult> GetUsers(UserListRequest request)
         {
-            try
+            var totalCount = await _userManager.Users.CountAsync();
+
+            var users = await _userManager.Users
+                .OrderBy(user => user.LastName)
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var userDTOs = users.Select(user => _mapper.Map<UserDTO>(user)).ToList();
+
+            var totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize);
+
+            PaginationMetadata paginationMetadata = new PaginationMetadata
             {
-                var totalCount = await _userManager.Users.CountAsync();
+                TotalCount = totalCount,
+                PageSize = request.PageSize,
+                CurrentPage = request.Page,
+                TotalPages = totalPages
+            };
 
-                var users = await _userManager.Users
-                    .OrderBy(user => user.LastName)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                var userDTOs = users.Select(user => _mapper.Map<UserDTO>(user)).ToList();
-
-                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-                PaginationMetadata paginationMetadata = new PaginationMetadata
-                {
-                    TotalCount = totalCount,
-                    PageSize = pageSize,
-                    CurrentPage = page,
-                    TotalPages = totalPages
-                };
-
-                return new UserListResult { Users = userDTOs, PaginationMetadata = paginationMetadata };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while fetching users.");
-                throw;
-            }
+            return new UserListResult { Users = userDTOs, PaginationMetadata = paginationMetadata };
         }
 
 
@@ -102,19 +87,11 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> GetUser(string id)
         {
-            try
-            {
-                var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdAsync(id);
 
-                var userDTO = _mapper.Map<UserDTO>(user);
+            var userDTO = _mapper.Map<UserDTO>(user);
 
-                return new UserResult { User = userDTO };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while fetching user.");
-                throw;
-            }
+            return new UserResult { User = userDTO };
         }
 
 
@@ -140,58 +117,46 @@ namespace AspNetWebService.Services
                 return validationResult;
             }
 
-            try
+            var newUser = new User
             {
-                var newUser = new User
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                BirthDate = user.BirthDate,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Country = user.Country,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+            };
+
+            var result = await _userManager.CreateAsync(newUser);
+
+            if (result.Succeeded)
+            {
+                var returnObject = new UserDTO
                 {
-                    UserName = user.UserName,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    BirthDate = user.BirthDate,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    Country = user.Country,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
+                    UserName = newUser.UserName,
+                    FirstName = newUser.FirstName,
+                    LastName = newUser.LastName,
+                    BirthDate = newUser.BirthDate,
+                    Email = newUser.Email,
+                    PhoneNumber = newUser.PhoneNumber,
+                    Country = newUser.Country
                 };
 
-                var result = await _userManager.CreateAsync(newUser);
-
-                if (result.Succeeded)
+                return new UserResult
                 {
-                    var returnObject = new UserDTO
-                    {
-                        UserName = newUser.UserName,
-                        FirstName = newUser.FirstName,
-                        LastName = newUser.LastName,
-                        BirthDate = newUser.BirthDate,
-                        Email = newUser.Email,
-                        PhoneNumber = newUser.PhoneNumber,
-                        Country = newUser.Country
-                    };
-
-                    return new UserResult
-                    {
-                        User = returnObject,
-                        Success = true
-                    };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = result.Errors.Select(e => e.Description).ToList()
-                    };
-                }
+                    User = returnObject,
+                    Success = true
+                };
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "An error occurred while creating user.");
                 return new UserResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while creating the user." }
+                    Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
         }
@@ -221,50 +186,38 @@ namespace AspNetWebService.Services
                 return validationResult;
             }
 
-            try
+            var existingUser = await _userManager.FindByIdAsync(id);
+
+            if (existingUser == null)
             {
-                var existingUser = await _userManager.FindByIdAsync(id);
-
-                if (existingUser == null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User not found." }
-                    };
-                }
-
-                existingUser.UserName = user.UserName;
-                existingUser.FirstName = user.FirstName;
-                existingUser.LastName = user.LastName;
-                existingUser.BirthDate = user.BirthDate;
-                existingUser.Email = user.Email;
-                existingUser.PhoneNumber = user.PhoneNumber;
-                existingUser.Country = user.Country;
-                existingUser.UpdatedAt = DateTime.UtcNow;
-
-                var result = await _userManager.UpdateAsync(existingUser);
-
-                if (result.Succeeded)
-                {
-                    return new UserResult { Success = true };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = result.Errors.Select(e => e.Description).ToList()
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while updating user.");
                 return new UserResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while updating the user." }
+                    Errors = new List<string> { "User not found." }
+                };
+            }
+
+            existingUser.UserName = user.UserName;
+            existingUser.FirstName = user.FirstName;
+            existingUser.LastName = user.LastName;
+            existingUser.BirthDate = user.BirthDate;
+            existingUser.Email = user.Email;
+            existingUser.PhoneNumber = user.PhoneNumber;
+            existingUser.Country = user.Country;
+            existingUser.UpdatedAt = DateTime.UtcNow;
+
+            var result = await _userManager.UpdateAsync(existingUser);
+
+            if (result.Succeeded)
+            {
+                return new UserResult { Success = true };
+            }
+            else
+            {
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
         }
@@ -284,44 +237,32 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> DeleteUser(string id)
         {
-            try
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
             {
-                var user = await _userManager.FindByIdAsync(id);
-
-                if (user == null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User not found." }
-                    };
-                }
-
-                var result = await _userManager.DeleteAsync(user);
-
-                if (result.Succeeded)
-                {
-                    return new UserResult
-                    {
-                        Success = true,
-                    };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = result.Errors.Select(e => e.Description).ToList()
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while deleting user.");
                 return new UserResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while deleting the user." }
+                    Errors = new List<string> { "User not found." }
+                };
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                return new UserResult
+                {
+                    Success = true,
+                };
+            }
+            else
+            {
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
         }
@@ -342,55 +283,43 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> ActivateUser(string id)
         {
-            try
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
             {
-                var user = await _userManager.FindByIdAsync(id);
-
-                if (user == null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User not found." }
-                    };
-                }
-
-                if (user.AccountStatus == 1)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User already activated inside the system." }
-                    };
-                }
-
-                user.AccountStatus = 1;
-
-                var result = await _userManager.UpdateAsync(user);
-
-                if (result.Succeeded)
-                {
-                    return new UserResult
-                    {
-                        Success = true
-                    };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = result.Errors.Select(e => e.Description).ToList()
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while activating user.");
                 return new UserResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while activating user." }
+                    Errors = new List<string> { "User not found." }
+                };
+            }
+
+            if (user.AccountStatus == 1)
+            {
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "User already activated inside the system." }
+                };
+            }
+
+            user.AccountStatus = 1;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return new UserResult
+                {
+                    Success = true
+                };
+            }
+            else
+            {
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
         }
@@ -411,55 +340,43 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> DeactivateUser(string id)
         {
-            try
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
             {
-                var user = await _userManager.FindByIdAsync(id);
-
-                if (user == null)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User not found." }
-                    };
-                }
-
-                if (user.AccountStatus == 0)
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = new List<string> { "User has not been activated in the system." }
-                    };
-                }
-
-                user.AccountStatus = 0;
-
-                var result = await _userManager.UpdateAsync(user);
-
-                if (result.Succeeded)
-                {
-                    return new UserResult
-                    {
-                        Success = true
-                    };
-                }
-                else
-                {
-                    return new UserResult
-                    {
-                        Success = false,
-                        Errors = result.Errors.Select(e => e.Description).ToList()
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while deactivating user.");
                 return new UserResult
                 {
                     Success = false,
-                    Errors = new List<string> { "An error occurred while deactivating user." }
+                    Errors = new List<string> { "User not found." }
+                };
+            }
+
+            if (user.AccountStatus == 0)
+            {
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = new List<string> { "User has not been activated in the system." }
+                };
+            }
+
+            user.AccountStatus = 0;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return new UserResult
+                {
+                    Success = true
+                };
+            }
+            else
+            {
+                return new UserResult
+                {
+                    Success = false,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
         }

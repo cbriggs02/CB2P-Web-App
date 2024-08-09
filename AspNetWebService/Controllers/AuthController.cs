@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Interfaces;
 using AspNetWebService.Models;
+using AspNetWebService.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -41,22 +42,17 @@ namespace AspNetWebService.Controllers
         /// <returns>
         ///     Returns an action result:
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the login is successful.
-        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the request body is invalid or the login attempt is unsuccessful.
+        ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
         [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(object))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Logs in a user in system.")]
-        public async Task<ActionResult<User>> Login([FromBody] LoginRequest model)
+        public async Task<ActionResult<object>> Login([FromBody] LoginRequest model)
         {
-            if (model == null)
-            {
-                ModelState.AddModelError(string.Empty, "Login body cannot be null or empty.");
-                return BadRequest(ModelState);
-            }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -66,7 +62,7 @@ namespace AspNetWebService.Controllers
 
             if (result.Success)
             {
-                return Ok(new { Token = result.Token });
+                return Ok(new { result.Token });
             }
             else
             {
@@ -93,8 +89,9 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the logout attempt is unsuccessful or no user is logged in.
         /// </returns>
         [HttpPost("logout")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [SwaggerOperation(Summary = "Logs out a user inside system.")]
         public async Task<IActionResult> Logout()
         {
