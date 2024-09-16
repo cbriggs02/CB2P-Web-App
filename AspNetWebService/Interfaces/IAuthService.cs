@@ -21,14 +21,5 @@ namespace AspNetWebService.Interfaces
         ///     A task representing the asynchronous operation that returns AuthResult object.
         /// </returns>
         Task<AuthResult> Login(LoginRequest credentials);
-
-
-        /// <summary>
-        ///     Definition of a task used for logging out a user in the system.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous operation that returns AuthResult object.
-        /// </returns>
-        Task<AuthResult> Logout();
     }
 }

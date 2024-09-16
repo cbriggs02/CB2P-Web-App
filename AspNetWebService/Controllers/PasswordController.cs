@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Interfaces;
 using AspNetWebService.Models.Request_Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -47,12 +48,14 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the set password attempt is unsuccessful or any parameters have not been provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [AllowAnonymous]
         [HttpPut("setPassword/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Sets a password for a user by id in system.")]
+        [Authorize]
         public async Task<IActionResult> SetPassword([FromRoute][Required] string id, [FromBody] SetPasswordRequest request)
         {
             var result = await _passwordService.SetPassword(id, request);
@@ -91,6 +94,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the password update attempt is unsuccessful or any parameters have not been provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [Authorize]
         [HttpPut("updatePassword/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]

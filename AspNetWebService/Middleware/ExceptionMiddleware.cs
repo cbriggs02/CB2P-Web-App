@@ -46,36 +46,10 @@ namespace AspNetWebService.Middleware
             {
                 await _next(context);
             }
-            catch (ArgumentNullException ex)
-            {
-                LogExceptionDetails(context, ex, "An argument null exception occurred during controller instantiation.");
-                await WriteErrorResponseAsync(context, "An unexpected error occurred during controller instantiation.");
-            }
-            catch (HttpRequestException ex)
-            {
-                LogExceptionDetails(context, ex, "An HTTP request exception occurred.");
-                await WriteErrorResponseAsync(context, "An error occurred while processing the HTTP request.");
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                LogExceptionDetails(context, ex, "An unauthorized access exception occurred.");
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                await WriteErrorResponseAsync(context, "You do not have permission to access this resource.");
-            }
-            catch (TaskCanceledException ex)
-            {
-                LogExceptionDetails(context, ex, "A task was canceled.");
-                await WriteErrorResponseAsync(context, "The request was canceled.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                LogExceptionDetails(context, ex, "An invalid operation exception occurred.");
-                await WriteErrorResponseAsync(context, "An invalid operation was attempted.");
-            }
             catch (Exception ex)
             {
-                LogExceptionDetails(context, ex, "An unhandled exception occurred.");
-                await WriteErrorResponseAsync(context, "An unexpected error occurred.");
+                LogExceptionDetails(context, ex);
+                await WriteErrorResponse(context);
             }
         }
 
@@ -90,26 +64,21 @@ namespace AspNetWebService.Middleware
         /// <param name="ex">
         ///     The exception that was thrown, providing details such as the message, stack trace, and inner exception.
         /// </param>
-        /// <param name="message">
-        ///     A custom message providing context about where and why the exception occurred.
-        /// </param>
-        private void LogExceptionDetails(HttpContext context, Exception ex, string message)
+        private void LogExceptionDetails(HttpContext context, Exception ex)
         {
             var exceptionType = ex.GetType().Name;
             var innerExceptionMessage = ex.InnerException?.Message;
             var stackTrace = ex.StackTrace;
-            var user = context.User?.Identity?.Name ?? "Anonymous";
             var requestPath = context.Request.Path;
             var requestQuery = context.Request.QueryString;
             var requestMethod = context.Request.Method;
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown";
             var timestamp = DateTime.UtcNow;
 
             _logger.LogError(ex, "{Message}. Exception of type {ExceptionType} occurred at {Timestamp}. " +
-                "User: {User}, Request: {Method} {Path}{QueryString}, Environment: {Environment}, " +
+                "Request: {Method} {Path}{QueryString}, " +
                 "Inner exception: {InnerExceptionMessage}, Stack Trace: {StackTrace}",
-                message, exceptionType, timestamp, user, requestMethod, requestPath, requestQuery,
-                environment, innerExceptionMessage, stackTrace);
+                "An unhandled exception occurred", exceptionType, timestamp, requestMethod, requestPath, requestQuery,
+                innerExceptionMessage, stackTrace);
         }
 
 
@@ -120,18 +89,19 @@ namespace AspNetWebService.Middleware
         /// <param name="context">
         ///     The HTTP context for the current request, used to manipulate the response.
         /// </param>
-        /// <param name="errorMessage">
-        ///     The message to be included in the error response, typically describing the nature of the error.
-        /// </param>
         /// <returns>
         ///     A task representing the asynchronous operation of writing the response.
         /// </returns>
-        private static async Task WriteErrorResponseAsync(HttpContext context, string errorMessage)
+        private static async Task WriteErrorResponse(HttpContext context)
         {
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/json";
-            var response = JsonConvert.SerializeObject(new { error = errorMessage });
-            await context.Response.WriteAsync(response);
+            var response = new
+            {
+                error = "An unexpected error occurred. Please try again later."
+            };
+            var jsonResponse = JsonConvert.SerializeObject(response);
+            await context.Response.WriteAsync(jsonResponse);
         }
     }
 }

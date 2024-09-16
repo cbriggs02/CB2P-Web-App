@@ -1,6 +1,6 @@
 ﻿using AspNetWebService.Interfaces;
 using AspNetWebService.Models;
-using AspNetWebService.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -45,6 +45,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the request body is invalid or the login attempt is unsuccessful.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [AllowAnonymous]
         [HttpPost("login")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(object))]
@@ -71,44 +72,6 @@ namespace AspNetWebService.Controllers
                     return NotFound();
                 }
 
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                }
-                return BadRequest(ModelState);
-            }
-        }
-
-
-        /// <summary>
-        ///     Processes all requests for logging out a user in the system to required service.
-        /// </summary>
-        /// <returns>
-        ///     Returns an action result:
-        ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the logout is successful.
-        ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the logout attempt is unsuccessful or no user is logged in.
-        /// </returns>
-        [HttpPost("logout")]
-        [Produces("application/json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
-        [SwaggerOperation(Summary = "Logs out a user inside system.")]
-        public async Task<IActionResult> Logout()
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                ModelState.AddModelError(string.Empty, "No user is logged in.");
-                return BadRequest(ModelState);
-            }
-
-            var result = await _authService.Logout();
-
-            if (result.Success)
-            {
-                return Ok();
-            }
-            else
-            {
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error);

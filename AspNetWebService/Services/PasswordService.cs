@@ -144,11 +144,8 @@ namespace AspNetWebService.Services
                 };
             }
 
-            // Hash password
-            var newPasswordHash = HashPassword(request.NewPassword, user);
-
-            // Send hash password to be checked against users history for re-use errors
-            var isPasswordReused = await IsPasswordReused(user.Id, newPasswordHash);
+            // Send password to be checked against users history for re-use errors
+            var isPasswordReused = await IsPasswordReused(user.Id, request.NewPassword);
 
             if (isPasswordReused)
             {
@@ -195,7 +192,7 @@ namespace AspNetWebService.Services
         /// </returns>
         private async Task CreatePasswordHistory(User user)
         {
-            var passwordHistoryRequest = new PasswordHistoryRequest
+            var passwordHistoryRequest = new StorePasswordHistoryRequest
             {
                 UserId = user.Id,
                 PasswordHash = user.PasswordHash,
@@ -211,8 +208,8 @@ namespace AspNetWebService.Services
         /// <param name="userId">
         ///     The ID of the user whose password history is being checked.
         /// </param>
-        /// <param name="newPasswordHash">
-        ///     The hashed password to check against the user's password history.
+        /// <param name="password">
+        ///     The password to check against the user's password history.
         /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation. The task result is a boolean value indicating
@@ -225,40 +222,15 @@ namespace AspNetWebService.Services
         ///     password, then calls the _historyService to check if the hash already exists in the user's 
         ///     password history. The result is a boolean indicating whether the password has been previously used.
         /// </remarks>
-        private async Task<bool> IsPasswordReused(string userId, string newPasswordHash)
+        private async Task<bool> IsPasswordReused(string userId, string password)
         {
-            var request = new PasswordHistoryRequest
+            var request = new SearchPasswordHistoryRequest
             {
                 UserId = userId,
-                PasswordHash = newPasswordHash
+                Password = password
             };
 
             return await _historyService.FindPasswordHash(request);
-        }
-
-
-        /// <summary>
-        ///     Hashes the specified password using the PasswordHasher for the given user.
-        /// </summary>
-        /// <param name="password">
-        ///     The plain-text password to be hashed.
-        /// </param>
-        /// <param name="user">
-        ///     The user object used to provide context for the hashing operation. 
-        ///     It can influence the hashing process depending on the implementation of the hasher.
-        /// </param>
-        /// <returns>
-        ///     The hashed password as a string.
-        /// </returns>
-        /// <remarks>
-        ///     This method uses ASP.NET Core's PasswordHasher to hash the password. It is important to note 
-        ///     that the PasswordHasher requires a user object for hashing. In this case, the user object is 
-        ///     passed to ensure that the password is hashed in a contextually relevant manner.
-        /// </remarks>
-        private static string HashPassword(string password, User user)
-        {
-            var passwordHasher = new PasswordHasher<User>();
-            return passwordHasher.HashPassword(user, password);
         }
     }
 }

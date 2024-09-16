@@ -21,20 +21,20 @@ namespace AspNetWebService.Interfaces
         ///     record to the database. The task completes when the record has been successfully
         ///     saved, or an error occurs.
         /// </returns>
-        Task AddPasswordHistory(PasswordHistoryRequest request);
+        Task AddPasswordHistory(StorePasswordHistoryRequest request);
 
 
         /// <summary>
         ///     Definition of service method that checks a users history for passwords that may be re-used.
         /// </summary>
         /// <param name="request">
-        ///     A model object that contains required data for checking a users password history, including user id and hashed password.
+        ///     A model object that contains required data for checking a users password history, including user id and hpassword.
         /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation. The task result is a boolean value indicating whether the provided password hash is found in the user's password history.
         ///     - <c>true</c> if the password hash is found in the user's history, indicating a potential re-use.
         ///     - <c>false</c> if the password hash is not found in the user's history, indicating that the password is not a re-used one.
         /// </returns>
-        Task<bool> FindPasswordHash(PasswordHistoryRequest request);
+        Task<bool> FindPasswordHash(SearchPasswordHistoryRequest request);
     }
 }

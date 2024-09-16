@@ -6,6 +6,7 @@ using AspNetWebService.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using AspNetWebService.Models.Request_Models.UserRequests;
 using AspNetWebService.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AspNetWebService.Controllers
 {
@@ -46,6 +47,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) if retrieving the list of users was successful 
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the list is empty.
         /// </returns>
+        [Authorize]
         [HttpGet]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDTO))]
@@ -76,6 +78,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) if retrieving the user was successful 
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [Authorize]
         [HttpGet("{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDTO))]
@@ -104,6 +107,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) if creating the user was successful.
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the user creation attempt is unsuccessful or user object has not been provided.
         /// </returns>
+        [AllowAnonymous]
         [HttpPost]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserDTO))]
@@ -147,6 +151,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the user update attempt is unsuccessful or any parameters are missing.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [Authorize]
         [HttpPut("{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -193,6 +198,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the user deletion attempt is unsuccessful or id was not provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [Authorize]
         [HttpDelete("{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -234,6 +240,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the activation attempt is unsuccessful or id is not provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [Authorize]
         [HttpPut("activateUser/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -275,6 +282,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the deactivation attempt is unsuccessful or id is not provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
+        [Authorize]
         [HttpPut("deactivateUser/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]

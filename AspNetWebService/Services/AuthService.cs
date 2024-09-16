@@ -1,5 +1,4 @@
-﻿using AspNetWebService.Helpers;
-using AspNetWebService.Interfaces;
+﻿using AspNetWebService.Interfaces;
 using AspNetWebService.Models;
 using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.Result_Models.Auth_Results;
@@ -11,6 +10,12 @@ using System.Text;
 
 namespace AspNetWebService.Services
 {
+    /// <summary>
+    ///     Service responsible for interacting with authentication-related data and business logic.
+    /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    /// </remarks>
     public class AuthService : IAuthService
     {
         private readonly SignInManager<User> _signInManager;
@@ -99,24 +104,6 @@ namespace AspNetWebService.Services
 
 
         /// <summary>
-        ///     Logs out a user in system using sign in manager.
-        /// </summary>
-        /// <returns>
-        ///     Returns a AuthResult Object indicating the logout status.
-        ///     - If successful, returns a AuthResult with success set to true.
-        /// </returns>
-        public async Task<AuthResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-
-            return new AuthResult
-            {
-                Success = true
-            };
-        }
-
-
-        /// <summary>
         ///     Generates a JWT token for the specified user based on configured settings.
         /// </summary>
         /// <param name="user">
@@ -127,12 +114,10 @@ namespace AspNetWebService.Services
         /// </returns>
         private string GenerateJwtToken(User user)
         {
-            // Read JwtSettings from appsettings.json
             var validIssuer = _configuration["JwtSettings:ValidIssuer"];
             var validAudience = _configuration["JwtSettings:ValidAudience"];
 
-            // Use the SecretKeyGenerator to generate a secret key dynamically
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKeyGenerator.GenerateRandomSecretKey(32)));
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
             var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
@@ -145,7 +130,7 @@ namespace AspNetWebService.Services
                 issuer: validIssuer,
                 audience: validAudience,
                 claims: claims,
-                expires: DateTime.UtcNow.Add(TimeSpan.FromHours(1)),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: signingCredentials
             );
 

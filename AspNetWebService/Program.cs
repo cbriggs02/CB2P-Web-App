@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AspNetWebService.Helpers;
 using AspNetWebService.Mapping;
 using AspNetWebService.Data;
 using System.Text;
@@ -86,12 +85,36 @@ namespace AspNetWebService
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AspNetWebService", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter your JWT token here"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
                 c.EnableAnnotations();
             });
 
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
-            var secretKey = SecretKeyGenerator.GenerateRandomSecretKey(32);
+            var secretKey = builder.Configuration["JwtSettings:SecretKey"];
             var validIssuer = builder.Configuration["JwtSettings:ValidIssuer"];
             var validAudience = builder.Configuration["JwtSettings:ValidAudience"];
 
