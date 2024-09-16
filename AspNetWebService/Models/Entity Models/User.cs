@@ -28,14 +28,6 @@ namespace AspNetWebService.Models.Entities
         public string LastName { get; set; }
 
         /// <summary>
-        ///     Gets or sets the birth date of the user.
-        /// </summary>
-        [PersonalData]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
-        public DateTime? BirthDate { get; set; }
-
-        /// <summary>
         ///     Gets or sets the country of the user.
         /// </summary>
         [Required]
@@ -61,16 +53,5 @@ namespace AspNetWebService.Models.Entities
         ///     Gets or sets a list of previous passwords used by this user.
         /// </summary>
         public virtual ICollection<PasswordHistory> Passwords { get; set; }
-
-        /// <summary>
-        ///     Checks if the birth date has been set for the user.
-        /// </summary>
-        /// <returns>
-        ///     True if the birth date is set, otherwise false.
-        /// </returns>
-        public bool IsBirthDateSet()
-        {
-            return BirthDate.HasValue;
-        }
     }
 }

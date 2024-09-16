@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using AspNetWebService.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using AspNetWebService.Models.Request_Models.UserRequests;
-using AspNetWebService.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 
 namespace AspNetWebService.Controllers

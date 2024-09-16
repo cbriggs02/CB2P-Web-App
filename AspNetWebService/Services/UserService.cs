@@ -19,6 +19,7 @@ namespace AspNetWebService.Services
     public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
+        private readonly IPasswordHistoryService _passwordHistoryService;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -27,15 +28,19 @@ namespace AspNetWebService.Services
         /// <param name="userManager">
         ///     The user manager used for managing user-related operations.
         /// </param>
+        /// <param name="passwordHistoryService">
+        ///     This service is used for deleting passwords in history for removed users.
+        /// </param>
         /// <param name="mapper">
         ///     The mapper used for mapping objects between different types.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public UserService(UserManager<User> userManager, IMapper mapper)
+        public UserService(UserManager<User> userManager, IPasswordHistoryService passwordHistoryService, IMapper mapper)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _passwordHistoryService = passwordHistoryService ?? throw new ArgumentNullException(nameof(passwordHistoryService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -110,19 +115,11 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> CreateUser(UserDTO user)
         {
-            var validationResult = BirthdayValidation(user);
-
-            if (!validationResult.Success)
-            {
-                return validationResult;
-            }
-
             var newUser = new User
             {
                 UserName = user.UserName,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                BirthDate = user.BirthDate,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Country = user.Country,
@@ -139,7 +136,6 @@ namespace AspNetWebService.Services
                     UserName = newUser.UserName,
                     FirstName = newUser.FirstName,
                     LastName = newUser.LastName,
-                    BirthDate = newUser.BirthDate,
                     Email = newUser.Email,
                     PhoneNumber = newUser.PhoneNumber,
                     Country = newUser.Country
@@ -179,13 +175,6 @@ namespace AspNetWebService.Services
         /// </returns>
         public async Task<UserResult> UpdateUser(string id, UserDTO user)
         {
-            var validationResult = BirthdayValidation(user);
-
-            if (!validationResult.Success)
-            {
-                return validationResult;
-            }
-
             var existingUser = await _userManager.FindByIdAsync(id);
 
             if (existingUser == null)
@@ -200,7 +189,6 @@ namespace AspNetWebService.Services
             existingUser.UserName = user.UserName;
             existingUser.FirstName = user.FirstName;
             existingUser.LastName = user.LastName;
-            existingUser.BirthDate = user.BirthDate;
             existingUser.Email = user.Email;
             existingUser.PhoneNumber = user.PhoneNumber;
             existingUser.Country = user.Country;
@@ -252,6 +240,9 @@ namespace AspNetWebService.Services
 
             if (result.Succeeded)
             {
+                // delete all stored passwords for user once user is deleted for data clean up.
+                await _passwordHistoryService.DeletePasswordHistory(id);
+
                 return new UserResult
                 {
                     Success = true,
@@ -379,33 +370,6 @@ namespace AspNetWebService.Services
                     Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
-        }
-
-
-        /// <summary>
-        ///     Receives a user DTO model to be validated for invalid birthday values.
-        /// </summary>
-        /// <param name="user">
-        ///     user model object to be validated for invalid birthday information.
-        /// </param>
-        /// <returns>
-        ///     Returns a result indicating that birthday validation failed or that the validation check was successful.
-        /// </returns>
-        private static UserResult BirthdayValidation(UserDTO user)
-        {
-            var result = new UserResult
-            {
-                Success = true,
-                Errors = new List<string>()
-            };
-
-            if (user.BirthDate > DateTime.UtcNow)
-            {
-                result.Success = false;
-                result.Errors.Add("The provided birthday exceeds todays date.");
-            }
-
-            return result;
         }
     }
 }

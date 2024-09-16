@@ -100,6 +100,35 @@ namespace AspNetWebService.Services
 
 
         /// <summary>
+        ///     Deletes all password history for the user matching the provided user id.
+        /// </summary>
+        /// <param name="userId">
+        ///     The user id whose password history is being deleted.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation. The task result is a boolean value indicating whether the provided password history has been deleted successfully.
+        ///     - <c>true</c> if the password history was successfully deleted for the provided user id.
+        ///     - <c>false</c> if the password history was unsuccessfully deleted for the provided user id.
+        /// </returns>
+        public async Task<bool> DeletePasswordHistory(string userId)
+        {
+            var passwordHistories = await _context.PasswordHistories
+               .Where(x => x.UserId == userId)
+               .OrderBy(x => x.Id)
+               .AsNoTracking()
+               .ToListAsync();
+
+            if(passwordHistories.Any())
+            {
+                _context.PasswordHistories.RemoveRange(passwordHistories);
+                await _context.SaveChangesAsync();
+            }
+            
+            return true;
+        }
+
+
+        /// <summary>
         ///     Removes old password entries for a user, keeping only the most recent 5.
         /// </summary>
         /// <param name="id">

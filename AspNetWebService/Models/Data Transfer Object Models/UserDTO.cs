@@ -33,14 +33,6 @@ namespace AspNetWebService.Models.DataTransferObjectModels
         public string LastName { get; set; }
 
         /// <summary>
-        ///     Gets or sets the birth date of the user.
-        /// </summary>
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{yyyy-MM-dd}")]
-        [Display(Name = "Birth Day")]
-        public DateTime? BirthDate { get; set; }
-
-        /// <summary>
         ///     Gets or sets the email address of the user.
         /// </summary>
         [Required(ErrorMessage = "Email Address is required")]

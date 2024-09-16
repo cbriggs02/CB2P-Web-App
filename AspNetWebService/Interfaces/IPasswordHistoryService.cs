@@ -28,7 +28,7 @@ namespace AspNetWebService.Interfaces
         ///     Definition of service method that checks a users history for passwords that may be re-used.
         /// </summary>
         /// <param name="request">
-        ///     A model object that contains required data for checking a users password history, including user id and hpassword.
+        ///     A model object that contains required data for checking a users password history, including user id and password.
         /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation. The task result is a boolean value indicating whether the provided password hash is found in the user's password history.
@@ -36,5 +36,19 @@ namespace AspNetWebService.Interfaces
         ///     - <c>false</c> if the password hash is not found in the user's history, indicating that the password is not a re-used one.
         /// </returns>
         Task<bool> FindPasswordHash(SearchPasswordHistoryRequest request);
+
+
+        /// <summary>
+        ///     Definition of service method that removes password in history for the provided user id.
+        /// </summary>
+        /// <param name="userId">
+        ///     The id of the user whose passwords are being removed from history.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation. The task result is a boolean value indicating whether the provided password history has been deleted successfully.
+        ///     - <c>true</c> if the password history was successfully deleted for the provided user id.
+        ///     - <c>false</c> if the password history was unsuccessfully deleted for the provided user id.
+        /// </returns>
+        Task<bool> DeletePasswordHistory(string userId);
     }
 }

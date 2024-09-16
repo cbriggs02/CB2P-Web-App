@@ -104,7 +104,6 @@ namespace AspNetWebService.Data
                     FirstName = $"FirstName{i}",
                     LastName = $"LastName{i}",
                     Email = $"userTest{i}@gmail.com",
-                    BirthDate = new DateTime(1990, 1, 1),
                     PhoneNumber = "222-222-2222",
                     Country = "Canada",
                     CreatedAt = DateTime.UtcNow,
