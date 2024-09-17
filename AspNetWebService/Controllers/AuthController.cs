@@ -12,8 +12,8 @@ namespace AspNetWebService.Controllers
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    [AllowAnonymous]
     [Route("api/[controller]")]
+    [AllowAnonymous]
     [ApiController]
     public class AuthController : ControllerBase
     {

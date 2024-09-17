@@ -48,8 +48,8 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the set password attempt is unsuccessful or any parameters have not been provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
-        [AllowAnonymous]
         [HttpPut("setPassword/{id}")]
+        [AllowAnonymous]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
@@ -94,8 +94,8 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) if the password update attempt is unsuccessful or any parameters have not been provided.
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
-        [Authorize]
         [HttpPut("updatePassword/{id}")]
+        [Authorize]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]

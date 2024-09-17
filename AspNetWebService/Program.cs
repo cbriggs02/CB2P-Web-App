@@ -181,12 +181,12 @@ namespace AspNetWebService
             app.UseHealthChecksUI(config => config.UIPath = "/health-ui");
 
             app.UseStaticFiles();
-
             app.UseRouting();
 
             app.UseAuthentication();
-
             app.UseAuthorization();
+
+            app.UseMiddleware<TokenValidator>();
 
             app.MapControllers();
 
