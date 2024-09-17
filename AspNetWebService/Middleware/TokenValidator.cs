@@ -14,6 +14,7 @@ namespace AspNetWebService.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<TokenValidator> _logger;
+        private const string UnauthorizedMessage = "Unauthorized";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TokenValidator"/> class.
@@ -47,31 +48,59 @@ namespace AspNetWebService.Middleware
         {
             if (context.User.Identity.IsAuthenticated)
             {
-                var identity = context.User.Identity as ClaimsIdentity;
-                IEnumerable<Claim> claims = identity?.Claims;
+                var userId = GetUserIdFromClaims(context.User);
 
-                var userClaim = claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-
-                if (userClaim == null)
+                if (userId == null)
                 {
-                    _logger.LogWarning("No valid user claim found in the token.");
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsync("Unauthorized");
+                    await HandleUnauthorized(context, "User ID claim is missing in the token.");
                     return;
                 }
 
                 var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-                var user = await userManager.FindByIdAsync(userClaim.Value);
+                var user = await userManager.FindByIdAsync(userId);
 
                 if (user == null)
                 {
-                    _logger.LogInformation($"User with ID {userClaim.Value} no longer exists in the system.");
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsync("Unauthorized - User no longer exists");
+                    await HandleUnauthorized(context, $"User with ID {userId} no longer exists in the system.");
                     return;
                 }
             }
             await _next(context);
+        }
+
+
+        /// <summary>
+        ///     Retrieves the user ID from claims.
+        /// </summary>
+        /// <param name="principal">
+        ///     The claims principal.
+        /// </param>
+        /// <returns>
+        ///     The user ID if found; otherwise, null.
+        /// </returns>
+        private static string GetUserIdFromClaims(ClaimsPrincipal principal)
+        {
+            var identity = principal.Identity as ClaimsIdentity;
+            var userClaim = identity?.FindFirst(ClaimTypes.NameIdentifier);
+            return userClaim?.Value;
+        }
+
+
+        /// <summary>
+        ///     Logs an unauthorized access attempt and writes the corresponding response.
+        /// </summary>
+        /// <param name="context">
+        ///     The current HttpContext.
+        /// </param>
+        /// <param name="reason">
+        ///     The reason for the unauthorized access.
+        /// </param>
+        private async Task HandleUnauthorized(HttpContext context, string reason)
+        {
+            _logger.LogWarning(reason);
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsync($"{{\"error\": \"{UnauthorizedMessage}\", \"message\": \"{reason}\"}}");
         }
     }
 }

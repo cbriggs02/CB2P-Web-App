@@ -8,13 +8,13 @@ namespace AspNetWebService.Middleware
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    public class ExceptionMiddleware
+    public class ExceptionHandler
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly ILogger<ExceptionHandler> _logger;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExceptionMiddleware"/> class.
+        ///     Initializes a new instance of the <see cref="ExceptionHandler"/> class.
         /// </summary>
         /// <param name="next">
         ///     The delegate representing the next middleware in the pipeline.
@@ -22,7 +22,7 @@ namespace AspNetWebService.Middleware
         /// <param name="logger">
         ///     The logger instance for logging exceptions.
         /// </param>
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        public ExceptionHandler(RequestDelegate next, ILogger<ExceptionHandler> logger)
         {
             _next = next;
             _logger = logger;

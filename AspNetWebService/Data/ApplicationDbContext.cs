@@ -25,6 +25,7 @@ namespace AspNetWebService.Data
 
         }
 
+
         /// <summary>
         ///     Configures relationships and keys for entities in the database.
         /// </summary>

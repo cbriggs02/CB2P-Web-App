@@ -126,6 +126,12 @@ namespace AspNetWebService.Services
                 new(ClaimTypes.Name, user.UserName),
             };
 
+            var roles = _userManager.GetRolesAsync(user).Result;
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
             var tokenOptions = new JwtSecurityToken(
                 issuer: validIssuer,
                 audience: validAudience,

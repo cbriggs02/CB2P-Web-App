@@ -159,7 +159,7 @@ namespace AspNetWebService
             }
             else
             {
-                app.UseMiddleware<ExceptionMiddleware>();
+                app.UseMiddleware<ExceptionHandler>();
             }
 
             app.UseMiddleware<PerformanceMonitor>();

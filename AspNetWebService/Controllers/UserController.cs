@@ -240,7 +240,7 @@ namespace AspNetWebService.Controllers
         ///     - <see cref="StatusCodes.Status404NotFound"/> (Not Found) if the user is not found.
         /// </returns>
         [HttpPut("activateUser/{id}")]
-        //[Authorize]
+        [Authorize]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]

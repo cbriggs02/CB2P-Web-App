@@ -29,6 +29,7 @@ namespace AspNetWebService.Data
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+
         /// <summary>
         ///     Initializes the database and performs seeding if necessary.
         ///     This method is called during the application startup.
@@ -47,55 +48,77 @@ namespace AspNetWebService.Data
             try
             {
                 var context = services.GetRequiredService<ApplicationDbContext>();
+                var userManager = services.GetRequiredService<UserManager<User>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+                await context.Database.MigrateAsync();
+
+                if (app.Environment.IsDevelopment())
                 {
-                    await Initialize(context);
+                    await InitializeUsers(userManager, roleManager);
                 }
+
+                await InitializeRoles(roleManager);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "An error occurred while updating the database.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while seeding the database.");
+                _logger.LogError(ex, "An unexpected error occurred during database initialization.");
             }
         }
 
 
         /// <summary>
-        ///     Applies pending migrations to the database and performs seeding
-        ///     if no users are present in the database.
+        ///     Initializes users by seeding default users and the admin user if no users exist.
         /// </summary>
-        /// <param name="context">
-        ///     The <see cref="ApplicationDbContext"/> instance used to interact with the database.
+        /// <param name="userManager">
+        ///     The <see cref="UserManager{TUser}"/> used to manage user creation.
+        /// </param>
+        /// <param name="roleManager">
+        ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
         /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        private static async Task Initialize(ApplicationDbContext context)
+        private static async Task InitializeUsers(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
-            context.Database.Migrate();
-
-            if (!context.Users.Any())
+            if (!userManager.Users.Any())
             {
-                await SeedDefaultUsers(context);
+                await SeedDefaultUsers(userManager);
+                await SeedAdmin(userManager, roleManager);
             }
+        }
+
+
+        /// <summary>
+        ///     Initializes roles by seeding them if they do not already exist.
+        /// </summary>
+        /// <param name="roleManager">
+        ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        private static async Task InitializeRoles(RoleManager<IdentityRole> roleManager)
+        {
+            await SeedRoles(roleManager);
         }
 
 
         /// <summary>
         ///     Seeds the database with a list of default users if no users exist.
-        ///     This method creates a set of default user accounts and adds them to the database.
         /// </summary>
-        /// <param name="context">
-        ///     The <see cref="ApplicationDbContext"/> instance used to interact with the database.
+        /// <param name="userManager">
+        ///     The <see cref="UserManager{TUser}"/> used to manage user creation.
         /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        private static async Task SeedDefaultUsers(ApplicationDbContext context)
+        private static async Task SeedDefaultUsers(UserManager<User> userManager)
         {
-            var passwordHasher = new PasswordHasher<User>();
-            var defaultUsers = new List<User>();
-
             for (int i = 0; i < 5000; i++)
             {
                 var user = new User
@@ -107,14 +130,83 @@ namespace AspNetWebService.Data
                     PhoneNumber = "222-222-2222",
                     Country = "Canada",
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    PasswordHash = passwordHasher.HashPassword(null, "P@s_s8w0rd!")
+                    UpdatedAt = DateTime.UtcNow
                 };
-                defaultUsers.Add(user);
-            }
 
-            await context.Users.AddRangeAsync(defaultUsers);
-            await context.SaveChangesAsync();
+                await userManager.CreateAsync(user, "P@s_s8w0rd!");
+            }
+        }
+
+
+        /// <summary>
+        ///     Seeds an admin user with a specified email and assigns the "Admin" role.
+        /// </summary>
+        /// <param name="userManager">
+        ///     The <see cref="UserManager{TUser}"/> used to manage user creation and role assignment.
+        /// </param>
+        /// <param name="roleManager">
+        ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        private static async Task SeedAdmin(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            const string adminEmail = "admin@admin.com";
+            const string adminPassword = "AdminPassword123!";
+            const string adminRole = "Admin";
+
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    UserName = adminEmail,
+                    FirstName = "Robert",
+                    LastName = "Plankton",
+                    Email = adminEmail,
+                    PhoneNumber = "222-222-2222",
+                    Country = "Canada",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(adminUser, adminPassword);
+
+                if (result.Succeeded)
+                {
+                    if (!await roleManager.RoleExistsAsync(adminRole))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(adminRole));
+                    }
+                    await userManager.AddToRoleAsync(adminUser, adminRole);
+                }
+            }
+        }
+
+
+        /// <summary>
+        ///     Seeds the default roles in the database if they do not already exist.
+        /// </summary>
+        /// <param name="roleManager">
+        ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+        {
+            string[] roleNames = { "Admin", "User" };
+
+            foreach (var roleName in roleNames)
+            {
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
         }
     }
 }

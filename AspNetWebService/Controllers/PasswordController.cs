@@ -55,7 +55,6 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Sets a password for a user by id in system.")]
-        [Authorize]
         public async Task<IActionResult> SetPassword([FromRoute][Required] string id, [FromBody] SetPasswordRequest request)
         {
             var result = await _passwordService.SetPassword(id, request);
