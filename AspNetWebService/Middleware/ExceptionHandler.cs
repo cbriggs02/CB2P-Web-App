@@ -94,11 +94,13 @@ namespace AspNetWebService.Middleware
         /// </returns>
         private static async Task WriteErrorResponse(HttpContext context)
         {
+            const string ErrorMessage = "An unexpected error occurred. Please try again later.";
+
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/json";
             var response = new
             {
-                error = "An unexpected error occurred. Please try again later."
+                error = ErrorMessage
             };
             var jsonResponse = JsonConvert.SerializeObject(response);
             await context.Response.WriteAsync(jsonResponse);

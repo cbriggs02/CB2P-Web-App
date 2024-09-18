@@ -51,14 +51,14 @@ namespace AspNetWebService.Data
                 var userManager = services.GetRequiredService<UserManager<User>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
+                await InitializeRoles(roleManager);
+
                 await context.Database.MigrateAsync();
 
                 if (app.Environment.IsDevelopment())
                 {
                     await InitializeUsers(userManager, roleManager);
                 }
-
-                await InitializeRoles(roleManager);
             }
             catch (DbUpdateException dbEx)
             {
@@ -177,10 +177,6 @@ namespace AspNetWebService.Data
 
                 if (result.Succeeded)
                 {
-                    if (!await roleManager.RoleExistsAsync(adminRole))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(adminRole));
-                    }
                     await userManager.AddToRoleAsync(adminUser, adminRole);
                 }
             }

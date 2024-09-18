@@ -14,7 +14,6 @@ namespace AspNetWebService.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<TokenValidator> _logger;
-        private const string UnauthorizedMessage = "Unauthorized";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TokenValidator"/> class.
@@ -97,6 +96,8 @@ namespace AspNetWebService.Middleware
         /// </param>
         private async Task HandleUnauthorized(HttpContext context, string reason)
         {
+            const string UnauthorizedMessage = "Unauthorized";
+
             _logger.LogWarning(reason);
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             context.Response.ContentType = "application/json";
