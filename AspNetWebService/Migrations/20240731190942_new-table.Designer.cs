@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AspNetWebService.Migrations
 {
-    [DbContext(typeof(IdentityRole))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240731190942_new-table")]
     partial class newtable
     {

@@ -7,36 +7,39 @@ using AspNetWebService.Data;
 using System.Text;
 using Serilog;
 using AspNetWebService.Middleware;
-using AspNetWebService.Interfaces;
-using AspNetWebService.Services;
 using AspNetWebService.Models.Entities;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Mvc;
+using AspNetWebService.Interfaces.Logging;
+using AspNetWebService.Services.Logging;
+using AspNetWebService.Interfaces.Authentication;
+using AspNetWebService.Services.Authentication;
+using AspNetWebService.Interfaces.Authorization;
+using AspNetWebService.Services.Authorization;
+using AspNetWebService.Interfaces.UserManagement;
+using AspNetWebService.Services.UserManagement;
 
 namespace AspNetWebService
 {
     /// <summary>
-    ///     Entry point class for the ASP.NET Core application.
-    ///     This class contains the main method that serves as the entry point for the application.
-    ///     It sets up and configures the ASP.NET Core Web API application.
+    ///     Entry point class for the ASP.NET Core application,
+    ///     containing the <see cref="Main"/> method to set up and configure the application.
     /// </summary>
     /// <remarks>
-    ///     @Author: Christian Briglio
+    ///     Author: Christian Briglio
     /// </remarks>
     public class Program
     {
         /// <summary>
-        ///     Main method - entry point of the application.
-        ///     This method initializes and configures the ASP.NET Core Web API application.
-        ///     It builds the application host, configures services, and sets up the HTTP request pipeline.
-        ///     The method is asynchronous and supports asynchronous operations during startup.
+        ///     Asynchronous entry point of the application that initializes and configures the Web API.
         /// </summary>
         /// <param name="args">
         ///     Command-line arguments passed to the application.
         /// </param>
         /// <returns>
-        ///     A task that represents the asynchronous operation of starting the application.
+        ///     A task representing the asynchronous operation of starting the application.
         /// </returns>
         public static async Task Main(string[] args)
         {
@@ -47,10 +50,15 @@ namespace AspNetWebService
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("ApplicationDatabase")));
+            {
+                options.UseLazyLoadingProxies()
+                    .UseSqlServer(builder.Configuration.GetConnectionString("ApplicationDatabase"));
+            });
             builder.Services.AddDbContext<HealthChecksDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("HealthChecksDatabase")));
-
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("HealthChecksDatabase"));
+            });
+               
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -70,11 +78,30 @@ namespace AspNetWebService
                 options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV3;
             });
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add(new ProducesAttribute("application/json"));
+                options.Filters.Add(new ConsumesAttribute("application/json"));
+            });
+
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IUserContextService, UserContextService>();
+
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IPasswordService, PasswordService>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
+
+            builder.Services.AddScoped<ILoginService, LoginService>();
+            builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+            builder.Services.AddScoped<IPermissionService, PermissionService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
+
+            builder.Services.AddScoped<IAuditLoggerService, AuditLoggerService>();
+            builder.Services.AddScoped<ILoggerService, LoggerService>();
+            builder.Services.AddScoped<IAuthorizationLoggerService, AuthorizationLoggerService>();
+            builder.Services.AddScoped<IExceptionLoggerService, ExceptionLoggerService>();
+            builder.Services.AddScoped<IPerformanceLoggerService, PerformanceLoggerService>();
+
             builder.Services.AddTransient<DbInitializer>();
 
             builder.Services.AddHealthChecks()

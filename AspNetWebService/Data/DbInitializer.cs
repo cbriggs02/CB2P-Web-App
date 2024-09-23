@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using AspNetWebService.Models.Entities;
+using AspNetWebService.Constants;
 
 namespace AspNetWebService.Data
 {
@@ -31,7 +32,7 @@ namespace AspNetWebService.Data
 
 
         /// <summary>
-        ///     Initializes the database and performs seeding if necessary.
+        ///     Asynchronously initializes the database and performs seeding if necessary.
         ///     This method is called during the application startup.
         /// </summary>
         /// <param name="app">
@@ -57,44 +58,39 @@ namespace AspNetWebService.Data
 
                 if (app.Environment.IsDevelopment())
                 {
-                    await InitializeUsers(userManager, roleManager);
+                    await InitializeUsers(userManager);
                 }
             }
             catch (DbUpdateException dbEx)
             {
-                _logger.LogError(dbEx, "An error occurred while updating the database.");
+                _logger.LogError(dbEx, ErrorMessages.Database.UpdateFailed);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unexpected error occurred during database initialization.");
+                _logger.LogError(ex, ErrorMessages.Database.InitializationFailed);
             }
         }
 
 
         /// <summary>
-        ///     Initializes users by seeding default users and the admin user if no users exist.
+        ///     Asynchronously initializes users by seeding default users and the admin user if no users exist.
         /// </summary>
         /// <param name="userManager">
         ///     The <see cref="UserManager{TUser}"/> used to manage user creation.
         /// </param>
-        /// <param name="roleManager">
-        ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
-        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        private static async Task InitializeUsers(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        private static async Task InitializeUsers(UserManager<User> userManager)
         {
-            if (!userManager.Users.Any())
-            {
-                await SeedDefaultUsers(userManager);
-                await SeedAdmin(userManager, roleManager);
-            }
+            await SeedDefaultUsers(userManager);
+            await SeedAdmin(userManager);
+            await SeedSuper(userManager);
         }
 
 
         /// <summary>
-        ///     Initializes roles by seeding them if they do not already exist.
+        ///     Asynchronously initializes roles by seeding them if they do not already exist.
         /// </summary>
         /// <param name="roleManager">
         ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
@@ -109,7 +105,7 @@ namespace AspNetWebService.Data
 
 
         /// <summary>
-        ///     Seeds the database with a list of default users if no users exist.
+        ///     Asynchronously seeds the database with a list of default users if no users exist.
         /// </summary>
         /// <param name="userManager">
         ///     The <see cref="UserManager{TUser}"/> used to manage user creation.
@@ -119,72 +115,116 @@ namespace AspNetWebService.Data
         /// </returns>
         private static async Task SeedDefaultUsers(UserManager<User> userManager)
         {
-            for (int i = 0; i < 5000; i++)
+            const string password = "P@s_s8w0rd!";
+
+            if (!userManager.Users.Any())
             {
-                var user = new User
+                for (int i = 0; i < 5000; i++)
                 {
-                    UserName = $"userTest{i}",
-                    FirstName = $"FirstName{i}",
-                    LastName = $"LastName{i}",
-                    Email = $"userTest{i}@gmail.com",
-                    PhoneNumber = "222-222-2222",
-                    Country = "Canada",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
+                    var user = new User
+                    {
+                        UserName = $"userTest{i}",
+                        FirstName = $"FirstName{i}",
+                        LastName = $"LastName{i}",
+                        Email = $"userTest{i}@gmail.com",
+                        PhoneNumber = "222-222-2222",
+                        Country = "Canada",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
 
-                await userManager.CreateAsync(user, "P@s_s8w0rd!");
-            }
-        }
-
-
-        /// <summary>
-        ///     Seeds an admin user with a specified email and assigns the "Admin" role.
-        /// </summary>
-        /// <param name="userManager">
-        ///     The <see cref="UserManager{TUser}"/> used to manage user creation and role assignment.
-        /// </param>
-        /// <param name="roleManager">
-        ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
-        /// </param>
-        /// <returns>
-        ///     A task that represents the asynchronous operation.
-        /// </returns>
-        private static async Task SeedAdmin(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
-        {
-            const string adminEmail = "admin@admin.com";
-            const string adminPassword = "AdminPassword123!";
-            const string adminRole = "Admin";
-
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-            if (adminUser == null)
-            {
-                adminUser = new User
-                {
-                    UserName = adminEmail,
-                    FirstName = "Robert",
-                    LastName = "Plankton",
-                    Email = adminEmail,
-                    PhoneNumber = "222-222-2222",
-                    Country = "Canada",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    EmailConfirmed = true
-                };
-
-                var result = await userManager.CreateAsync(adminUser, adminPassword);
-
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, adminRole);
+                    await userManager.CreateAsync(user, password);
                 }
             }
         }
 
 
         /// <summary>
-        ///     Seeds the default roles in the database if they do not already exist.
+        ///     Asynchronously seeds an super admin user with a specified email and assigns the "SuperAdmin" role.
+        /// </summary>
+        /// <param name="userManager">
+        ///     The <see cref="UserManager{TUser}"/> used to manage user creation and role assignment.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        private static async Task SeedSuper(UserManager<User> userManager)
+        {
+            const string Email = "super@admin.com";
+            const string Password = "superPassword123!";
+
+            var superAdmin = await userManager.FindByEmailAsync(Email);
+
+            if (superAdmin == null)
+            {
+                superAdmin = new User
+                {
+                    UserName = Email,
+                    FirstName = "Christian",
+                    LastName = "Briglio",
+                    Email = Email,
+                    PhoneNumber = "222-222-2222",
+                    Country = "Canada",
+                    AccountStatus = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(superAdmin, Password);
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(superAdmin, Roles.SuperAdmin);
+                }
+            }
+        }
+
+
+        /// <summary>
+        ///     Asynchronously seeds an admin user with a specified email and assigns the "Admin" role.
+        /// </summary>
+        /// <param name="userManager">
+        ///     The <see cref="UserManager{TUser}"/> used to manage user creation and role assignment.
+        /// </param>
+        /// <returns>
+        ///     A task that represents the asynchronous operation.
+        /// </returns>
+        private static async Task SeedAdmin(UserManager<User> userManager)
+        {
+            const string Email = "admin@admin.com";
+            const string Password = "AdminPassword123!";
+
+            var adminUser = await userManager.FindByEmailAsync(Email);
+
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    UserName = Email,
+                    FirstName = "Robert",
+                    LastName = "Plankton",
+                    Email = Email,
+                    PhoneNumber = "222-222-2222",
+                    Country = "Canada",
+                    AccountStatus = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(adminUser, Password);
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, Roles.Admin);
+                }
+            }
+        }
+
+
+        /// <summary>
+        ///     Asynchronously seeds the default roles in the database if they do not already exist.
         /// </summary>
         /// <param name="roleManager">
         ///     The <see cref="RoleManager{IdentityRole}"/> used to manage roles.
@@ -194,7 +234,7 @@ namespace AspNetWebService.Data
         /// </returns>
         private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
         {
-            string[] roleNames = { "Admin", "User" };
+            string[] roleNames = { Roles.SuperAdmin, Roles.Admin, Roles.User };
 
             foreach (var roleName in roleNames)
             {
