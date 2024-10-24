@@ -41,8 +41,8 @@ namespace AspNetWebService.Services.Authentication
         public LoginService(SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration)
         {
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
 
@@ -85,7 +85,7 @@ namespace AspNetWebService.Services.Authentication
 
             if (result.Succeeded)
             {
-                var token = GenerateJwtToken(user);
+                var token = await GenerateJwtToken(user);
 
                 return new LoginServiceResult
                 {
@@ -113,7 +113,7 @@ namespace AspNetWebService.Services.Authentication
         /// <returns>
         ///     A string representing the generated JWT token.
         /// </returns>
-        private string GenerateJwtToken(User user)
+        private async Task<string> GenerateJwtToken(User user)
         {
             var validIssuer = _configuration["JwtSettings:ValidIssuer"];
             var validAudience = _configuration["JwtSettings:ValidAudience"];
@@ -127,12 +127,16 @@ namespace AspNetWebService.Services.Authentication
                 new(ClaimTypes.Name, user.UserName),
             };
 
-            var roles = _userManager.GetRolesAsync(user).Result;
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            var roles = await _userManager.GetRolesAsync(user);
 
+            if (roles != null && roles.Any())
+            {
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+            }
+           
             var tokenOptions = new JwtSecurityToken(
                 issuer: validIssuer,
                 audience: validAudience,
