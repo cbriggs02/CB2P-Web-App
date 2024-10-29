@@ -52,12 +52,29 @@ namespace AspNetWebService.Services.Authorization
         ///     - Returns true if the current user is a regular user accessing their own data.
         ///     - Returns true if the current user is an admin accessing their own data or non-admin data.
         ///     - Returns false if an admin attempts to access another admin's data.
+        ///     -Returns false if id is not provided or user context is not availible.
         /// </returns>
         public async Task<bool> ValidatePermission(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return false; // No ID provided, so permission cannot be validated
+            }
+
             var principal = _userContextService.GetClaimsPrincipal();
+
+            if (principal == null)
+            {
+                return false; // No user context available, so permission cannot be validated
+            }
+
             var currentUserId = _userContextService.GetUserId(principal);
             var roles = _userContextService.GetRoles(principal);
+
+            if (roles == null || !roles.Any())
+            {
+                return false; // No roles assigned, deny access
+            }
 
             if (roles.Contains(Roles.Admin))
             {
@@ -102,10 +119,19 @@ namespace AspNetWebService.Services.Authorization
         ///     The ID of the current admin user.
         /// </param>
         /// <returns>
-        ///     True if the current user has permission; otherwise, false.
+        ///     True if the current user has permission;
+        ///     False if if the target user's is is null;
+        ///     False if no user found matching target id;
+        ///     False is target user is a super admin;
+        ///     False is target user is admin or super;
         /// </returns>
         private async Task<bool> ValidateAdminPermission(string id, string currentUserId)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                return false; // No target user ID provided, so permission cannot be validated
+            }
+
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)

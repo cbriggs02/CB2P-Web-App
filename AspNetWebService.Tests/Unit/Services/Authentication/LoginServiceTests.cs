@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace AspNetWebService.Tests.UnitTests.Services.Authentication
+namespace AspNetWebService.Tests.Unit.Services.Authentication
 {
     /// <summary>
     ///     Unit tests for the <see cref="LoginService"/> class.
@@ -23,14 +23,6 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
     [Trait("Category", "UnitTest")]
     public class LoginServiceTests
     {
-        private const string NonExistentUserName = "nonexistent";
-        private const string TestPassword = "testpassword";
-        private const string CorrectPassword = "correctpassword";
-        private const string WrongPassword = "wrongpassword";
-        private const string ValidIssuer = "issuer";
-        private const string ValidAudience = "audience";
-        private const string SecretKey = "superSecretKey123!";
-
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly Mock<SignInManager<User>> _signInManagerMock;
         private readonly Mock<IConfiguration> _configurationMock;
@@ -49,6 +41,7 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
         private readonly Mock<IAuthenticationSchemeProvider> _schemesMock;
         private readonly Mock<IUserConfirmation<User>> _confirmationMock;
         private readonly LoginService _loginService;
+        private const string TestPassword = "testpassword";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="LoginServiceTests"/> class.
@@ -66,6 +59,7 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
             _errorsMock = new Mock<IdentityErrorDescriber>();
             _serviceProviderMock = new Mock<IServiceProvider>();
             _userManagerLoggerMock = new Mock<ILogger<UserManager<User>>>();
+
             _signInManagerLoggerMock = new Mock<ILogger<SignInManager<User>>>();
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _claimsFactoryMock = new Mock<IUserClaimsPrincipalFactory<User>>();
@@ -97,8 +91,6 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
             );
 
             _configurationMock = new Mock<IConfiguration>();
-
-            // Create the LoginService instance for testing
             _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _configurationMock.Object);
         }
 
@@ -113,14 +105,19 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
         [Fact]
         public async Task Login_UserNotFound_ReturnsNotFoundResult()
         {
-            var request = new LoginRequest { UserName = NonExistentUserName, Password = TestPassword };
+            // Arrange
+            const string nonExistentUserName = "nonexistent";
+
+            var request = new LoginRequest { UserName = nonExistentUserName, Password = TestPassword };
 
             _userManagerMock
-                .Setup(x => x.FindByNameAsync(NonExistentUserName))
+                .Setup(x => x.FindByNameAsync(nonExistentUserName))
                 .ReturnsAsync((User)null);
 
+            // Act
             var result = await _loginService.Login(request);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Contains(ErrorMessages.User.NotFound, result.Errors);
         }
@@ -136,6 +133,7 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
         [Fact]
         public async Task Login_UserNotActivated_ReturnsNotActivatedResult()
         {
+            // Arrange
             var inactiveUser = CreateMockUser(false);
 
             _userManagerMock
@@ -144,8 +142,10 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
 
             var request = CreateRequestObject(TestPassword, inactiveUser);
 
+            // Act
             var result = await _loginService.Login(request);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Contains(ErrorMessages.User.NotActivated, result.Errors);
         }
@@ -161,20 +161,24 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
         [Fact]
         public async Task Login_InvalidCredentials_ReturnsInvalidCredentialsResult()
         {
+            // Arrange
+            const string wrongPassword = "wrongpassword";
+
             var user = CreateMockUser(true);
 
             _userManagerMock
                 .Setup(x => x.FindByNameAsync(user.UserName))
                 .ReturnsAsync(user);
-
             _signInManagerMock
-                .Setup(j => j.PasswordSignInAsync(user, WrongPassword, false, true))
+                .Setup(j => j.PasswordSignInAsync(user, wrongPassword, false, true))
                 .ReturnsAsync(SignInResult.Failed);
 
-            var request = CreateRequestObject(WrongPassword, user);
+            var request = CreateRequestObject(wrongPassword, user);
 
+            // Act
             var result = await _loginService.Login(request);
 
+            // Assert
             Assert.False(result.Success);
             Assert.Contains(ErrorMessages.Password.InvalidCredentials, result.Errors);
         }
@@ -190,24 +194,45 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
         [Fact]
         public async Task Login_SuccessfulLogin_ReturnsToken()
         {
+            // Arrange
+            const string correctPassword = "correctpassword";
+            const string validIssuer = "issuer";
+            const string validAudience = "audience";
+            const string secretKey = "superSecretKey123!";
+
             var mockUser = CreateMockUser(true);
 
             _userManagerMock
                 .Setup(x => x.FindByNameAsync(mockUser.UserName))
                 .ReturnsAsync(mockUser);
-
             _signInManagerMock
-                .Setup(j => j.PasswordSignInAsync(mockUser, CorrectPassword, false, true))
+                .Setup(j => j.PasswordSignInAsync(mockUser, correctPassword, false, true))
                 .ReturnsAsync(SignInResult.Success);
 
-            SetupConfiguration(ValidIssuer, ValidAudience, SecretKey);
+            SetupConfiguration(validIssuer, validAudience, secretKey);
 
-            var request = CreateRequestObject(CorrectPassword, mockUser);
+            var request = CreateRequestObject(correctPassword, mockUser);
 
+            // Act
             var result = await _loginService.Login(request);
 
+            // Assert
             Assert.True(result.Success);
             Assert.NotNull(result.Token);
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with null credentials throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_NullCredentials_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(null));
         }
 
 
@@ -266,7 +291,8 @@ namespace AspNetWebService.Tests.UnitTests.Services.Authentication
         /// </returns>
         private static User CreateMockUser(bool accountStatus)
         {
-            return new User { UserName = "testuser", AccountStatus = accountStatus ? 1 : 0};
+            const string mockUserName = "testuser";
+            return new User { UserName = mockUserName, AccountStatus = accountStatus ? 1 : 0};
         }
     }
 }

@@ -59,47 +59,38 @@ namespace AspNetWebService.Services.Authentication
         ///     - If the provided password does not match the located user, returns an error message.  
         ///     - If an error occurs during login, returns <see cref="LoginServiceResult"/> with an error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when if credentials are null.
+        /// </exception>
         public async Task<LoginServiceResult> Login(LoginRequest credentials)
         {
+            if (credentials == null)
+            {
+                throw new ArgumentNullException(nameof(credentials));
+            }
+
             var user = await _userManager.FindByNameAsync(credentials.UserName);
 
             if (user == null)
             {
-                return new LoginServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
+                return GenerateErrorResult(ErrorMessages.User.NotFound);
             }
 
             if (user.AccountStatus == 0)
             {
-                return new LoginServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotActivated }
-                };
+                return GenerateErrorResult(ErrorMessages.User.NotActivated);
             }
-
+            
             var result = await _signInManager.PasswordSignInAsync(user, credentials.Password, false, true);
 
             if (result.Succeeded)
             {
                 var token = await GenerateJwtToken(user);
-
-                return new LoginServiceResult
-                {
-                    Success = true,
-                    Token = token,
-                };
+                return GenerateSuccsesResult(token);
             }
             else
             {
-                return new LoginServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Password.InvalidCredentials }
-                };
+                return GenerateErrorResult(ErrorMessages.Password.InvalidCredentials);
             }
         }
 
@@ -147,6 +138,44 @@ namespace AspNetWebService.Services.Authentication
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
             return tokenString;
+        }
+
+
+        /// <summary>
+        ///     Generates a login service result representing an error, with success set to false.
+        /// </summary>
+        /// <param name="errorMessage">
+        ///     The error message to include in the result.
+        /// </param>
+        /// <returns>
+        ///     A login service result indicating failure, with a list of error messages.
+        /// </returns>
+        private static LoginServiceResult GenerateErrorResult(string errorMessage)
+        {
+            return new LoginServiceResult
+            {
+                Success = false,
+                Errors = new List<string> { errorMessage }
+            };
+        }
+
+
+        /// <summary>
+        ///     Generates a login service result representing a successful login.
+        /// </summary>
+        /// <param name="token">
+        ///     The JWT token issued for the authenticated user.
+        /// </param>
+        /// <returns>
+        ///     A login service result indicating success, with the generated token.
+        /// </returns>
+        private static LoginServiceResult GenerateSuccsesResult(string token)
+        {
+            return new LoginServiceResult
+            {
+                Success = true,
+                Token = token,
+            };
         }
     }
 }

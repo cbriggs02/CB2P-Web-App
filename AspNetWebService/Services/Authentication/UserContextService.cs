@@ -58,6 +58,10 @@ namespace AspNetWebService.Services.Authentication
         /// </returns>
         public string GetUserId(ClaimsPrincipal principal)
         {
+            if (principal == null)
+            {
+                return null;
+            }
             return principal.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
@@ -75,6 +79,10 @@ namespace AspNetWebService.Services.Authentication
         /// </returns>
         public List<string> GetRoles(ClaimsPrincipal principal)
         {
+            if (principal == null)
+            {
+                return new List<string>();
+            }
             return principal.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
         }
 
@@ -88,7 +96,7 @@ namespace AspNetWebService.Services.Authentication
         /// </returns>
         public IPAddress GetAddress()
         {
-            return _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
+            return _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress;
         }
 
 
@@ -101,7 +109,7 @@ namespace AspNetWebService.Services.Authentication
         /// </returns>
         public string GetRequestPath()
         {
-            return _httpContextAccessor.HttpContext.Request.Path.Value;
+            return _httpContextAccessor.HttpContext?.Request?.Path.Value;
         }
     }
 }

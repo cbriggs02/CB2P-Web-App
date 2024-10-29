@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <Folder Include="Unit\Controllers\" />
-    <Folder Include="Unit\Services\Authorization\" />
     <Folder Include="Unit\Services\Logging\" />
     <Folder Include="Unit\Services\UserManagement\" />
   </ItemGroup>

@@ -74,8 +74,16 @@ namespace AspNetWebService.Services.Authorization
         ///     - If the role already exists, returns an error message.
         ///     - If an error occurs during creation, returns a result with an error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when role name is null.
+        /// </exception>
         public async Task<RoleServiceResult> CreateRole(string roleName)
         {
+            if (string.IsNullOrEmpty(roleName))
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
             if (await _roleManager.RoleExistsAsync(roleName))
             {
                 return new RoleServiceResult
@@ -118,8 +126,16 @@ namespace AspNetWebService.Services.Authorization
         ///     - If the role is not found, returns an error message.
         ///     - If an error occurs during deletion, returns a result with an error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when id is null.
+        /// </exception>
         public async Task<RoleServiceResult> DeleteRole(string id)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             var role = await _roleManager.FindByIdAsync(id);
 
             if (role == null)
@@ -168,8 +184,21 @@ namespace AspNetWebService.Services.Authorization
         ///     - If the user already has the role, an error is returned.
         ///     - If an error occurs during the assignment, an error message is returned.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when any of the parameters are null.
+        /// </exception>
         public async Task<RoleServiceResult> AssignRole(string id, string roleName)
         {
+            if(string.IsNullOrEmpty(id))
+            { 
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            if(string.IsNullOrEmpty(roleName))
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
@@ -244,8 +273,21 @@ namespace AspNetWebService.Services.Authorization
         ///     - If the user ID or role name is invalid, returns an error message.
         ///     - If an error occurs during removal, returns a result with an error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when any of the parameters are null.
+        /// </exception>
         public async Task<RoleServiceResult> RemoveRole(string id, string roleName)
         {
+            if(string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            if (string.IsNullOrEmpty(roleName))
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)

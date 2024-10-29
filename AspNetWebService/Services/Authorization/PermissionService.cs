@@ -48,23 +48,60 @@ namespace AspNetWebService.Services.Authorization
         ///     - If the user lacks the required permissions, returns a result with Success set to false 
         ///       and an appropriate error message.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when id is null.
+        /// </exception>
         public async Task<PermissionServiceResult> ValidatePermissions(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             // Use the auth service to check permissions
             bool hasPermission = await _authService.ValidatePermission(id);
 
             if (!hasPermission)
             {
                 await _loggerService.LogAuthorizationBreach();
-
-                return new PermissionServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Authorization.Forbidden }
-                };
+                return GenerateErrorResult(ErrorMessages.Authorization.Forbidden);
             }
 
-            return new PermissionServiceResult { Success = true };
+            return GenerateSuccsesResult();
+        }
+
+
+        /// <summary>
+        ///     Generates a permission service result representing an error, with success set to false.
+        /// </summary>
+        /// <param name="errorMessage">
+        ///     The error message to include in the result.
+        /// </param>
+        /// <returns>
+        ///     A permission service result indicating failure, with a list of error messages.
+        /// </returns>
+        private static PermissionServiceResult GenerateErrorResult(string errorMessage)
+        {
+            return new PermissionServiceResult
+            {
+                Success = false,
+                Errors = new List<string> { errorMessage }
+            };
+        }
+
+
+        /// <summary>
+        ///     Generates a permission service result with success set to true.
+        /// </summary>
+        /// <returns>
+        ///     A permission service result indicating success, with the generated token.
+        /// </returns>
+        private static PermissionServiceResult GenerateSuccsesResult()
+        {
+            return new PermissionServiceResult
+            {
+                Success = true,
+            };
         }
     }
 }
