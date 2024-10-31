@@ -1,4 +1,4 @@
-﻿using AspNetWebService.Models.ServiceResultModels.PermissionResults;
+﻿using AspNetWebService.Models.ServiceResultModels;
 
 namespace AspNetWebService.Interfaces.Authorization
 {
@@ -19,9 +19,9 @@ namespace AspNetWebService.Interfaces.Authorization
         ///     The ID of the user whose permissions are being validated.
         /// </param>
         /// <returns>
-        ///     A service method that returns a PermissionResult,
+        ///     A service method that returns a ServiceResult,
         ///     with success status and errors (if any).
         /// </returns>
-        Task<PermissionServiceResult> ValidatePermissions(string id);
+        Task<ServiceResult> ValidatePermissions(string id);
     }
 }

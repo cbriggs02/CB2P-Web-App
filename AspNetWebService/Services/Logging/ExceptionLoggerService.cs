@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Interfaces.Authentication;
 using AspNetWebService.Interfaces.Logging;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.RequestModels.AuditLogRequests;
 
 namespace AspNetWebService.Services.Logging
@@ -16,6 +17,7 @@ namespace AspNetWebService.Services.Logging
     {
         private readonly IAuditLoggerService _auditLogService;
         private readonly IUserContextService _userContextService;
+        private readonly IParameterValidator _parameterValidator;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ExceptionLoggerService"/> class.
@@ -26,13 +28,17 @@ namespace AspNetWebService.Services.Logging
         /// <param name="userContextService">
         ///     The user context service used to retrieve the current user ID and IP address.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the provided services are null.
         /// </exception>
-        public ExceptionLoggerService(IAuditLoggerService auditLogService, IUserContextService userContextService)
+        public ExceptionLoggerService(IAuditLoggerService auditLogService, IUserContextService userContextService, IParameterValidator parameterValidator)
         {
             _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
             _userContextService = userContextService ?? throw new ArgumentNullException(nameof(userContextService));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
         }
 
 
@@ -51,6 +57,8 @@ namespace AspNetWebService.Services.Logging
         /// </exception>
         public async Task LogException(Exception exception)
         {
+            _parameterValidator.ValidateObjectNotNull(exception, nameof(exception));
+
             var principal = _userContextService.GetClaimsPrincipal();
             var currentUserId = _userContextService.GetUserId(principal);
             var ipAddress = _userContextService.GetAddress()?.ToString();

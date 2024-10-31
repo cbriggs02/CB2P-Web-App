@@ -1,6 +1,8 @@
 ﻿using AspNetWebService.Constants;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.RequestModels.LoginRequests;
+using AspNetWebService.Models.ServiceResultModels.LoginServiceResults;
 using AspNetWebService.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +28,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly Mock<SignInManager<User>> _signInManagerMock;
         private readonly Mock<IConfiguration> _configurationMock;
+        private readonly Mock<IParameterValidator> _parameterValidatorMock;
+        private readonly Mock<IServiceResultFactory> _serviceResultFactoryMock;
         private readonly Mock<ILogger<UserManager<User>>> _userManagerLoggerMock;
         private readonly Mock<ILogger<SignInManager<User>>> _signInManagerLoggerMock;
         private readonly Mock<IUserStore<User>> _userStoreMock;
@@ -91,7 +95,157 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             );
 
             _configurationMock = new Mock<IConfiguration>();
-            _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _configurationMock.Object);
+            _parameterValidatorMock = new Mock<IParameterValidator>();
+            _serviceResultFactoryMock = new Mock<IServiceResultFactory>();
+
+            _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _configurationMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object);
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with null credentials throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_NullCredentials_ThrowsArgumentNullException()
+        {
+            // Arrange
+            _parameterValidatorMock
+                .Setup(x => x.ValidateObjectNotNull(It.IsAny<object>(), It.IsAny<string>()))
+                .Throws<ArgumentNullException>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(null));
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with null username throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_NullUserName_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var request = new LoginRequest { UserName = null, Password = TestPassword };
+
+            _parameterValidatorMock
+                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
+                .Throws<ArgumentNullException>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with null password throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_NullPassword_ThrowsArgumentNullException()
+        {
+            // Arrange
+            const string userName = "name";
+            var request = new LoginRequest { UserName = userName, Password = null };
+
+            _parameterValidatorMock
+                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
+                .Throws<ArgumentNullException>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with null username and password throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_NullUsernameAndPassword_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var request = new LoginRequest { UserName = null, Password = null };
+
+            _parameterValidatorMock
+                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
+                .Throws<ArgumentNullException>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with empty username throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_EmptyUserName_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var request = new LoginRequest { UserName = "", Password = TestPassword };
+
+            _parameterValidatorMock
+                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
+                .Throws<ArgumentNullException>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with empty password throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_EmptyPassword_ThrowsArgumentNullException()
+        {
+            // Arrange
+            const string userName = "name";
+            var request = new LoginRequest { UserName = userName, Password = "" };
+
+            _parameterValidatorMock
+                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
+                .Throws<ArgumentNullException>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+        }
+
+
+        /// <summary>
+        ///     Verifies that calling the login method with empty username and password throws an ArgumentNullException.
+        /// </summary>
+        /// <returns>
+        ///     A task representing the asynchronous test operation.
+        /// </returns>
+        [Fact]
+        public async Task Login_EmptyUsernameAndPassword_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var request = new LoginRequest { UserName = "", Password = "" };
+
+            _parameterValidatorMock
+                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
+                .Throws<ArgumentNullException>();
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
         }
 
 
@@ -107,6 +261,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         {
             // Arrange
             const string nonExistentUserName = "nonexistent";
+            const string expectedErrorMessage = ErrorMessages.User.NotFound;
 
             var request = new LoginRequest { UserName = nonExistentUserName, Password = TestPassword };
 
@@ -114,12 +269,14 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
                 .Setup(x => x.FindByNameAsync(nonExistentUserName))
                 .ReturnsAsync((User)null);
 
+            ArrangeServiceResult(expectedErrorMessage);
+
             // Act
             var result = await _loginService.Login(request);
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains(ErrorMessages.User.NotFound, result.Errors);
+            Assert.Contains(expectedErrorMessage, result.Errors);
         }
 
 
@@ -134,11 +291,14 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         public async Task Login_UserNotActivated_ReturnsNotActivatedResult()
         {
             // Arrange
+            const string expectedErrorMessage = ErrorMessages.User.NotActivated;
             var inactiveUser = CreateMockUser(false);
 
             _userManagerMock
                 .Setup(x => x.FindByNameAsync(inactiveUser.UserName))
                 .ReturnsAsync(inactiveUser);
+
+            ArrangeServiceResult(expectedErrorMessage);
 
             var request = CreateRequestObject(TestPassword, inactiveUser);
 
@@ -147,7 +307,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains(ErrorMessages.User.NotActivated, result.Errors);
+            Assert.Contains(expectedErrorMessage, result.Errors);
         }
 
 
@@ -163,6 +323,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         {
             // Arrange
             const string wrongPassword = "wrongpassword";
+            const string expectedErrorMessage = ErrorMessages.Password.InvalidCredentials;
 
             var user = CreateMockUser(true);
 
@@ -173,6 +334,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
                 .Setup(j => j.PasswordSignInAsync(user, wrongPassword, false, true))
                 .ReturnsAsync(SignInResult.Failed);
 
+            ArrangeServiceResult(expectedErrorMessage);
+
             var request = CreateRequestObject(wrongPassword, user);
 
             // Act
@@ -180,7 +343,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains(ErrorMessages.Password.InvalidCredentials, result.Errors);
+            Assert.Contains(expectedErrorMessage, result.Errors);
         }
 
 
@@ -211,28 +374,24 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             SetupConfiguration(validIssuer, validAudience, secretKey);
 
+            var expectedResult = new LoginServiceResult
+            {
+                Success = true,
+                Token = "token" // Mocked placeholder token
+            };
+
+            _serviceResultFactoryMock
+                .Setup(x => x.LoginOperationSuccess(It.IsAny<string>()))
+                .Returns(expectedResult);
+
             var request = CreateRequestObject(correctPassword, mockUser);
 
             // Act
             var result = await _loginService.Login(request);
 
             // Assert
-            Assert.True(result.Success);
-            Assert.NotNull(result.Token);
-        }
-
-
-        /// <summary>
-        ///     Verifies that calling the login method with null credentials throws an ArgumentNullException.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous test operation.
-        /// </returns>
-        [Fact]
-        public async Task Login_NullCredentials_ThrowsArgumentNullException()
-        {
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(null));
+            Assert.True(expectedResult.Success);
+            Assert.NotNull(expectedResult.Token);
         }
 
 
@@ -293,6 +452,28 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         {
             const string mockUserName = "testuser";
             return new User { UserName = mockUserName, AccountStatus = accountStatus ? 1 : 0};
+        }
+
+
+        /// <summary>
+        ///     Sets up the mock service factory result to return a 
+        ///     <see cref="LoginServiceResult"/> indicating a failure with the specified error message.
+        /// </summary>
+        /// <param name="expectedErrorMessage">
+        ///     The expected error message to be included in the 
+        ///     <see cref="LoginServiceResult"/> indicating the reason for failure.
+        /// </param>
+        private void ArrangeServiceResult(string expectedErrorMessage)
+        {
+            var result = new LoginServiceResult
+            {
+                Success = false,
+                Errors = new List<string> { expectedErrorMessage }
+            };
+
+            _serviceResultFactoryMock
+                .Setup(x => x.LoginOperationFailure(new[] { expectedErrorMessage }))
+                .Returns(result);
         }
     }
 }

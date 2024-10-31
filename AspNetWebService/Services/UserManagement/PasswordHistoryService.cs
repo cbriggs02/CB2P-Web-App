@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Data;
 using AspNetWebService.Interfaces.UserManagement;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.RequestModels.PasswordHistoryRequests;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,7 @@ namespace AspNetWebService.Services.UserManagement
     {
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IParameterValidator _parameterValidator;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PasswordHistoryService"/> class.
@@ -27,13 +29,17 @@ namespace AspNetWebService.Services.UserManagement
         /// <param name="passwordHasher">
         ///     This is used for comparing hashed passwords and ensuring password security.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if the <paramref name="context"/> parameter is null.
         /// </exception>
-        public PasswordHistoryService(ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
+        public PasswordHistoryService(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IParameterValidator parameterValidator)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
         }
 
 
@@ -50,6 +56,10 @@ namespace AspNetWebService.Services.UserManagement
         /// </returns>
         public async Task AddPasswordHistory(StorePasswordHistoryRequest request)
         {
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+            _parameterValidator.ValidateNotNullOrEmpty(request.UserId, nameof(request.UserId));
+            _parameterValidator.ValidateNotNullOrEmpty(request.PasswordHash, nameof(request.PasswordHash));
+
             var passwordHistory = new PasswordHistory
             {
                 UserId = request.UserId,
@@ -76,6 +86,10 @@ namespace AspNetWebService.Services.UserManagement
         /// </returns>
         public async Task<bool> FindPasswordHash(SearchPasswordHistoryRequest request)
         {
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+            _parameterValidator.ValidateNotNullOrEmpty(request.UserId, nameof(request.UserId));
+            _parameterValidator.ValidateNotNullOrEmpty(request.Password, nameof(request.Password));
+
             var passwordHistories = await _context.PasswordHistories
                 .Where(x => x.UserId == request.UserId)
                 .Select(x => x.PasswordHash)
@@ -102,6 +116,8 @@ namespace AspNetWebService.Services.UserManagement
         /// </returns>
         public async Task<bool> DeletePasswordHistory(string userId)
         {
+            _parameterValidator.ValidateNotNullOrEmpty(userId, nameof(userId));
+
             var passwordHistories = await _context.PasswordHistories
                .Where(x => x.UserId == userId)
                .OrderBy(x => x.Id)

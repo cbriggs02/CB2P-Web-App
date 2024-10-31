@@ -1,10 +1,11 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authorization;
 using AspNetWebService.Interfaces.UserManagement;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.RequestModels.PasswordHistoryRequests;
 using AspNetWebService.Models.RequestModels.PasswordRequests;
-using AspNetWebService.Models.ServiceResultModels.PasswordResults;
+using AspNetWebService.Models.ServiceResultModels;
 using Microsoft.AspNetCore.Identity;
 
 namespace AspNetWebService.Services.UserManagement
@@ -20,6 +21,8 @@ namespace AspNetWebService.Services.UserManagement
         private readonly UserManager<User> _userManager;
         private readonly IPasswordHistoryService _historyService;
         private readonly IPermissionService _permissionService;
+        private readonly IParameterValidator _parameterValidator;
+        private readonly IServiceResultFactory _serviceResultFactory;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PasswordService"/> class.
@@ -33,14 +36,22 @@ namespace AspNetWebService.Services.UserManagement
         /// <param name="permissionService">
         ///     The service used for validating user permissions.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
+        /// <param name="serviceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the parameters are null.
         /// </exception>
-        public PasswordService(UserManager<User> userManager, IPasswordHistoryService historyService, IPermissionService permissionService)
+        public PasswordService(UserManager<User> userManager, IPasswordHistoryService historyService, IPermissionService permissionService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _historyService = historyService ?? throw new ArgumentNullException(nameof(historyService));
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
+            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
         }
 
 
@@ -54,41 +65,33 @@ namespace AspNetWebService.Services.UserManagement
         ///     A model object containing the password and confirmed password.
         /// </param>
         /// <returns>
-        ///     A <see cref="PasswordServiceResult"/> indicating the outcome of the password setting operation:
+        ///     A <see cref="ServiceResult"/> indicating the outcome of the password setting operation:
         ///     - If successful, Success is set to true.
         ///     - If the user ID cannot be found, an error message is provided.
         ///     - If an error occurs during setup, an error message is returned.
         /// </returns>
-        public async Task<PasswordServiceResult> SetPassword(string id, SetPasswordRequest request)
+        public async Task<ServiceResult> SetPassword(string id, SetPasswordRequest request)
         {
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+            _parameterValidator.ValidateNotNullOrEmpty(request.Password, nameof(request.Password));
+            _parameterValidator.ValidateNotNullOrEmpty(request.PasswordConfirmed, nameof(request.PasswordConfirmed));
+
             if (!request.PasswordConfirmed.Equals(request.Password))
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Password.Mismatch }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.Mismatch });
             }
-
 
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             if (user.PasswordHash != null)
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Password.AlreadySet }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.AlreadySet });
             }
 
             var result = await _userManager.AddPasswordAsync(user, request.Password);
@@ -96,19 +99,11 @@ namespace AspNetWebService.Services.UserManagement
             if (result.Succeeded)
             {
                 await CreatePasswordHistory(user);
-
-                return new PasswordServiceResult
-                {
-                    Success = true
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -123,44 +118,37 @@ namespace AspNetWebService.Services.UserManagement
         ///     A model object containing the current password and the new password.
         /// </param>
         /// <returns>
-        ///     A <see cref="PasswordServiceResult"/> indicating the outcome of the password update operation:
+        ///     A <see cref="ServiceResult"/> indicating the outcome of the password update operation:
         ///     - If successful, Success is set to true.
         ///     - If the user ID cannot be found or the current password is invalid, an error message is provided.
         ///     - If an error occurs during the update, an error message is returned.
         /// </returns>
-        public async Task<PasswordServiceResult> UpdatePassword(string id, UpdatePasswordRequest request)
+        public async Task<ServiceResult> UpdatePassword(string id, UpdatePasswordRequest request)
         {
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+            _parameterValidator.ValidateNotNullOrEmpty(request.CurrentPassword, nameof(request.CurrentPassword));
+            _parameterValidator.ValidateNotNullOrEmpty(request.NewPassword, nameof(request.NewPassword));
+
             var permissionResult = await _permissionService.ValidatePermissions(id);
 
             if (!permissionResult.Success)
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = permissionResult.Errors
-                };
+                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null || user.PasswordHash == null)
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Password.InvalidCredentials }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.InvalidCredentials });
             }
 
             var passwordIsValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
 
             if (!passwordIsValid)
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Password.InvalidCredentials }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.InvalidCredentials });
             }
 
             // Send password to be checked against users history for re-use errors
@@ -168,11 +156,7 @@ namespace AspNetWebService.Services.UserManagement
 
             if (isPasswordReused)
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Password.CannotReuse }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.CannotReuse });
             }
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
@@ -180,19 +164,11 @@ namespace AspNetWebService.Services.UserManagement
             if (result.Succeeded)
             {
                 await CreatePasswordHistory(user);
-
-                return new PasswordServiceResult
-                {
-                    Success = true
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new PasswordServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 

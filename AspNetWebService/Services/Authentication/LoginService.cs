@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authentication;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.RequestModels.LoginRequests;
 using AspNetWebService.Models.ServiceResultModels.LoginServiceResults;
@@ -22,6 +23,8 @@ namespace AspNetWebService.Services.Authentication
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly IParameterValidator _parameterValidator;
+        private readonly IServiceResultFactory _serviceResultFactory;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="LoginService"/> class.
@@ -35,14 +38,22 @@ namespace AspNetWebService.Services.Authentication
         /// <param name="configuration">
         ///     The configuration used for accessing app settings, including JWT settings.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
+        /// <param name="serviceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public LoginService(SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration)
+        public LoginService(SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
         {
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
+            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
         }
 
 
@@ -59,26 +70,22 @@ namespace AspNetWebService.Services.Authentication
         ///     - If the provided password does not match the located user, returns an error message.  
         ///     - If an error occurs during login, returns <see cref="LoginServiceResult"/> with an error message.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     Thrown when if credentials are null.
-        /// </exception>
         public async Task<LoginServiceResult> Login(LoginRequest credentials)
         {
-            if (credentials == null)
-            {
-                throw new ArgumentNullException(nameof(credentials));
-            }
+            _parameterValidator.ValidateObjectNotNull(credentials, nameof(credentials));
+            _parameterValidator.ValidateNotNullOrEmpty(credentials.UserName, nameof(credentials.UserName));
+            _parameterValidator.ValidateNotNullOrEmpty(credentials.Password, nameof(credentials.Password));
 
             var user = await _userManager.FindByNameAsync(credentials.UserName);
 
             if (user == null)
             {
-                return GenerateErrorResult(ErrorMessages.User.NotFound);
+                return _serviceResultFactory.LoginOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             if (user.AccountStatus == 0)
             {
-                return GenerateErrorResult(ErrorMessages.User.NotActivated);
+                return _serviceResultFactory.LoginOperationFailure(new[] { ErrorMessages.User.NotActivated });
             }
             
             var result = await _signInManager.PasswordSignInAsync(user, credentials.Password, false, true);
@@ -86,11 +93,11 @@ namespace AspNetWebService.Services.Authentication
             if (result.Succeeded)
             {
                 var token = await GenerateJwtToken(user);
-                return GenerateSuccsesResult(token);
+                return _serviceResultFactory.LoginOperationSuccess(token);
             }
             else
             {
-                return GenerateErrorResult(ErrorMessages.Password.InvalidCredentials);
+                return _serviceResultFactory.LoginOperationFailure(new[] { ErrorMessages.Password.InvalidCredentials });
             }
         }
 
@@ -138,44 +145,6 @@ namespace AspNetWebService.Services.Authentication
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
             return tokenString;
-        }
-
-
-        /// <summary>
-        ///     Generates a login service result representing an error, with success set to false.
-        /// </summary>
-        /// <param name="errorMessage">
-        ///     The error message to include in the result.
-        /// </param>
-        /// <returns>
-        ///     A login service result indicating failure, with a list of error messages.
-        /// </returns>
-        private static LoginServiceResult GenerateErrorResult(string errorMessage)
-        {
-            return new LoginServiceResult
-            {
-                Success = false,
-                Errors = new List<string> { errorMessage }
-            };
-        }
-
-
-        /// <summary>
-        ///     Generates a login service result representing a successful login.
-        /// </summary>
-        /// <param name="token">
-        ///     The JWT token issued for the authenticated user.
-        /// </param>
-        /// <returns>
-        ///     A login service result indicating success, with the generated token.
-        /// </returns>
-        private static LoginServiceResult GenerateSuccsesResult(string token)
-        {
-            return new LoginServiceResult
-            {
-                Success = true,
-                Token = token,
-            };
         }
     }
 }

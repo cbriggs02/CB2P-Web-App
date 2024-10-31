@@ -1,5 +1,6 @@
 ﻿using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.RequestModels.UserRequests;
+using AspNetWebService.Models.ServiceResultModels;
 using AspNetWebService.Models.ServiceResultModels.UserServiceResults;
 
 namespace AspNetWebService.Interfaces.UserManagement
@@ -58,9 +59,9 @@ namespace AspNetWebService.Interfaces.UserManagement
         ///     An object model containing data to be adjusted in the located user object model.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns a <see cref="UserServiceResult"/> object.
+        ///     A task representing the asynchronous operation that returns a <see cref="ServiceResult"/> object.
         /// </returns>
-        Task<UserServiceResult> UpdateUser(string id, UserDTO userDTO);
+        Task<ServiceResult> UpdateUser(string id, UserDTO userDTO);
 
 
         /// <summary>
@@ -70,9 +71,9 @@ namespace AspNetWebService.Interfaces.UserManagement
         ///     The ID used to locate the user to be deleted in the system.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns a <see cref="UserServiceResult"/> object.
+        ///     A task representing the asynchronous operation that returns a <see cref="ServiceResult"/> object.
         /// </returns>
-        Task<UserServiceResult> DeleteUser(string id);
+        Task<ServiceResult> DeleteUser(string id);
 
 
         /// <summary>
@@ -82,9 +83,9 @@ namespace AspNetWebService.Interfaces.UserManagement
         ///     The ID to identify the user to be activated within the system.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns a <see cref="UserServiceResult"/> object.
+        ///     A task representing the asynchronous operation that returns a <see cref="ServiceResult"/> object.
         /// </returns>
-        Task<UserServiceResult> ActivateUser(string id);
+        Task<ServiceResult> ActivateUser(string id);
 
 
         /// <summary>
@@ -94,8 +95,8 @@ namespace AspNetWebService.Interfaces.UserManagement
         ///     The ID of the user who is being deactivated within the system.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns a <see cref="UserServiceResult"/> object.
+        ///     A task representing the asynchronous operation that returns a <see cref="ServiceResult"/> object.
         /// </returns>
-        Task<UserServiceResult> DeactivateUser(string id);
+        Task<ServiceResult> DeactivateUser(string id);
     }
 }

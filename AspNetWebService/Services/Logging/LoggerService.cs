@@ -1,4 +1,5 @@
 ﻿using AspNetWebService.Interfaces.Logging;
+using AspNetWebService.Interfaces.Utilities;
 
 namespace AspNetWebService.Services.Logging
 {
@@ -14,6 +15,7 @@ namespace AspNetWebService.Services.Logging
         private readonly IAuthorizationLoggerService _authorizationLoggerService;
         private readonly IExceptionLoggerService _exceptionLoggerService;
         private readonly IPerformanceLoggerService _performanceLoggerService;
+        private readonly IParameterValidator _parameterValidator;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="LoggerService"/> class.
@@ -27,14 +29,18 @@ namespace AspNetWebService.Services.Logging
         /// <param name="performanceLoggerService">
         ///     The service responsible for logging slow performance events.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the provided services are null.
         /// </exception>
-        public LoggerService(IAuthorizationLoggerService authorizationLoggerService, IExceptionLoggerService exceptionLoggerService, IPerformanceLoggerService performanceLoggerService)
+        public LoggerService(IAuthorizationLoggerService authorizationLoggerService, IExceptionLoggerService exceptionLoggerService, IPerformanceLoggerService performanceLoggerService, IParameterValidator parameterValidator)
         {
             _authorizationLoggerService = authorizationLoggerService ?? throw new ArgumentNullException(nameof(authorizationLoggerService));
             _exceptionLoggerService = exceptionLoggerService ?? throw new ArgumentNullException(nameof(exceptionLoggerService));
             _performanceLoggerService = performanceLoggerService ?? throw new ArgumentNullException(nameof(performanceLoggerService));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
         }
 
 
@@ -61,6 +67,7 @@ namespace AspNetWebService.Services.Logging
         /// </returns>
         public async Task LogException(Exception exception)
         {
+            _parameterValidator.ValidateObjectNotNull(exception, nameof(exception));
             await _exceptionLoggerService.LogException(exception);
         }
 

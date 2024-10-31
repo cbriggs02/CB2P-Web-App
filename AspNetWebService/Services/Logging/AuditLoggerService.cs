@@ -1,10 +1,12 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Data;
 using AspNetWebService.Interfaces.Logging;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.EntityModels;
 using AspNetWebService.Models.PaginationModels;
 using AspNetWebService.Models.RequestModels.AuditLogRequests;
+using AspNetWebService.Models.ServiceResultModels;
 using AspNetWebService.Models.ServiceResultModels.AuditLogServiceResults;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,8 @@ namespace AspNetWebService.Services.Logging
     public class AuditLoggerService : IAuditLoggerService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IParameterValidator _parameterValidator;
+        private readonly IServiceResultFactory _serviceResultFactory;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -31,15 +35,23 @@ namespace AspNetWebService.Services.Logging
         /// <param name="context">
         ///     The database context used for accessing audit logs.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
         /// <param name="mapper">
         ///     Object mapper for converting between entities and data transfer objects (DTOs).
+        /// </param>
+        /// <param name="serviceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if the context is null.
         /// </exception>
-        public AuditLoggerService(ApplicationDbContext context, IMapper mapper)
+        public AuditLoggerService(ApplicationDbContext context, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IMapper mapper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
+            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -56,6 +68,8 @@ namespace AspNetWebService.Services.Logging
         /// </returns>
         public async Task<AuditLogServiceListResult> GetLogs(AuditLogListRequest request)
         {
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+
             var query = _context.AuditLogs.AsQueryable();
 
             if (request.Action.HasValue)
@@ -99,17 +113,15 @@ namespace AspNetWebService.Services.Logging
         ///     indicates whether the deletion was successful and provides any 
         ///     associated error messages if applicable.
         /// </returns>
-        public async Task<AuditLogServiceResult> DeleteLog(string id)
+        public async Task<ServiceResult> DeleteLog(string id)
         {
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+
             var log = await _context.AuditLogs.FindAsync(id);
 
             if (log == null)
             {
-                return new AuditLogServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.AuditLog.NotFound }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.AuditLog.NotFound });
             }
 
             _context.AuditLogs.Remove(log);
@@ -117,18 +129,11 @@ namespace AspNetWebService.Services.Logging
 
             if (result > 0)
             {
-                return new AuditLogServiceResult
-                {
-                    Success = true,
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new AuditLogServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.AuditLog.DeletionFailed }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.AuditLog.DeletionFailed });
             }
         }
 
@@ -146,6 +151,11 @@ namespace AspNetWebService.Services.Logging
         /// </returns>
         public async Task LogAuthorizationBreach(AuditLogAuthorizationRequest request)
         {
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+            _parameterValidator.ValidateNotNullOrEmpty(request.UserId, nameof(request.UserId));
+            _parameterValidator.ValidateNotNullOrEmpty(request.ActionAttempted, nameof(request.ActionAttempted));
+            _parameterValidator.ValidateNotNullOrEmpty(request.IpAddress, nameof(request.IpAddress));
+
             var log = new AuditLog
             {
                 Action = AuditAction.AuthorizationBreach,
@@ -173,6 +183,11 @@ namespace AspNetWebService.Services.Logging
         /// </returns>
         public async Task LogException(AuditLogExceptionRequest request)
         {
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+            _parameterValidator.ValidateObjectNotNull(request.Exception, nameof(request.Exception));
+            _parameterValidator.ValidateNotNullOrEmpty(request.UserId, nameof(request.UserId));
+            _parameterValidator.ValidateNotNullOrEmpty(request.IpAddress, nameof(request.IpAddress));
+
             var log = new AuditLog
             {
                 Action = AuditAction.Exception,
@@ -200,6 +215,11 @@ namespace AspNetWebService.Services.Logging
         /// </returns>
         public async Task LogSlowPerformance(AuditLogPerformanceRequest request)
         {
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+            _parameterValidator.ValidateNotNullOrEmpty(request.UserId , nameof(request.UserId));
+            _parameterValidator.ValidateNotNullOrEmpty(request.Action, nameof(request.Action));
+            _parameterValidator.ValidateNotNullOrEmpty(request.IpAddress , nameof(request.IpAddress));
+
             var log = new AuditLog
             {
                 Action = AuditAction.SlowPerformance,

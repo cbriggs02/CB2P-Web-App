@@ -1,4 +1,5 @@
-﻿using AspNetWebService.Models.ServiceResultModels.RoleServiceResults;
+﻿using AspNetWebService.Models.ServiceResultModels;
+using AspNetWebService.Models.ServiceResultModels.RoleServiceResults;
 
 namespace AspNetWebService.Interfaces.Authorization
 {
@@ -28,7 +29,7 @@ namespace AspNetWebService.Interfaces.Authorization
         /// <returns>
         ///     A task that represents the asynchronous operation, returning a result object indicating the outcome of the role creation.
         /// </returns>
-        Task<RoleServiceResult> CreateRole(string roleName);
+        Task<ServiceResult> CreateRole(string roleName);
 
 
         /// <summary>
@@ -40,7 +41,7 @@ namespace AspNetWebService.Interfaces.Authorization
         /// <returns>
         ///     A task that represents the asynchronous operation, returning a result object indicating the outcome of the role deletion.
         /// </returns>
-        Task<RoleServiceResult> DeleteRole(string id);
+        Task<ServiceResult> DeleteRole(string id);
 
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace AspNetWebService.Interfaces.Authorization
         /// <returns>
         ///     A task that represents the asynchronous operation, returning a result object indicating the outcome of the role assignment.
         /// </returns>
-        Task<RoleServiceResult> AssignRole(string id, string roleName);
+        Task<ServiceResult> AssignRole(string id, string roleName);
 
 
         /// <summary>
@@ -70,6 +71,6 @@ namespace AspNetWebService.Interfaces.Authorization
         /// <returns>
         ///     A task that represents the asynchronous operation, returning a result object indicating the outcome of the role removal.
         /// </returns>
-        Task<RoleServiceResult> RemoveRole(string id, string roleName);
+        Task<ServiceResult> RemoveRole(string id, string roleName);
     }
 }

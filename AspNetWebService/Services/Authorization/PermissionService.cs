@@ -1,7 +1,8 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authorization;
 using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Models.ServiceResultModels.PermissionResults;
+using AspNetWebService.Interfaces.Utilities;
+using AspNetWebService.Models.ServiceResultModels;
 
 namespace AspNetWebService.Services.Authorization
 {
@@ -16,6 +17,8 @@ namespace AspNetWebService.Services.Authorization
     {
         private readonly IAuthorizationService _authService;
         private readonly ILoggerService _loggerService;
+        private readonly IParameterValidator _parameterValidator;
+        private readonly IServiceResultFactory _serviceResultFactory;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PermissionService"/> class.
@@ -26,13 +29,21 @@ namespace AspNetWebService.Services.Authorization
         /// <param name="loggerService">
         ///     log service used for logging authorization breaches with audit logger service.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
+        /// <param name="serviceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when <paramref name="authService"/> is null.
         /// </exception>
-        public PermissionService(IAuthorizationService authService, ILoggerService loggerService)
+        public PermissionService(IAuthorizationService authService, ILoggerService loggerService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
         {
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _loggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
+            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
         }
 
 
@@ -43,20 +54,14 @@ namespace AspNetWebService.Services.Authorization
         ///     The unique ID of the user whose permissions are to be validated.
         /// </param>
         /// <returns>
-        ///     A <see cref="PermissionServiceResult"/> indicating the outcome of the validation:
+        ///     A <see cref="ServiceResult"/> indicating the outcome of the validation:
         ///     - If the user has the necessary permissions, returns a result with Success set to true.
         ///     - If the user lacks the required permissions, returns a result with Success set to false 
         ///       and an appropriate error message.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     Thrown when id is null.
-        /// </exception>
-        public async Task<PermissionServiceResult> ValidatePermissions(string id)
+        public async Task<ServiceResult> ValidatePermissions(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             // Use the auth service to check permissions
             bool hasPermission = await _authService.ValidatePermission(id);
@@ -64,44 +69,10 @@ namespace AspNetWebService.Services.Authorization
             if (!hasPermission)
             {
                 await _loggerService.LogAuthorizationBreach();
-                return GenerateErrorResult(ErrorMessages.Authorization.Forbidden);
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Authorization.Forbidden });
             }
 
-            return GenerateSuccsesResult();
-        }
-
-
-        /// <summary>
-        ///     Generates a permission service result representing an error, with success set to false.
-        /// </summary>
-        /// <param name="errorMessage">
-        ///     The error message to include in the result.
-        /// </param>
-        /// <returns>
-        ///     A permission service result indicating failure, with a list of error messages.
-        /// </returns>
-        private static PermissionServiceResult GenerateErrorResult(string errorMessage)
-        {
-            return new PermissionServiceResult
-            {
-                Success = false,
-                Errors = new List<string> { errorMessage }
-            };
-        }
-
-
-        /// <summary>
-        ///     Generates a permission service result with success set to true.
-        /// </summary>
-        /// <returns>
-        ///     A permission service result indicating success, with the generated token.
-        /// </returns>
-        private static PermissionServiceResult GenerateSuccsesResult()
-        {
-            return new PermissionServiceResult
-            {
-                Success = true,
-            };
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authorization;
 using AspNetWebService.Interfaces.UserManagement;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.PaginationModels;
 using AspNetWebService.Models.RequestModels.UserRequests;
+using AspNetWebService.Models.ServiceResultModels;
 using AspNetWebService.Models.ServiceResultModels.UserServiceResults;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +25,8 @@ namespace AspNetWebService.Services.UserManagement
         private readonly UserManager<User> _userManager;
         private readonly IPasswordHistoryService _passwordHistoryService;
         private readonly IPermissionService _permissionService;
+        private readonly IParameterValidator _parameterValidator;
+        private readonly IServiceResultFactory _serviceResultFactory;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -37,17 +41,25 @@ namespace AspNetWebService.Services.UserManagement
         /// <param name="permissionService">
         ///     Service for validating and checking user permissions within the system.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
+        /// <param name="serviceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
+        /// </param>
         /// <param name="mapper">
         ///     Object mapper for converting between entities and data transfer objects (DTOs).
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the provided service parameters are null.
         /// </exception>
-        public UserService(UserManager<User> userManager, IPasswordHistoryService passwordHistoryService, IPermissionService permissionService, IMapper mapper)
+        public UserService(UserManager<User> userManager, IPasswordHistoryService passwordHistoryService, IPermissionService permissionService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IMapper mapper)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _passwordHistoryService = passwordHistoryService ?? throw new ArgumentNullException(nameof(passwordHistoryService));
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
+            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -65,6 +77,8 @@ namespace AspNetWebService.Services.UserManagement
         /// </returns>
         public async Task<UserServiceListResult> GetUsers(UserListRequest request)
         {
+            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
+
             var query = _userManager.Users.AsQueryable();
 
             if (request.AccountStatus.HasValue)
@@ -109,31 +123,24 @@ namespace AspNetWebService.Services.UserManagement
         /// </returns>
         public async Task<UserServiceResult> GetUser(string id)
         {
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
+                return _serviceResultFactory.UserOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
 
             if (!permissionResult.Success)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = permissionResult.Errors
-                };
+                return _serviceResultFactory.UserOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var userDTO = _mapper.Map<UserDTO>(user);
-
-            return new UserServiceResult { User = userDTO };
+            return _serviceResultFactory.UserOperationSuccess(userDTO);
         }
 
 
@@ -151,6 +158,8 @@ namespace AspNetWebService.Services.UserManagement
         /// </returns>
         public async Task<UserServiceResult> CreateUser(UserDTO user)
         {
+            ValidateUserDTO(user);
+
             var newUser = new User
             {
                 UserName = user.UserName,
@@ -167,7 +176,7 @@ namespace AspNetWebService.Services.UserManagement
 
             if (result.Succeeded)
             {
-                var returnObject = new UserDTO
+                var returnUser = new UserDTO
                 {
                     UserName = newUser.UserName,
                     FirstName = newUser.FirstName,
@@ -177,19 +186,11 @@ namespace AspNetWebService.Services.UserManagement
                     Country = newUser.Country
                 };
 
-                return new UserServiceResult
-                {
-                    User = returnObject,
-                    Success = true
-                };
+                return _serviceResultFactory.UserOperationSuccess(returnUser);
             }
             else
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.UserOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -204,31 +205,26 @@ namespace AspNetWebService.Services.UserManagement
         ///     A <see cref="UserDTO"/> object containing the updated user details.
         /// </param>
         /// <returns>
-        ///     A task that represents the asynchronous operation, returning a <see cref="UserServiceResult"/>
+        ///     A task that represents the asynchronous operation, returning a <see cref="ServiceResult"/>
         ///     indicating the success or failure of the update operation.
         /// </returns>
-        public async Task<UserServiceResult> UpdateUser(string id, UserDTO user)
+        public async Task<ServiceResult> UpdateUser(string id, UserDTO user)
         {
-            var existingUser = await _userManager.FindByIdAsync(id);
-
-            if (existingUser == null)
-            {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+            ValidateUserDTO(user);
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
 
             if (!permissionResult.Success)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = permissionResult.Errors
-                };
+                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+            }
+
+            var existingUser = await _userManager.FindByIdAsync(id);
+
+            if (existingUser == null)
+            {
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             existingUser.UserName = user.UserName;
@@ -243,15 +239,11 @@ namespace AspNetWebService.Services.UserManagement
 
             if (result.Succeeded)
             {
-                return new UserServiceResult { Success = true };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -263,33 +255,27 @@ namespace AspNetWebService.Services.UserManagement
         ///     The unique identifier of the user to delete.
         /// </param>
         /// <returns>
-        ///     A task that represents the asynchronous operation, returning a <see cref="UserServiceResult"/>
+        ///     A task that represents the asynchronous operation, returning a <see cref="ServiceResult"/>
         ///     indicating whether the deletion was successful.
         ///     - If successful, deletes associated password history as well.
         ///     - If the user is not found or an error occurs, returns relevant error messages.
         /// </returns>
-        public async Task<UserServiceResult> DeleteUser(string id)
+        public async Task<ServiceResult> DeleteUser(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
 
             if (!permissionResult.Success)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = permissionResult.Errors
-                };
+                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             var result = await _userManager.DeleteAsync(user);
@@ -298,19 +284,11 @@ namespace AspNetWebService.Services.UserManagement
             {
                 // delete all stored passwords for user once user is deleted for data clean up.
                 await _passwordHistoryService.DeletePasswordHistory(id);
-
-                return new UserServiceResult
-                {
-                    Success = true,
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -322,40 +300,30 @@ namespace AspNetWebService.Services.UserManagement
         ///     The unique identifier of the user to activate.
         /// </param>
         /// <returns>
-        ///     A task that represents the asynchronous operation, returning a <see cref="UserServiceResult"/>
+        ///     A task that represents the asynchronous operation, returning a <see cref="ServiceResult"/>
         ///     indicating the success or failure of the account activation.
         /// </returns>
-        public async Task<UserServiceResult> ActivateUser(string id)
+        public async Task<ServiceResult> ActivateUser(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
 
             if (!permissionResult.Success)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = permissionResult.Errors
-                };
+                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             if (user.AccountStatus == 1)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.AlreadyActivated }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.AlreadyActivated });
             }
 
             user.AccountStatus = 1;
@@ -364,18 +332,11 @@ namespace AspNetWebService.Services.UserManagement
 
             if (result.Succeeded)
             {
-                return new UserServiceResult
-                {
-                    Success = true
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -387,40 +348,30 @@ namespace AspNetWebService.Services.UserManagement
         ///     The unique identifier of the user to deactivate.
         /// </param>
         /// <returns>
-        ///     A task that represents the asynchronous operation, returning a <see cref="UserServiceResult"/>
+        ///     A task that represents the asynchronous operation, returning a <see cref="ServiceResult"/>
         ///     indicating the success or failure of the account deactivation.
         /// </returns>
-        public async Task<UserServiceResult> DeactivateUser(string id)
+        public async Task<ServiceResult> DeactivateUser(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
 
             if (!permissionResult.Success)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = permissionResult.Errors
-                };
+                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             if (user.AccountStatus == 0)
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotActivated }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotActivated });
             }
 
             user.AccountStatus = 0;
@@ -429,19 +380,32 @@ namespace AspNetWebService.Services.UserManagement
 
             if (result.Succeeded)
             {
-                return new UserServiceResult
-                {
-                    Success = true
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new UserServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+        }
+
+
+        /// <summary>
+        ///     Validates the properties of the provided <see cref="UserDTO"/> object to ensure
+        ///     it is properly initialized and contains all required data.
+        /// </summary>
+        /// <param name="user">
+        ///     The <see cref="UserDTO"/> instance to validate. Expected to contain
+        ///     values for properties such as UserName, FirstName, LastName, Email, PhoneNumber, and Country.
+        /// </param>
+        private void ValidateUserDTO(UserDTO user)
+        {
+            _parameterValidator.ValidateObjectNotNull(user, nameof(user));
+            _parameterValidator.ValidateNotNullOrEmpty(user.UserName, nameof(user.UserName));
+            _parameterValidator.ValidateNotNullOrEmpty(user.FirstName, nameof(user.FirstName));
+            _parameterValidator.ValidateNotNullOrEmpty(user.LastName, nameof(user.LastName));
+            _parameterValidator.ValidateNotNullOrEmpty(user.Email, nameof(user.Email));
+            _parameterValidator.ValidateNotNullOrEmpty(user.PhoneNumber, nameof(user.PhoneNumber));
+            _parameterValidator.ValidateNotNullOrEmpty(user.Country, nameof(user.Country));
         }
     }
 }

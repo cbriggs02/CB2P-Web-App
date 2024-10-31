@@ -1,5 +1,5 @@
 ﻿using AspNetWebService.Models.RequestModels.PasswordRequests;
-using AspNetWebService.Models.ServiceResultModels.PasswordResults;
+using AspNetWebService.Models.ServiceResultModels;
 
 namespace AspNetWebService.Interfaces.UserManagement
 {
@@ -23,7 +23,7 @@ namespace AspNetWebService.Interfaces.UserManagement
         /// <returns>
         ///     A task that represents the asynchronous operation, returning a result object that indicates the outcome of the password setting process.
         /// </returns>
-        Task<PasswordServiceResult> SetPassword(string id, SetPasswordRequest request);
+        Task<ServiceResult> SetPassword(string id, SetPasswordRequest request);
 
 
         /// <summary>
@@ -38,6 +38,6 @@ namespace AspNetWebService.Interfaces.UserManagement
         /// <returns>
         ///     A task that represents the asynchronous operation, returning a result object that indicates the outcome of the password update process.
         /// </returns>
-        Task<PasswordServiceResult> UpdatePassword(string id, UpdatePasswordRequest request);
+        Task<ServiceResult> UpdatePassword(string id, UpdatePasswordRequest request);
     }
 }

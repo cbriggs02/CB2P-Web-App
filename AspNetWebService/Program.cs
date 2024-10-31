@@ -20,6 +20,8 @@ using AspNetWebService.Interfaces.Authorization;
 using AspNetWebService.Services.Authorization;
 using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Services.UserManagement;
+using AspNetWebService.Interfaces.Utilities;
+using AspNetWebService.Services.Utilities;
 
 namespace AspNetWebService
 {
@@ -101,6 +103,9 @@ namespace AspNetWebService
             builder.Services.AddScoped<IAuthorizationLoggerService, AuthorizationLoggerService>();
             builder.Services.AddScoped<IExceptionLoggerService, ExceptionLoggerService>();
             builder.Services.AddScoped<IPerformanceLoggerService, PerformanceLoggerService>();
+
+            builder.Services.AddScoped<IParameterValidator, ParameterValidator>();
+            builder.Services.AddScoped<IServiceResultFactory, ServiceResultFactory>();
 
             builder.Services.AddTransient<DbInitializer>();
 

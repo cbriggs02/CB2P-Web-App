@@ -1,4 +1,5 @@
 ﻿using AspNetWebService.Models.RequestModels.AuditLogRequests;
+using AspNetWebService.Models.ServiceResultModels;
 using AspNetWebService.Models.ServiceResultModels.AuditLogServiceResults;
 
 namespace AspNetWebService.Interfaces.Logging
@@ -32,9 +33,9 @@ namespace AspNetWebService.Interfaces.Logging
         ///     The ID used to locate the audit log to be deleted in the system.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation that returns a <see cref= AuditLogServiceResult"/> object.
+        ///     A task representing the asynchronous operation that returns a <see cref= ServiceResult"/> object.
         /// </returns>
-        Task<AuditLogServiceResult> DeleteLog(string id);
+        Task<ServiceResult> DeleteLog(string id);
 
 
         /// <summary>

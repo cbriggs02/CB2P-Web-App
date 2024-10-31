@@ -1,7 +1,9 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authorization;
+using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.Entities;
+using AspNetWebService.Models.ServiceResultModels;
 using AspNetWebService.Models.ServiceResultModels.RoleServiceResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +20,8 @@ namespace AspNetWebService.Services.Authorization
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<User> _userManager;
+        private readonly IParameterValidator _parameterValidator;
+        private readonly IServiceResultFactory _serviceResultFactory;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RoleService"/> class.
@@ -28,13 +32,21 @@ namespace AspNetWebService.Services.Authorization
         /// <param name="userManager">
         ///     The user manager for handling user operations within the system.
         /// </param>
+        /// <param name="parameterValidator">
+        ///     The paramter validator service used for defense checking service paramters.
+        /// </param>
+        /// <param name="serviceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the parameters are null.
         /// </exception>
-        public RoleService(RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+        public RoleService(RoleManager<IdentityRole> roleManager, UserManager<User> userManager, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
         {
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
+            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
         }
 
 
@@ -49,11 +61,7 @@ namespace AspNetWebService.Services.Authorization
         {
             var roles = await _roleManager.Roles
                 .OrderBy(x => x.Name)
-                .Select(x => new RoleDTO
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                })
+                .Select(x => new RoleDTO { Id = x.Id, Name = x.Name })
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -68,47 +76,30 @@ namespace AspNetWebService.Services.Authorization
         ///     The name of the role to create.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation, returning a <see cref="RoleServiceResult"/>
+        ///     A task representing the asynchronous operation, returning a <see cref="ServiceResult"/>
         ///     indicating the creation status:
         ///     - If successful, returns a result with Success set to true.
         ///     - If the role already exists, returns an error message.
         ///     - If an error occurs during creation, returns a result with an error message.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     Thrown when role name is null.
-        /// </exception>
-        public async Task<RoleServiceResult> CreateRole(string roleName)
+        public async Task<ServiceResult> CreateRole(string roleName)
         {
-            if (string.IsNullOrEmpty(roleName))
-            {
-                throw new ArgumentNullException(nameof(roleName));
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
             if (await _roleManager.RoleExistsAsync(roleName))
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Role.AlreadyExist }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.AlreadyExist });
             }
 
             var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
 
             if (result.Succeeded)
             {
-                return new RoleServiceResult
-                {
-                    Success = true,
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -120,49 +111,32 @@ namespace AspNetWebService.Services.Authorization
         ///     The unique ID of the role to delete.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation, returning a <see cref="RoleServiceResult"/>
+        ///     A task representing the asynchronous operation, returning a <see cref="ServiceResult"/>
         ///     indicating the deletion status:
         ///     - If successful, returns a result with Success set to true.
         ///     - If the role is not found, returns an error message.
         ///     - If an error occurs during deletion, returns a result with an error message.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     Thrown when id is null.
-        /// </exception>
-        public async Task<RoleServiceResult> DeleteRole(string id)
+        public async Task<ServiceResult> DeleteRole(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var role = await _roleManager.FindByIdAsync(id);
 
             if (role == null)
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Role.NotFound }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.NotFound });
             }
 
             var result = await _roleManager.DeleteAsync(role);
 
             if (result.Succeeded)
             {
-                return new RoleServiceResult
-                {
-                    Success = true,
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -177,82 +151,49 @@ namespace AspNetWebService.Services.Authorization
         ///     The name of the role to assign to the user.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation, returning a <see cref="RoleServiceResult"/>.
+        ///     A task representing the asynchronous operation, returning a <see cref="ServiceResult"/>.
         ///     The result indicates the assignment status:
         ///     - If successful, Success is true.
         ///     - If the user ID or role name is invalid, an error message is returned.
         ///     - If the user already has the role, an error is returned.
         ///     - If an error occurs during the assignment, an error message is returned.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     Thrown when any of the parameters are null.
-        /// </exception>
-        public async Task<RoleServiceResult> AssignRole(string id, string roleName)
+        public async Task<ServiceResult> AssignRole(string id, string roleName)
         {
-            if(string.IsNullOrEmpty(id))
-            { 
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if(string.IsNullOrEmpty(roleName))
-            {
-                throw new ArgumentNullException(nameof(roleName));
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+            _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             if (!IsUserActive(user))
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Role.InactiveUser }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InactiveUser });
             }
 
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Role.InvalidRole }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InvalidRole });
             }
 
             if (await HasRole(user, roleName))
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Role.HasRole }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.HasRole });
             }
 
             var result = await _userManager.AddToRoleAsync(user, roleName);
 
             if (result.Succeeded)
             {
-                return new RoleServiceResult
-                {
-                    Success = true,
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
@@ -267,72 +208,43 @@ namespace AspNetWebService.Services.Authorization
         ///     The name of the role to remove from the user.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation, returning a <see cref="RoleServiceResult"/>
+        ///     A task representing the asynchronous operation, returning a <see cref="ServiceResult"/>
         ///     indicating the removal status:
         ///     - If successful, returns a result with Success set to true.
         ///     - If the user ID or role name is invalid, returns an error message.
         ///     - If an error occurs during removal, returns a result with an error message.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     Thrown when any of the parameters are null.
-        /// </exception>
-        public async Task<RoleServiceResult> RemoveRole(string id, string roleName)
+        public async Task<ServiceResult> RemoveRole(string id, string roleName)
         {
-            if(string.IsNullOrEmpty(id))
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (string.IsNullOrEmpty(roleName))
-            {
-                throw new ArgumentNullException(nameof(roleName));
-            }
+            _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+            _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.User.NotFound }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
 
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Role.InvalidRole }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InvalidRole });
             }
 
             if (!await HasRole(user, roleName))
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = new List<string> { ErrorMessages.Role.MissingRole }
-                };
+                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.MissingRole });
             }
 
             var result = await _userManager.RemoveFromRoleAsync(user, roleName);
 
             if (result.Succeeded)
             {
-                return new RoleServiceResult
-                {
-                    Success = true,
-                };
+                return _serviceResultFactory.GeneralOperationSuccess();
             }
             else
             {
-                return new RoleServiceResult
-                {
-                    Success = false,
-                    Errors = result.Errors.Select(e => e.Description).ToList()
-                };
+                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
         }
 
