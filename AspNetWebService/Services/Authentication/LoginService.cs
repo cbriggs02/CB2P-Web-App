@@ -1,9 +1,10 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authentication;
+using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.LoginRequests;
-using AspNetWebService.Models.ServiceResultModels.LoginServiceResults;
+using AspNetWebService.Models.RequestModels.Authentication;
+using AspNetWebService.Models.ServiceResultModels.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -25,6 +26,7 @@ namespace AspNetWebService.Services.Authentication
         private readonly IConfiguration _configuration;
         private readonly IParameterValidator _parameterValidator;
         private readonly IServiceResultFactory _serviceResultFactory;
+        private readonly IUserLookupService _userLookupService;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="LoginService"/> class.
@@ -33,7 +35,7 @@ namespace AspNetWebService.Services.Authentication
         ///     The sign-in manager used for user authentication.
         /// </param>
         /// <param name="userManager">
-        ///     The user manager used for managing user-related operations.
+        ///     The user manager responsible for handling user management operations.
         /// </param>
         /// <param name="configuration">
         ///     The configuration used for accessing app settings, including JWT settings.
@@ -44,16 +46,20 @@ namespace AspNetWebService.Services.Authentication
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
         /// </param>
+        /// <param name="userLookupService">'
+        ///     The service used for looking up users in the system.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public LoginService(SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
+        public LoginService(SignInManager<User> signInManager, UserManager<User> userManager, IConfiguration configuration, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IUserLookupService userLookupService)
         {
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
             _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
+            _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
         }
 
 
@@ -76,12 +82,14 @@ namespace AspNetWebService.Services.Authentication
             _parameterValidator.ValidateNotNullOrEmpty(credentials.UserName, nameof(credentials.UserName));
             _parameterValidator.ValidateNotNullOrEmpty(credentials.Password, nameof(credentials.Password));
 
-            var user = await _userManager.FindByNameAsync(credentials.UserName);
+            var userLookupResult = await _userLookupService.FindUserByUsername(credentials.UserName);
 
-            if (user == null)
+            if (!userLookupResult.Success)
             {
-                return _serviceResultFactory.LoginOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.LoginOperationFailure(userLookupResult.Errors.ToArray());
             }
+
+            var user = userLookupResult.UserFound;
 
             if (user.AccountStatus == 0)
             {

@@ -1,6 +1,7 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authentication;
 using AspNetWebService.Interfaces.Authorization;
+using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,6 +17,7 @@ namespace AspNetWebService.Services.Authorization
     {
         private readonly UserManager<User> _userManager;
         private readonly IUserContextService _userContextService;
+        private readonly IUserLookupService _userLookupService;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AuthorizationService"/> class.
@@ -27,13 +29,17 @@ namespace AspNetWebService.Services.Authorization
         /// <param name="userContextService">
         ///     The service used for accessing current HTTP context.
         /// </param>
+        /// <param name="userLookupService">'
+        ///     The service used for looking up users in the system.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public AuthorizationService(UserManager<User> userManager, IUserContextService userContextService)
+        public AuthorizationService(UserManager<User> userManager, IUserContextService userContextService, IUserLookupService userLookupService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _userContextService = userContextService ?? throw new ArgumentNullException(nameof(userContextService));
+            _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
         }
 
 
@@ -132,12 +138,14 @@ namespace AspNetWebService.Services.Authorization
                 return false; // No target user ID provided, so permission cannot be validated
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupResult = await _userLookupService.FindUserById(id);
 
-            if (user == null)
+            if(!userLookupResult.Success)
             {
                 return false;
             }
+
+            var user = userLookupResult.UserFound;
 
             if (await IsTargetSuperAdmin(user))
             {

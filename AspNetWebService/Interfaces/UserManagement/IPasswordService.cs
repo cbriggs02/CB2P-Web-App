@@ -1,5 +1,5 @@
-﻿using AspNetWebService.Models.RequestModels.PasswordRequests;
-using AspNetWebService.Models.ServiceResultModels;
+﻿using AspNetWebService.Models.RequestModels.UserManagement;
+using AspNetWebService.Models.ServiceResultModels.Common;
 
 namespace AspNetWebService.Interfaces.UserManagement
 {

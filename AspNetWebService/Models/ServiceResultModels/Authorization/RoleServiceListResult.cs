@@ -1,6 +1,6 @@
 ﻿using AspNetWebService.Models.DataTransferObjectModels;
 
-namespace AspNetWebService.Models.ServiceResultModels.RoleServiceResults
+namespace AspNetWebService.Models.ServiceResultModels.Authorization
 {
     /// <summary>
     ///     Represents the result of a service operation that retrieves a list of roles.
@@ -13,6 +13,6 @@ namespace AspNetWebService.Models.ServiceResultModels.RoleServiceResults
         /// <summary>
         ///     Gets or sets the collection of roles returned from the service operation.
         /// </summary>
-        public IEnumerable<RoleDTO> Roles { get; set; } = new List<RoleDTO> ();
+        public IEnumerable<RoleDTO> Roles { get; set; } = new List<RoleDTO>();
     }
 }

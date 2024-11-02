@@ -1,5 +1,5 @@
-﻿using AspNetWebService.Models.RequestModels.LoginRequests;
-using AspNetWebService.Models.ServiceResultModels.LoginServiceResults;
+﻿using AspNetWebService.Models.RequestModels.Authentication;
+using AspNetWebService.Models.ServiceResultModels.Authentication;
 
 namespace AspNetWebService.Interfaces.Authentication
 {

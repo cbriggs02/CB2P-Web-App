@@ -2,7 +2,7 @@
 using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.PasswordHistoryRequests;
+using AspNetWebService.Models.RequestModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

@@ -5,9 +5,9 @@ using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.Entities;
 using AspNetWebService.Models.PaginationModels;
-using AspNetWebService.Models.RequestModels.UserRequests;
-using AspNetWebService.Models.ServiceResultModels;
-using AspNetWebService.Models.ServiceResultModels.UserServiceResults;
+using AspNetWebService.Models.RequestModels.UserManagement;
+using AspNetWebService.Models.ServiceResultModels.Common;
+using AspNetWebService.Models.ServiceResultModels.UserManagement;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +27,7 @@ namespace AspNetWebService.Services.UserManagement
         private readonly IPermissionService _permissionService;
         private readonly IParameterValidator _parameterValidator;
         private readonly IServiceResultFactory _serviceResultFactory;
+        private readonly IUserLookupService _userLookupService;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -47,19 +48,23 @@ namespace AspNetWebService.Services.UserManagement
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
         /// </param>
+        /// <param name="userLookupService">'
+        ///     The service used for looking up users in the system.
+        /// </param>
         /// <param name="mapper">
         ///     Object mapper for converting between entities and data transfer objects (DTOs).
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the provided service parameters are null.
         /// </exception>
-        public UserService(UserManager<User> userManager, IPasswordHistoryService passwordHistoryService, IPermissionService permissionService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IMapper mapper)
+        public UserService(UserManager<User> userManager, IPasswordHistoryService passwordHistoryService, IPermissionService permissionService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IUserLookupService userLookupService, IMapper mapper)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _passwordHistoryService = passwordHistoryService ?? throw new ArgumentNullException(nameof(passwordHistoryService));
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
             _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
             _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
+            _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -125,19 +130,21 @@ namespace AspNetWebService.Services.UserManagement
         {
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                return _serviceResultFactory.UserOperationFailure(new[] { ErrorMessages.User.NotFound });
-            }
-
             var permissionResult = await _permissionService.ValidatePermissions(id);
 
             if (!permissionResult.Success)
             {
                 return _serviceResultFactory.UserOperationFailure(permissionResult.Errors.ToArray());
             }
+
+            var userLookupResult = await _userLookupService.FindUserById(id);
+
+            if(!userLookupResult.Success)
+            {
+                return _serviceResultFactory.UserOperationFailure(userLookupResult.Errors.ToArray());
+            }
+
+            var user = userLookupResult.UserFound;
 
             var userDTO = _mapper.Map<UserDTO>(user);
             return _serviceResultFactory.UserOperationSuccess(userDTO);
@@ -220,12 +227,14 @@ namespace AspNetWebService.Services.UserManagement
                 return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
-            var existingUser = await _userManager.FindByIdAsync(id);
+            var userLookupResult = await _userLookupService.FindUserById(id);
 
-            if (existingUser == null)
+            if(!userLookupResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
             }
+
+            var existingUser = userLookupResult.UserFound;
 
             existingUser.UserName = user.UserName;
             existingUser.FirstName = user.FirstName;
@@ -271,12 +280,14 @@ namespace AspNetWebService.Services.UserManagement
                 return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupServiceResult = await _userLookupService.FindUserById(id);
 
-            if (user == null)
+            if (!userLookupServiceResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
             }
+
+            var user = userLookupServiceResult.UserFound;
 
             var result = await _userManager.DeleteAsync(user);
 
@@ -314,12 +325,14 @@ namespace AspNetWebService.Services.UserManagement
                 return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupServiceResult = await _userLookupService.FindUserById(id);
 
-            if (user == null)
+            if (!userLookupServiceResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
             }
+
+            var user = userLookupServiceResult.UserFound;
 
             if (user.AccountStatus == 1)
             {
@@ -362,12 +375,14 @@ namespace AspNetWebService.Services.UserManagement
                 return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupServiceResult = await _userLookupService.FindUserById(id);
 
-            if (user == null)
+            if (!userLookupServiceResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
             }
+
+            var user = userLookupServiceResult.UserFound;
 
             if (user.AccountStatus == 0)
             {

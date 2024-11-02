@@ -1,7 +1,7 @@
 ﻿using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.PaginationModels;
 
-namespace AspNetWebService.Models.ServiceResultModels.AuditLogServiceResults
+namespace AspNetWebService.Models.ServiceResultModels.Logging
 {
     /// <summary>
     ///     Represents the result of a service operation that retrieves a list of audit logs.

@@ -1,6 +1,7 @@
 ﻿using AspNetWebService.Models.DataTransferObjectModels;
+using AspNetWebService.Models.ServiceResultModels.Common;
 
-namespace AspNetWebService.Models.ServiceResultModels.UserServiceResults
+namespace AspNetWebService.Models.ServiceResultModels.UserManagement
 {
     /// <summary>
     ///     Represents the result of a user-related operation 

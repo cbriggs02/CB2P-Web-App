@@ -1,7 +1,7 @@
 ﻿using AspNetWebService.Models.EntityModels;
 using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Models.RequestModels.AuditLogRequests
+namespace AspNetWebService.Models.RequestModels.Logging
 {
     /// <summary>
     ///     Represents the model used when requesting a paginated list of audit logs.

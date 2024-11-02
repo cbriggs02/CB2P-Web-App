@@ -90,6 +90,7 @@ namespace AspNetWebService
             builder.Services.AddScoped<IUserContextService, UserContextService>();
 
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserLookupService, UserLookupService>();
             builder.Services.AddScoped<IPasswordService, PasswordService>();
             builder.Services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
 

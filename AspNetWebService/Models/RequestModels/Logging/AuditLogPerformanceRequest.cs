@@ -1,5 +1,4 @@
-﻿
-namespace AspNetWebService.Models.RequestModels.AuditLogRequests
+﻿namespace AspNetWebService.Models.RequestModels.Logging
 {
     /// <summary>
     ///     Request model for logging audit data related to HTTP requests that exceed performance thresholds.

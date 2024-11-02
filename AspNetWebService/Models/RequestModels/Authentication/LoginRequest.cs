@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Models.RequestModels.LoginRequests
+namespace AspNetWebService.Models.RequestModels.Authentication
 {
     /// <summary>
     ///     Represents the model that encapsulates data used for user authentication.

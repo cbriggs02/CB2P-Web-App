@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Models.ServiceResultModels
+﻿namespace AspNetWebService.Models.ServiceResultModels.Common
 {
     /// <summary>
     ///     Represents the uniform model repersenting the result of a service operation.

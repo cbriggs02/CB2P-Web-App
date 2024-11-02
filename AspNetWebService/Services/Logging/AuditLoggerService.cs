@@ -5,9 +5,9 @@ using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.EntityModels;
 using AspNetWebService.Models.PaginationModels;
-using AspNetWebService.Models.RequestModels.AuditLogRequests;
-using AspNetWebService.Models.ServiceResultModels;
-using AspNetWebService.Models.ServiceResultModels.AuditLogServiceResults;
+using AspNetWebService.Models.RequestModels.Logging;
+using AspNetWebService.Models.ServiceResultModels.Common;
+using AspNetWebService.Models.ServiceResultModels.Logging;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 

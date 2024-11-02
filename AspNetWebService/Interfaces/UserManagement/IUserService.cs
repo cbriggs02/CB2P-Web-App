@@ -1,7 +1,7 @@
 ﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.RequestModels.UserRequests;
-using AspNetWebService.Models.ServiceResultModels;
-using AspNetWebService.Models.ServiceResultModels.UserServiceResults;
+using AspNetWebService.Models.RequestModels.UserManagement;
+using AspNetWebService.Models.ServiceResultModels.Common;
+using AspNetWebService.Models.ServiceResultModels.UserManagement;
 
 namespace AspNetWebService.Interfaces.UserManagement
 {

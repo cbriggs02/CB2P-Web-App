@@ -1,5 +1,4 @@
-﻿
-namespace AspNetWebService.Models.RequestModels.AuditLogRequests
+﻿namespace AspNetWebService.Models.RequestModels.Logging
 {
     /// <summary>
     ///     Request model for logging audit data related to authorization breaches.
@@ -13,7 +12,7 @@ namespace AspNetWebService.Models.RequestModels.AuditLogRequests
         /// <summary>
         ///     Gets or sets the unique identifier of the user who attempted the action.
         /// </summary>
-        public string UserId {  get; set; }
+        public string UserId { get; set; }
 
         /// <summary>
         ///     Gets or sets the name or description of the action that was attempted.

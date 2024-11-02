@@ -1,7 +1,8 @@
 ﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.ServiceResultModels;
-using AspNetWebService.Models.ServiceResultModels.LoginServiceResults;
-using AspNetWebService.Models.ServiceResultModels.UserServiceResults;
+using AspNetWebService.Models.Entities;
+using AspNetWebService.Models.ServiceResultModels.Authentication;
+using AspNetWebService.Models.ServiceResultModels.Common;
+using AspNetWebService.Models.ServiceResultModels.UserManagement;
 
 namespace AspNetWebService.Interfaces.Utilities
 {
@@ -17,38 +18,103 @@ namespace AspNetWebService.Interfaces.Utilities
     public interface IServiceResultFactory
     {
         /// <summary>
-        ///     Creates a successful service result for general operations.
+        ///     Creates a service result indicating a successful operation 
+        ///     without any additional data.
         /// </summary>
+        /// <returns>
+        ///     A <see cref="ServiceResult"/> object indicating success.
+        /// </returns>
         ServiceResult GeneralOperationSuccess();
 
 
         /// <summary>
-        ///     Creates a successful login service result with a token.
+        ///     Creates a login service result indicating a successful login 
+        ///     operation, along with the generated token for the session.
         /// </summary>
+        /// <param name="token">
+        ///     The authentication token generated for the user.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="LoginServiceResult"/> object indicating success.
+        /// </returns>
         LoginServiceResult LoginOperationSuccess(string token);
 
-    
+
         /// <summary>
-        ///     Creates a successful user operation result with a user DTO.
+        ///     Creates a user service result indicating a successful user 
+        ///     operation, including the details of the user.
         /// </summary>
+        /// <param name="user">
+        ///     The user data transfer object containing user details.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="UserServiceResult"/> object indicating success.
+        /// </returns>
         UserServiceResult UserOperationSuccess(UserDTO user);
 
 
         /// <summary>
-        ///     Creates a failed service result with specified errors for general operations.
+        ///     Creates a user lookup service result indicating a successful 
+        ///     user lookup operation, including the user entity found.
         /// </summary>
+        /// <param name="user">
+        ///     The user entity that was found during the lookup.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="UserLookupServiceResult"/> object indicating success.
+        /// </returns>
+        UserLookupServiceResult UserLookupOperationSuccess(User user);
+
+
+        /// <summary>
+        ///     Creates a service result indicating a general failure 
+        ///     in an operation, including error messages.
+        /// </summary>
+        /// <param name="errors">
+        ///     An array of error messages describing the failure.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="ServiceResult"/> object indicating failure.
+        /// </returns>
         ServiceResult GeneralOperationFailure(string[] errors);
 
 
         /// <summary>
-        ///     Creates a failed service result with specified errors for login operations.
+        ///     Creates a login service result indicating a failure during the 
+        ///     login operation, including error messages.
         /// </summary>
+        /// <param name="errors">
+        ///     An array of error messages describing the failure.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="LoginServiceResult"/> object indicating failure.
+        /// </returns>
         LoginServiceResult LoginOperationFailure(string[] errors);
 
 
         /// <summary>
-        ///     Creates a failed service result with specified errors for user operations.
+        ///     Creates a user service result indicating a failure during the 
+        ///     user operation, including error messages.
         /// </summary>
+        /// <param name="errors">
+        ///     An array of error messages describing the failure.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="UserServiceResult"/> object indicating failure.
+        /// </returns>
         UserServiceResult UserOperationFailure(string[] errors);
+
+
+        /// <summary>
+        ///     Creates a user lookup service result indicating a failure during 
+        ///     the user lookup operation, including error messages.
+        /// </summary>
+        /// <param name="errors">
+        ///     An array of error messages describing the failure.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="UserLookupServiceResult"/> object indicating failure.
+        /// </returns>
+        UserLookupServiceResult UserLookupOperationFailure(string[] errors);
     }
 }

@@ -3,9 +3,8 @@ using AspNetWebService.Interfaces.Authorization;
 using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.PasswordHistoryRequests;
-using AspNetWebService.Models.RequestModels.PasswordRequests;
-using AspNetWebService.Models.ServiceResultModels;
+using AspNetWebService.Models.RequestModels.UserManagement;
+using AspNetWebService.Models.ServiceResultModels.Common;
 using Microsoft.AspNetCore.Identity;
 
 namespace AspNetWebService.Services.UserManagement
@@ -23,6 +22,7 @@ namespace AspNetWebService.Services.UserManagement
         private readonly IPermissionService _permissionService;
         private readonly IParameterValidator _parameterValidator;
         private readonly IServiceResultFactory _serviceResultFactory;
+        private readonly IUserLookupService _userLookupService;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PasswordService"/> class.
@@ -42,16 +42,20 @@ namespace AspNetWebService.Services.UserManagement
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
         /// </param>
+        /// <param name="userLookupService">'
+        ///     The service used for looking up users in the system.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the parameters are null.
         /// </exception>
-        public PasswordService(UserManager<User> userManager, IPasswordHistoryService historyService, IPermissionService permissionService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
+        public PasswordService(UserManager<User> userManager, IPasswordHistoryService historyService, IPermissionService permissionService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IUserLookupService userLookupService)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _historyService = historyService ?? throw new ArgumentNullException(nameof(historyService));
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
             _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
             _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
+            _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
         }
 
 
@@ -82,12 +86,14 @@ namespace AspNetWebService.Services.UserManagement
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.Mismatch });
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupResult = await _userLookupService.FindUserById(id);
 
-            if (user == null)
+            if (!userLookupResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
             }
+
+            var user = userLookupResult.UserFound;
 
             if (user.PasswordHash != null)
             {
@@ -137,12 +143,14 @@ namespace AspNetWebService.Services.UserManagement
                 return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupResult = await _userLookupService.FindUserById(id);
 
-            if (user == null || user.PasswordHash == null)
+            if (!userLookupResult.Success || userLookupResult.UserFound.PasswordHash == null)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.InvalidCredentials });
             }
+
+            var user = userLookupResult.UserFound;
 
             var passwordIsValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
 

@@ -1,7 +1,7 @@
 ﻿using AspNetWebService.Interfaces.Authentication;
 using AspNetWebService.Interfaces.Logging;
 using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.RequestModels.AuditLogRequests;
+using AspNetWebService.Models.RequestModels.Logging;
 
 namespace AspNetWebService.Services.Logging
 {

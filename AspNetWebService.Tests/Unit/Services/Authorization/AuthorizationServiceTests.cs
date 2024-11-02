@@ -1,6 +1,8 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authentication;
+using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Models.Entities;
+using AspNetWebService.Models.ServiceResultModels.UserManagement;
 using AspNetWebService.Services.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -23,6 +25,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
     {
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly Mock<IUserContextService> _userContextServiceMock;
+        private readonly Mock<IUserLookupService> _userLookupServiceMock;
         private readonly Mock<ILogger<UserManager<User>>> _userManagerLoggerMock;
         private readonly Mock<IUserStore<User>> _userStoreMock;
         private readonly Mock<IOptions<IdentityOptions>> _optionsMock;
@@ -65,7 +68,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
             );
 
             _userContextServiceMock = new Mock<IUserContextService>();
-            _authorizationService = new AuthorizationService(_userManagerMock.Object, _userContextServiceMock.Object);
+            _userLookupServiceMock = new Mock<IUserLookupService>();
+
+            _authorizationService = new AuthorizationService(_userManagerMock.Object, _userContextServiceMock.Object, _userLookupServiceMock.Object);
         }
 
 
@@ -80,28 +85,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "adminId";
+            const string currentUserRole = Roles.Admin;
+
             const string targetUserId = "nonAdminId";
+            const string targetUserRole = Roles.User;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.Admin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.Admin });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.User });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -123,28 +121,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "adminId1";
+            const string currentUserRole = Roles.Admin;
+
             const string targetUserId = "adminId2";
+            const string targetUserRole = Roles.Admin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.Admin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.Admin });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.Admin });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -165,28 +156,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "superId";
+            const string currentUserRole = Roles.SuperAdmin;
+
             const string targetUserId = "adminId";
+            const string targetUserRole = Roles.Admin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.SuperAdmin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.SuperAdmin });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.Admin });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -207,28 +191,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "superId";
+            const string currentUserRole = Roles.SuperAdmin;
+
             const string targetUserId = "userId";
+            const string targetUserRole = Roles.User;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.SuperAdmin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.SuperAdmin });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.User });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -249,28 +226,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "superId1";
+            const string currentUserRole = Roles.SuperAdmin;
+
             const string targetUserId = "superId2";
+            const string targetUserRole = Roles.SuperAdmin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.SuperAdmin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.SuperAdmin });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.SuperAdmin });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -291,28 +261,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "id";
+            const string currentUserRole = Roles.SuperAdmin;
+
             const string targetUserId = "id";
+            const string targetUserRole = Roles.SuperAdmin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.SuperAdmin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.SuperAdmin });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.SuperAdmin });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -333,28 +296,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "id";
+            const string currentUserRole = Roles.Admin;
+
             const string targetUserId = "id";
+            const string targetUserRole = Roles.Admin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.Admin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.Admin });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.Admin });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -375,28 +331,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "id";
+            const string currentUserRole = Roles.User;
+
             const string targetUserId = "id";
+            const string targetUserRole = Roles.User;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.User);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.User });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.User });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -422,18 +371,12 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             var claimsPrincipal = CreateClaimsPrinciple(currentUserId, "");
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
+            ArrangeUserLookupResult(targetUser);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -459,18 +402,12 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             var claimsPrincipal = CreateClaimsPrinciple(currentUserId, "");
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
+            ArrangeUserLookupResult(targetUser);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -492,28 +429,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "userId1";
+            const string currentUserRole = Roles.User;
+
             const string targetUserId = "userId2";
+            const string targetUserRole = Roles.User;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.User);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.User });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.User });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -535,28 +465,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "userId";
+            const string currentUserRole = Roles.User;
+
             const string targetUserId = "adminId";
+            const string targetUserRole = Roles.Admin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.User);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.User });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.Admin });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -578,28 +501,21 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "userId";
+            const string currentUserRole = Roles.User;
+
             const string targetUserId = "superAdminId";
+            const string targetUserRole = Roles.SuperAdmin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.User);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.User });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.SuperAdmin });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -620,23 +536,23 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "existingUserId";
+            const string currentUserRole = Roles.User;
+
             const string targetUserId = "nonExistentUserId";
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.User);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
-            _userContextServiceMock
-                .Setup(x => x.GetUserId(claimsPrincipal))
-                .Returns(currentUserId);
-            _userContextServiceMock
-                .Setup(x => x.GetRoles(claimsPrincipal))
-                .Returns(new List<string> { Roles.User });
+            ArrangeClaimsPrinciple(claimsPrincipal);
+            ArrangeGetUserIdFromClaims(currentUserId, claimsPrincipal);
+            ArrangeGetRolesForClaimsPrincipal(claimsPrincipal, currentUserRole);
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync((User)null);
+            _userLookupServiceMock
+                .Setup(x => x.FindUserById(targetUserId))
+                .ReturnsAsync(new UserLookupServiceResult
+                {
+                    Success = false,
+                    Errors = new[] { ErrorMessages.User.NotFound }.ToList()
+                });
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -658,21 +574,16 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string targetUserId = "nonAdminId";
+            const string targetUserRole = Roles.User;
 
             ClaimsPrincipal claimsPrincipal = null;
 
-            _userContextServiceMock
-                   .Setup(x => x.GetClaimsPrincipal())
-                   .Returns(claimsPrincipal);
+            ArrangeClaimsPrinciple(claimsPrincipal);
 
             var targetUser = new User { Id = targetUserId };
 
-            _userManagerMock
-                .Setup(x => x.FindByIdAsync(targetUserId))
-                .ReturnsAsync(targetUser);
-            _userManagerMock
-                .Setup(x => x.GetRolesAsync(targetUser))
-                .ReturnsAsync(new List<string> { Roles.User });
+            ArrangeUserLookupResult(targetUser);
+            ArrangeGetRolesForUser(targetUser, targetUserRole);
 
             // Act
             var result = await _authorizationService.ValidatePermission(targetUserId);
@@ -694,12 +605,11 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
         {
             // Arrange
             const string currentUserId = "";
+            const string currentUserRole = Roles.Admin;
 
-            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, Roles.Admin);
+            var claimsPrincipal = CreateClaimsPrinciple(currentUserId, currentUserRole);
 
-            _userContextServiceMock
-                .Setup(x => x.GetClaimsPrincipal())
-                .Returns(claimsPrincipal);
+            ArrangeClaimsPrinciple(claimsPrincipal);
 
             // Act
             var result = await _authorizationService.ValidatePermission(null);
@@ -722,9 +632,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
             // Arrange
             ClaimsPrincipal claimsPrincipal = null;
 
-            _userContextServiceMock
-                   .Setup(x => x.GetClaimsPrincipal())
-                   .Returns(claimsPrincipal);
+            ArrangeClaimsPrinciple(claimsPrincipal);
 
             // Act
             var result = await _authorizationService.ValidatePermission(null);
@@ -753,6 +661,95 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
                 new(ClaimTypes.NameIdentifier, currentUserId),
                 new(ClaimTypes.Role, role)
             }));
+        }
+
+
+        /// <summary>
+        ///     Sets up a mock for retrieving the current <see cref="ClaimsPrincipal"/> 
+        ///     from the user context service to be used in tests.
+        /// </summary>
+        /// <param name="claimsPrincipal">
+        ///     The <see cref="ClaimsPrincipal"/> instance to return when requested.
+        /// </param>
+        private void ArrangeClaimsPrinciple(ClaimsPrincipal claimsPrincipal)
+        {
+            _userContextServiceMock
+                .Setup(x => x.GetClaimsPrincipal())
+                .Returns(claimsPrincipal);
+        }
+
+
+        /// <summary>
+        ///     Sets up a mock for retrieving a user ID from a specified <see cref="ClaimsPrincipal"/> 
+        ///     in the user context service.
+        /// </summary>
+        /// <param name="currentUserId">
+        ///     The user ID that should be returned by the mock.
+        /// </param>
+        /// <param name="claimsPrincipal">
+        ///     The <see cref="ClaimsPrincipal"/> used to identify the user.
+        /// </param>
+        private void ArrangeGetUserIdFromClaims(string currentUserId, ClaimsPrincipal claimsPrincipal)
+        {
+            _userContextServiceMock
+                .Setup(x => x.GetUserId(claimsPrincipal))
+                .Returns(currentUserId);
+        }
+
+
+        /// <summary>
+        ///     Sets up a mock for retrieving a role associated with a specified <see cref="ClaimsPrincipal"/> 
+        ///     in the user context service.
+        /// </summary>
+        /// <param name="claimsPrincipal">
+        ///     The <see cref="ClaimsPrincipal"/> for which roles will be retrieved.
+        /// </param>
+        /// <param name="role">
+        ///     The role to be returned by the mock.
+        /// </param>
+        private void ArrangeGetRolesForClaimsPrincipal(ClaimsPrincipal claimsPrincipal, string role)
+        {
+            _userContextServiceMock
+                .Setup(x => x.GetRoles(claimsPrincipal))
+                .Returns(new List<string> { role });
+        }
+
+
+        /// <summary>
+        ///     Sets up a mock for retrieving roles assigned to a specific <see cref="User"/> 
+        ///     in the user manager service.
+        /// </summary>
+        /// <param name="targetUser">
+        ///     The <see cref="User"/> for whom roles will be retrieved.
+        /// </param>
+        /// <param name="role">
+        ///     The role to be returned by the mock.
+        /// </param>
+        private void ArrangeGetRolesForUser(User targetUser, string role)
+        {
+            _userManagerMock
+                .Setup(x => x.GetRolesAsync(targetUser))
+                .ReturnsAsync(new List<string> { role });
+        }
+
+
+        /// <summary>
+        ///     Prepares a mock result for the user lookup service to return a successful user lookup operation.
+        /// </summary>
+        /// <param name="user">
+        ///     The <see cref="User"/> object representing the user to be returned by the mock service.
+        /// </param>
+        private void ArrangeUserLookupResult(User user)
+        {
+            var result = new UserLookupServiceResult
+            {
+                Success = true,
+                UserFound = user,
+            };
+
+            _userLookupServiceMock
+                .Setup(x => x.FindUserById(user.Id))
+                .ReturnsAsync(result);
         }
     }
 }

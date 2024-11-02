@@ -1,8 +1,8 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Models.ApiResponseModels;
 using AspNetWebService.Models.ApiResponseModels.AuditLogsApiResponses;
-using AspNetWebService.Models.RequestModels.AuditLogRequests;
+using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
+using AspNetWebService.Models.RequestModels.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;

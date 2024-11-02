@@ -1,8 +1,8 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Models.ApiResponseModels;
+using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
 using AspNetWebService.Models.ApiResponseModels.LoginApiResponses;
-using AspNetWebService.Models.RequestModels.LoginRequests;
+using AspNetWebService.Models.RequestModels.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

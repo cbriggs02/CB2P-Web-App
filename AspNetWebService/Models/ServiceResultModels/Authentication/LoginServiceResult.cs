@@ -1,5 +1,6 @@
-﻿
-namespace AspNetWebService.Models.ServiceResultModels.LoginServiceResults
+﻿using AspNetWebService.Models.ServiceResultModels.Common;
+
+namespace AspNetWebService.Models.ServiceResultModels.Authentication
 {
     /// <summary>
     ///     Represents the result of a login-related operation performed by the login service.

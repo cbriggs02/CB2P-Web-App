@@ -1,4 +1,5 @@
 ﻿using AspNetWebService.Interfaces.Utilities;
+using System.Collections;
 
 namespace AspNetWebService.Services.Utilities
 {
@@ -27,16 +28,16 @@ namespace AspNetWebService.Services.Utilities
         /// </exception>
         public void ValidateNotNullOrEmpty(string parameter, string parameterName)
         {
-            if(string.IsNullOrEmpty(parameter)) 
-            {  
-                throw new ArgumentNullException(parameterName); 
+            if (string.IsNullOrEmpty(parameter))
+            {
+                throw new ArgumentNullException(parameterName);
             }
         }
 
 
         /// <summary>
-        ///     Validates that an object parameter is not null.
-        ///     If the parameter is null, an <see cref="ArgumentNullException"/>
+        ///     Validates that an object parameter is not null and if it is an IEnumerable, 
+        ///     checks that it is not empty. If the parameter is null, an <see cref="ArgumentNullException"/>
         ///     is thrown with a message indicating that the parameter cannot be null.
         /// </summary>
         /// <param name="parameter">
@@ -53,6 +54,11 @@ namespace AspNetWebService.Services.Utilities
             if (parameter == null)
             {
                 throw new ArgumentNullException(parameterName, $"{parameterName} cannot be null.");
+            }
+
+            if (parameter is IEnumerable enumerable && !enumerable.Cast<object>().Any())
+            {
+                throw new ArgumentException($"{parameterName} cannot be an empty collection.", parameterName);
             }
         }
     }

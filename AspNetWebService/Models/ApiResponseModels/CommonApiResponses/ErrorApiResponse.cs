@@ -1,5 +1,4 @@
-﻿
-namespace AspNetWebService.Models.ApiResponseModels
+﻿namespace AspNetWebService.Models.ApiResponseModels.CommonApiResponses
 {
     /// <summary>
     ///     Represents errors encountered during service operations.

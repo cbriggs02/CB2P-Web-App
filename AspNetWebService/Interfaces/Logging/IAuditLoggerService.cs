@@ -1,6 +1,6 @@
-﻿using AspNetWebService.Models.RequestModels.AuditLogRequests;
-using AspNetWebService.Models.ServiceResultModels;
-using AspNetWebService.Models.ServiceResultModels.AuditLogServiceResults;
+﻿using AspNetWebService.Models.RequestModels.Logging;
+using AspNetWebService.Models.ServiceResultModels.Common;
+using AspNetWebService.Models.ServiceResultModels.Logging;
 
 namespace AspNetWebService.Interfaces.Logging
 {

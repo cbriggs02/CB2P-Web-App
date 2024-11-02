@@ -1,4 +1,4 @@
-﻿using AspNetWebService.Models.ServiceResultModels;
+﻿using AspNetWebService.Models.ServiceResultModels.Common;
 
 namespace AspNetWebService.Interfaces.Authorization
 {

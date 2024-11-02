@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Models.RequestModels.PasswordRequests
+namespace AspNetWebService.Models.RequestModels.UserManagement
 {
     /// <summary>
     ///     Represents the model used by a user to set a new password.

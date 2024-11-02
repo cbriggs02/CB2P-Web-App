@@ -3,12 +3,12 @@ using AspNetWebService.Models.DataTransferObjectModels;
 using Swashbuckle.AspNetCore.Annotations;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using AspNetWebService.Models.RequestModels.UserRequests;
 using Microsoft.AspNetCore.Authorization;
 using AspNetWebService.Constants;
 using AspNetWebService.Models.ApiResponseModels.UsersApiResponses;
-using AspNetWebService.Models.ApiResponseModels;
 using AspNetWebService.Interfaces.UserManagement;
+using AspNetWebService.Models.RequestModels.UserManagement;
+using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
 
 namespace AspNetWebService.Controllers
 {

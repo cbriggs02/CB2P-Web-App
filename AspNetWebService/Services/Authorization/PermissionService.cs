@@ -2,7 +2,7 @@
 using AspNetWebService.Interfaces.Authorization;
 using AspNetWebService.Interfaces.Logging;
 using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.ServiceResultModels;
+using AspNetWebService.Models.ServiceResultModels.Common;
 
 namespace AspNetWebService.Services.Authorization
 {

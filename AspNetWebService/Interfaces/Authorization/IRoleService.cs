@@ -1,5 +1,5 @@
-﻿using AspNetWebService.Models.ServiceResultModels;
-using AspNetWebService.Models.ServiceResultModels.RoleServiceResults;
+﻿using AspNetWebService.Models.ServiceResultModels.Authorization;
+using AspNetWebService.Models.ServiceResultModels.Common;
 
 namespace AspNetWebService.Interfaces.Authorization
 {

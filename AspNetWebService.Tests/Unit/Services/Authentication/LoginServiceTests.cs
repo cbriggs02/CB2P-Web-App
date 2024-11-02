@@ -1,8 +1,10 @@
 ﻿using AspNetWebService.Constants;
+using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.LoginRequests;
-using AspNetWebService.Models.ServiceResultModels.LoginServiceResults;
+using AspNetWebService.Models.RequestModels.Authentication;
+using AspNetWebService.Models.ServiceResultModels.Authentication;
+using AspNetWebService.Models.ServiceResultModels.UserManagement;
 using AspNetWebService.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +32,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         private readonly Mock<IConfiguration> _configurationMock;
         private readonly Mock<IParameterValidator> _parameterValidatorMock;
         private readonly Mock<IServiceResultFactory> _serviceResultFactoryMock;
+        private readonly Mock<IUserLookupService> _userLookupServiceMock;
         private readonly Mock<ILogger<UserManager<User>>> _userManagerLoggerMock;
         private readonly Mock<ILogger<SignInManager<User>>> _signInManagerLoggerMock;
         private readonly Mock<IUserStore<User>> _userStoreMock;
@@ -97,8 +100,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             _configurationMock = new Mock<IConfiguration>();
             _parameterValidatorMock = new Mock<IParameterValidator>();
             _serviceResultFactoryMock = new Mock<IServiceResultFactory>();
+            _userLookupServiceMock = new Mock<IUserLookupService>();
 
-            _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _configurationMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object);
+            _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _configurationMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object, _userLookupServiceMock.Object);
         }
 
 
@@ -265,9 +269,13 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             var request = new LoginRequest { UserName = nonExistentUserName, Password = TestPassword };
 
-            _userManagerMock
-                .Setup(x => x.FindByNameAsync(nonExistentUserName))
-                .ReturnsAsync((User)null);
+            _userLookupServiceMock
+                .Setup(x => x.FindUserByUsername(nonExistentUserName))
+                .ReturnsAsync(new UserLookupServiceResult
+                {
+                    Success = false,
+                    Errors = new[] { expectedErrorMessage }.ToList()
+                });
 
             ArrangeServiceResult(expectedErrorMessage);
 
@@ -294,10 +302,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             const string expectedErrorMessage = ErrorMessages.User.NotActivated;
             var inactiveUser = CreateMockUser(false);
 
-            _userManagerMock
-                .Setup(x => x.FindByNameAsync(inactiveUser.UserName))
-                .ReturnsAsync(inactiveUser);
-
+            ArrangeUserLookupResult(inactiveUser);
             ArrangeServiceResult(expectedErrorMessage);
 
             var request = CreateRequestObject(TestPassword, inactiveUser);
@@ -327,9 +332,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             var user = CreateMockUser(true);
 
-            _userManagerMock
-                .Setup(x => x.FindByNameAsync(user.UserName))
-                .ReturnsAsync(user);
+            ArrangeUserLookupResult(user);
+
             _signInManagerMock
                 .Setup(j => j.PasswordSignInAsync(user, wrongPassword, false, true))
                 .ReturnsAsync(SignInResult.Failed);
@@ -365,9 +369,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             var mockUser = CreateMockUser(true);
 
-            _userManagerMock
-                .Setup(x => x.FindByNameAsync(mockUser.UserName))
-                .ReturnsAsync(mockUser);
+            ArrangeUserLookupResult(mockUser);
+
             _signInManagerMock
                 .Setup(j => j.PasswordSignInAsync(mockUser, correctPassword, false, true))
                 .ReturnsAsync(SignInResult.Success);
@@ -474,6 +477,26 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             _serviceResultFactoryMock
                 .Setup(x => x.LoginOperationFailure(new[] { expectedErrorMessage }))
                 .Returns(result);
+        }
+
+
+        /// <summary>
+        ///     Prepares a mock result for the user lookup service to return a successful user lookup operation.
+        /// </summary>
+        /// <param name="user">
+        ///     The <see cref="User"/> object representing the user to be returned by the mock service.
+        /// </param>
+        private void ArrangeUserLookupResult(User user)
+        {
+            var result = new UserLookupServiceResult
+            {
+                Success = true,
+                UserFound = user,
+            };
+
+            _userLookupServiceMock
+                .Setup(x => x.FindUserByUsername(user.UserName))
+                .ReturnsAsync(result);
         }
     }
 }

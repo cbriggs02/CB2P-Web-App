@@ -1,10 +1,11 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authorization;
+using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Interfaces.Utilities;
 using AspNetWebService.Models.DataTransferObjectModels;
 using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.ServiceResultModels;
-using AspNetWebService.Models.ServiceResultModels.RoleServiceResults;
+using AspNetWebService.Models.ServiceResultModels.Authorization;
+using AspNetWebService.Models.ServiceResultModels.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,7 @@ namespace AspNetWebService.Services.Authorization
         private readonly UserManager<User> _userManager;
         private readonly IParameterValidator _parameterValidator;
         private readonly IServiceResultFactory _serviceResultFactory;
+        private readonly IUserLookupService _userLookupService;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RoleService"/> class.
@@ -38,15 +40,19 @@ namespace AspNetWebService.Services.Authorization
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
         /// </param>
+        /// <param name="userLookupService">'
+        ///     The service used for looking up users in the system.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the parameters are null.
         /// </exception>
-        public RoleService(RoleManager<IdentityRole> roleManager, UserManager<User> userManager, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
+        public RoleService(RoleManager<IdentityRole> roleManager, UserManager<User> userManager, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IUserLookupService userLookupService)
         {
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
             _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
+            _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
         }
 
 
@@ -163,12 +169,14 @@ namespace AspNetWebService.Services.Authorization
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
             _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupResult = await _userLookupService.FindUserById(id);
 
-            if (user == null)
+            if (!userLookupResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
             }
+
+            var user = userLookupResult.UserFound;
 
             if (!IsUserActive(user))
             {
@@ -219,12 +227,14 @@ namespace AspNetWebService.Services.Authorization
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
             _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
-            var user = await _userManager.FindByIdAsync(id);
+            var userLookupResult = await _userLookupService.FindUserById(id);
 
-            if (user == null)
+            if (!userLookupResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
             }
+
+            var user = userLookupResult.UserFound;
 
             if (!await _roleManager.RoleExistsAsync(roleName))
             {

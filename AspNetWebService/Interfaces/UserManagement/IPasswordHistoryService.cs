@@ -1,4 +1,4 @@
-﻿using AspNetWebService.Models.RequestModels.PasswordHistoryRequests;
+﻿using AspNetWebService.Models.RequestModels.UserManagement;
 
 namespace AspNetWebService.Interfaces.UserManagement
 {

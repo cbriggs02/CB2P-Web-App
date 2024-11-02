@@ -1,5 +1,4 @@
-﻿
-namespace AspNetWebService.Models.RequestModels.PasswordHistoryRequests
+﻿namespace AspNetWebService.Models.RequestModels.UserManagement
 {
     /// <summary>
     ///     Represents the model for searching a user's password history,

@@ -1,6 +1,6 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Models.ApiResponseModels;
+using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
 using AspNetWebService.Models.ApiResponseModels.RolesApiResponses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
