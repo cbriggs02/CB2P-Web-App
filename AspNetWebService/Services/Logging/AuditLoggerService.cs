@@ -127,14 +127,12 @@ namespace AspNetWebService.Services.Logging
             _context.AuditLogs.Remove(log);
             int result = await _context.SaveChangesAsync();
 
-            if (result > 0)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (result == 0)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.AuditLog.DeletionFailed });
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 

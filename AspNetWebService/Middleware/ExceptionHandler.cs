@@ -77,19 +77,42 @@ namespace AspNetWebService.Middleware
         /// </param>
         private void LogToConsole(HttpContext context, Exception ex)
         {
-            var exceptionType = ex.GetType().Name;
-            var innerExceptionMessage = ex.InnerException?.Message ?? "No inner exception";
-            var stackTrace = ex.StackTrace ?? "No stack trace available";
-            var requestPath = context.Request.Path.ToString() ?? "No request path";
-            var requestQuery = context.Request.QueryString.ToString() ?? "No query string";
-            var requestMethod = context.Request.Method ?? "No request method";
-            var timestamp = DateTime.UtcNow;
+            var (exceptionType, innerExceptionMessage, stackTrace, requestPath,
+                requestQuery, requestMethod, timestamp) = GatherExceptionDetails(context, ex);
 
             _logger.LogError(ex, "{Message}. Exception of type {ExceptionType} occurred at {Timestamp}. " +
                 "Request: {Method} {Path}{QueryString}, " +
                 "Inner exception: {InnerExceptionMessage}, Stack Trace: {StackTrace}",
                 "An unhandled exception occurred", exceptionType, timestamp, requestMethod, requestPath, requestQuery,
                 innerExceptionMessage, stackTrace);
+        }
+
+
+        /// <summary>
+        ///     Gathers detailed information about an exception and the associated HTTP request context.
+        /// </summary>
+        /// <param name="context">
+        ///     The <see cref="HttpContext"/> for the current request, providing information about the HTTP request.
+        /// </param>
+        /// <param name="ex">
+        ///     The <see cref="Exception"/> that was thrown, containing details of the error.
+        /// </param>
+        /// <returns>
+        ///   A list of exceptions details used when logging the exception to console.
+        /// </returns>
+        private static (string ExceptionType, string InnerExceptionMessage, string StackTrace, string RequestPath,
+            string RequestQuery, string RequestMethod, DateTime Timestamp)
+         GatherExceptionDetails(HttpContext context, Exception ex)
+        {
+            return (
+                ExceptionType: ex.GetType().Name,
+                InnerExceptionMessage: ex.InnerException?.Message ?? "No inner exception",
+                StackTrace: ex.StackTrace ?? "No stack trace available",
+                RequestPath: context.Request.Path.ToString() ?? "No request path",
+                RequestQuery: context.Request.QueryString.ToString() ?? "No query string",
+                RequestMethod: context.Request.Method ?? "No request method",
+                Timestamp: DateTime.UtcNow
+            );
         }
 
 
@@ -107,10 +130,12 @@ namespace AspNetWebService.Middleware
         {
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/json";
+
             var response = new
             {
                 error = ErrorMessages.General.GlobalExceptionMessage
             };
+
             var jsonResponse = JsonConvert.SerializeObject(response);
             await context.Response.WriteAsync(jsonResponse);
         }

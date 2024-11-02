@@ -1,4 +1,5 @@
-﻿using AspNetWebService.Constants;
+﻿using Asp.Versioning;
+using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authorization;
 using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
 using AspNetWebService.Models.ApiResponseModels.RolesApiResponses;
@@ -18,7 +19,8 @@ namespace AspNetWebService.Controllers
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[Controller]")]
     [ApiController]
     public class RolesApiController : ControllerBase
     {
@@ -80,7 +82,7 @@ namespace AspNetWebService.Controllers
         /// </param>
         /// <returns>
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) if the role creation was successful.
-        ///     
+        ///
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) with a list of errors 
         ///         returned by the role service that occurred during role creation.
         ///       
@@ -97,14 +99,12 @@ namespace AspNetWebService.Controllers
         {
             var result = await _roleService.CreateRole(roleName);
 
-            if (result.Success)
-            {
-                return Ok();
-            }
-            else
+            if (!result.Success)
             {
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
 
 
@@ -137,20 +137,17 @@ namespace AspNetWebService.Controllers
         {
             var result = await _roleService.DeleteRole(id);
 
-            if (result.Success)
-            {
-                return Ok();
-            }
-            else
+            if (!result.Success)
             {
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.Role.NotFound, StringComparison.OrdinalIgnoreCase)))
                 {
                     return NotFound();
-
                 }
 
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
 
 
@@ -186,11 +183,7 @@ namespace AspNetWebService.Controllers
         {
             var result = await _roleService.AssignRole(id, roleName);
 
-            if (result.Success)
-            {
-                return Ok();
-            }
-            else
+            if (!result.Success)
             {
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -199,6 +192,8 @@ namespace AspNetWebService.Controllers
 
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
 
 
@@ -234,11 +229,7 @@ namespace AspNetWebService.Controllers
         {
             var result = await _roleService.RemoveRole(id, roleName);
 
-            if (result.Success)
-            {
-                return Ok();
-            }
-            else
+            if (!result.Success)
             {
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -247,6 +238,8 @@ namespace AspNetWebService.Controllers
 
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
     }
 }

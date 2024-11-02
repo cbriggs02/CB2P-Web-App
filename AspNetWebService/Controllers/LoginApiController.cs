@@ -1,4 +1,5 @@
-﻿using AspNetWebService.Constants;
+﻿using Asp.Versioning;
+using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Authentication;
 using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
 using AspNetWebService.Models.ApiResponseModels.LoginApiResponses;
@@ -17,7 +18,8 @@ namespace AspNetWebService.Controllers
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[Controller]")]
     [ApiController]
     public class LoginApiController : ControllerBase
     {
@@ -42,7 +44,7 @@ namespace AspNetWebService.Controllers
         ///     Asynchronously processes all requests for logging in a user using their credentials.
         ///     This method delegates the login process to the required service.
         /// </summary>
-        /// <param name="model">
+        /// <param name="credentials">
         ///     The <see cref="LoginRequest"/> model containing the user's login credentials.
         /// </param>
         /// <returns>
@@ -60,23 +62,21 @@ namespace AspNetWebService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorApiResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = ApiDocumentation.LoginApi.Login)]
-        public async Task<ActionResult<LoginApiResponse>> Login([FromBody] LoginRequest model)
+        public async Task<ActionResult<LoginApiResponse>> Login([FromBody] LoginRequest credentials)
         {
-            var result = await _loginService.Login(model);
+            var result = await _loginService.Login(credentials);
 
-            if (result.Success)
-            {
-                return Ok(new LoginApiResponse { Token = result.Token });
-            }
-            else
+            if (!result.Success)
             {
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
                 {
                     return NotFound();
                 }
 
-                return BadRequest(new ErrorApiResponse {  Errors = result.Errors });
+                return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok(new LoginApiResponse { Token = result.Token });
         }
     }
 }

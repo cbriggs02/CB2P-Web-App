@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <Folder Include="Unit\Controllers\" />
+    <Folder Include="Unit\Middleware\" />
     <Folder Include="Unit\Services\Logging\" />
     <Folder Include="Unit\Services\Utilities\" />
     <Folder Include="Unit\Services\UserManagement\" />

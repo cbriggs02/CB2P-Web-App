@@ -99,14 +99,12 @@ namespace AspNetWebService.Services.Authorization
 
             var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
 
-            if (result.Succeeded)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 
@@ -136,14 +134,12 @@ namespace AspNetWebService.Services.Authorization
 
             var result = await _roleManager.DeleteAsync(role);
 
-            if (result.Succeeded)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 
@@ -195,14 +191,12 @@ namespace AspNetWebService.Services.Authorization
 
             var result = await _userManager.AddToRoleAsync(user, roleName);
 
-            if (result.Succeeded)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 
@@ -248,14 +242,12 @@ namespace AspNetWebService.Services.Authorization
 
             var result = await _userManager.RemoveFromRoleAsync(user, roleName);
 
-            if (result.Succeeded)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 

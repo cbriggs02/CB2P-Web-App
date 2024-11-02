@@ -1,7 +1,6 @@
 ﻿using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Models.Entities;
-using Microsoft.AspNetCore.Identity;
+using AspNetWebService.Interfaces.UserManagement;
 using System.Security.Claims;
 
 namespace AspNetWebService.Middleware
@@ -70,10 +69,10 @@ namespace AspNetWebService.Middleware
                     return;
                 }
 
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                var user = await userManager.FindByIdAsync(userId);
+                var userLookupService = scope.ServiceProvider.GetRequiredService<IUserLookupService>();
+                var userLookupResult = await userLookupService.FindUserById(userId);
 
-                if (user == null)
+                if (!userLookupResult.Success)
                 {
                     await loggerService.LogAuthorizationBreach();
                     await HandleUnauthorized(context, $"User with ID {userId} no longer exists in the system.");

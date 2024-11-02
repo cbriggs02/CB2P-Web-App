@@ -102,15 +102,13 @@ namespace AspNetWebService.Services.UserManagement
 
             var result = await _userManager.AddPasswordAsync(user, request.Password);
 
-            if (result.Succeeded)
-            {
-                await CreatePasswordHistory(user);
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            await CreatePasswordHistory(user);
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 
@@ -169,15 +167,13 @@ namespace AspNetWebService.Services.UserManagement
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
 
-            if (result.Succeeded)
-            {
-                await CreatePasswordHistory(user);
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            await CreatePasswordHistory(user);
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 

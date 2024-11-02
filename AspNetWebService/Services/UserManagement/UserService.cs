@@ -145,8 +145,8 @@ namespace AspNetWebService.Services.UserManagement
             }
 
             var user = userLookupResult.UserFound;
-
             var userDTO = _mapper.Map<UserDTO>(user);
+
             return _serviceResultFactory.UserOperationSuccess(userDTO);
         }
 
@@ -246,14 +246,12 @@ namespace AspNetWebService.Services.UserManagement
 
             var result = await _userManager.UpdateAsync(existingUser);
 
-            if (result.Succeeded)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 
@@ -291,16 +289,14 @@ namespace AspNetWebService.Services.UserManagement
 
             var result = await _userManager.DeleteAsync(user);
 
-            if (result.Succeeded)
-            {
-                // delete all stored passwords for user once user is deleted for data clean up.
-                await _passwordHistoryService.DeletePasswordHistory(id);
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            // delete all stored passwords for user once user is deleted for data clean up.
+            await _passwordHistoryService.DeletePasswordHistory(id);
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 
@@ -343,14 +339,12 @@ namespace AspNetWebService.Services.UserManagement
 
             var result = await _userManager.UpdateAsync(user);
 
-            if (result.Succeeded)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 
@@ -393,14 +387,12 @@ namespace AspNetWebService.Services.UserManagement
 
             var result = await _userManager.UpdateAsync(user);
 
-            if (result.Succeeded)
-            {
-                return _serviceResultFactory.GeneralOperationSuccess();
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
+
+            return _serviceResultFactory.GeneralOperationSuccess();
         }
 
 

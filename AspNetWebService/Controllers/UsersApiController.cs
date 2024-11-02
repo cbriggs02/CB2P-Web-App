@@ -9,6 +9,7 @@ using AspNetWebService.Models.ApiResponseModels.UsersApiResponses;
 using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Models.RequestModels.UserManagement;
 using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
+using Asp.Versioning;
 
 namespace AspNetWebService.Controllers
 {
@@ -20,7 +21,8 @@ namespace AspNetWebService.Controllers
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[Controller]")]
     [ApiController]
     public class UsersApiController : ControllerBase
     {
@@ -117,14 +119,14 @@ namespace AspNetWebService.Controllers
 
             if (!result.Success)
             {
-                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return NotFound();
-                }
-
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.Authorization.Forbidden, StringComparison.OrdinalIgnoreCase)))
                 {
                     return Forbid();
+                }
+
+                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return NotFound();
                 }
             }
 
@@ -154,16 +156,14 @@ namespace AspNetWebService.Controllers
         {
             var result = await _userService.CreateUser(user);
 
-            var response = new UserApiResponse { User = result.User };
-
-            if (result.Success)
-            {
-                return CreatedAtAction(nameof(GetUser), new { id = response.User.UserName }, response);
-            }
-            else
+            if (!result.Success)
             {
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            var response = new UserApiResponse { User = result.User };
+
+            return CreatedAtAction(nameof(GetUser), new { id = response.User.UserName }, response);
         }
 
 
@@ -203,24 +203,22 @@ namespace AspNetWebService.Controllers
         {
             var result = await _userService.UpdateUser(id, user);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                return NoContent();
-            }
-            else
-            {
-                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return NotFound();
-                }
-
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.Authorization.Forbidden, StringComparison.OrdinalIgnoreCase)))
                 {
                     return Forbid();
                 }
 
+                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return NotFound();
+                }
+
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return NoContent();
         }
 
 
@@ -257,24 +255,22 @@ namespace AspNetWebService.Controllers
         {
             var result = await _userService.DeleteUser(id);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                return Ok();
-            }
-            else
-            {
-                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return NotFound();
-                }
-
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.Authorization.Forbidden, StringComparison.OrdinalIgnoreCase)))
                 {
                     return Forbid();
                 }
 
+                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return NotFound();
+                }
+
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
 
 
@@ -311,24 +307,22 @@ namespace AspNetWebService.Controllers
         {
             var result = await _userService.ActivateUser(id);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                return Ok();
-            }
-            else
-            {
-                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return NotFound();
-                }
-
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.Authorization.Forbidden, StringComparison.OrdinalIgnoreCase)))
                 {
                     return Forbid();
                 }
 
+                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return NotFound();
+                }
+
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
 
 
@@ -365,24 +359,22 @@ namespace AspNetWebService.Controllers
         {
             var result = await _userService.DeactivateUser(id);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                return Ok();
-            }
-            else
-            {
-                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
-                {
-                    return NotFound();
-                }
-
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.Authorization.Forbidden, StringComparison.OrdinalIgnoreCase)))
                 {
                     return Forbid();
                 }
 
+                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return NotFound();
+                }
+
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
     }
 }

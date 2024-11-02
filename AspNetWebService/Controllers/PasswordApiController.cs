@@ -1,4 +1,5 @@
-﻿using AspNetWebService.Constants;
+﻿using Asp.Versioning;
+using AspNetWebService.Constants;
 using AspNetWebService.Interfaces.UserManagement;
 using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
 using AspNetWebService.Models.RequestModels.UserManagement;
@@ -17,7 +18,8 @@ namespace AspNetWebService.Controllers
     /// <remarks>
     ///     @Author: Christian Briglio
     /// </remarks>
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[Controller]")]
     [ApiController]
     public class PasswordApiController : ControllerBase
     {
@@ -67,12 +69,8 @@ namespace AspNetWebService.Controllers
         {
             var result = await _passwordService.SetPassword(id, request);
 
-            if (result.Success)
-            {
-                return Ok();
-            }
-            else
-            {
+            if (!result.Success)
+            {   
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
                 {
                     return NotFound();
@@ -80,6 +78,8 @@ namespace AspNetWebService.Controllers
 
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
 
 
@@ -120,11 +120,7 @@ namespace AspNetWebService.Controllers
         {
             var result = await _passwordService.UpdatePassword(id, request);
 
-            if (result.Success)
-            {
-                return Ok();
-            }
-            else
+            if (!result.Success)
             {
                 if (result.Errors.Any(error => error.Contains(ErrorMessages.Authorization.Forbidden, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -138,6 +134,8 @@ namespace AspNetWebService.Controllers
 
                 return BadRequest(new ErrorApiResponse { Errors = result.Errors });
             }
+
+            return Ok();
         }
     }
 }

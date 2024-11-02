@@ -98,15 +98,13 @@ namespace AspNetWebService.Services.Authentication
             
             var result = await _signInManager.PasswordSignInAsync(user, credentials.Password, false, true);
 
-            if (result.Succeeded)
-            {
-                var token = await GenerateJwtToken(user);
-                return _serviceResultFactory.LoginOperationSuccess(token);
-            }
-            else
+            if (!result.Succeeded)
             {
                 return _serviceResultFactory.LoginOperationFailure(new[] { ErrorMessages.Password.InvalidCredentials });
             }
+
+            var token = await GenerateJwtToken(user);
+            return _serviceResultFactory.LoginOperationSuccess(token);
         }
 
 
