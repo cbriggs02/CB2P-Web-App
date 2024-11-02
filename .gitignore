@@ -6,6 +6,3 @@
 **/.vs/
 **appsettings.Development.json
 **appsettings.json
-
-# Ignore Node.js modules
-node_modules/
