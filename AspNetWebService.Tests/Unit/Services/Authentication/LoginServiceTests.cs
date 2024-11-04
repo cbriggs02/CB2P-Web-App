@@ -122,6 +122,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(null));
+
+            VerifyCallsToParameterService(0);
         }
 
 
@@ -143,6 +145,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+
+            VerifyCallsToParameterService(1);
         }
 
 
@@ -165,6 +169,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+
+            VerifyCallsToParameterService(1);
         }
 
 
@@ -186,6 +192,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+
+            VerifyCallsToParameterService(1);
         }
 
 
@@ -207,6 +215,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+
+            VerifyCallsToParameterService(1);
         }
 
 
@@ -229,6 +239,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+
+            VerifyCallsToParameterService(1);
         }
 
 
@@ -250,6 +262,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
+
+            VerifyCallsToParameterService(1);
         }
 
 
@@ -285,6 +299,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             // Assert
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(nonExistentUserName);
+            VerifyCallsToParameterService(2);
         }
 
 
@@ -313,6 +330,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             // Assert
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(inactiveUser.UserName);
+            VerifyCallsToParameterService(2);
         }
 
 
@@ -348,6 +368,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             // Assert
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(user.UserName);
+            VerifyCallsToParameterService(2);
         }
 
 
@@ -395,6 +418,11 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             // Assert
             Assert.True(expectedResult.Success);
             Assert.NotNull(expectedResult.Token);
+
+            _signInManagerMock.Verify(s => s.PasswordSignInAsync(mockUser, correctPassword, false, true), Times.Once);
+
+            VerifyCallsToLookupService(mockUser.UserName);
+            VerifyCallsToParameterService(2);
         }
 
 
@@ -497,6 +525,33 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             _userLookupServiceMock
                 .Setup(x => x.FindUserByUsername(user.UserName))
                 .ReturnsAsync(result);
+        }
+
+
+        /// <summary>
+        ///     Verifies that the <see cref="_parameterValidatorMock"/> mock was called with 
+        ///     expected validation methods during test execution.
+        /// </summary>
+        /// <param name="numberOfTimes">
+        ///     number of times <see cref="_parameterValidatorMock.ValidateNotNullOrEmpty"/> is expected to be called.
+        /// </param>
+        private void VerifyCallsToParameterService(int numberOfTimes)
+        {
+            _parameterValidatorMock.Verify(v => v.ValidateObjectNotNull(It.IsAny<object>(), It.IsAny<string>()), Times.Once);
+            _parameterValidatorMock.Verify(v => v.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(numberOfTimes));
+        }
+
+
+        /// <summary>
+        ///     Verifies that the <see cref="_userLookupServiceMock"/> mock was called once
+        ///     to find a user by the specified username.
+        /// </summary>
+        /// <param name="username">
+        ///     The username string used as the parameter to look up the user in the test.
+        /// </param>
+        private void VerifyCallsToLookupService(string username)
+        {
+            _userLookupServiceMock.Verify(l => l.FindUserByUsername(username), Times.Once);
         }
     }
 }

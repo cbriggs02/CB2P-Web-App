@@ -106,6 +106,10 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.True(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
+            VerifyCallsToUserLookupService(targetUser.Id);
         }
 
 
@@ -142,6 +146,10 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
+            VerifyCallsToUserLookupService(targetUser.Id);
         }
 
 
@@ -177,6 +185,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.True(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -212,6 +223,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.True(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -247,6 +261,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.True(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -282,6 +299,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.True(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -317,6 +337,10 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.True(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
+            VerifyCallsToUserLookupService(targetUser.Id);
         }
 
 
@@ -352,6 +376,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.True(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -383,6 +410,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
         }
 
 
@@ -414,6 +443,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
         }
 
 
@@ -450,6 +481,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -486,6 +520,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -522,6 +559,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -559,6 +599,9 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            VerifyCallsToUserContextService(claimsPrincipal);
+            VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
 
@@ -590,6 +633,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
 
             // Assert
             Assert.False(result);
+
+            _userContextServiceMock.Verify(p => p.GetClaimsPrincipal(), Times.Once);
         }
 
 
@@ -750,6 +795,46 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
             _userLookupServiceMock
                 .Setup(x => x.FindUserById(user.Id))
                 .ReturnsAsync(result);
+        }
+
+
+        /// <summary>
+        ///     Verifies that the <see cref="_userContextServiceMock"/> mock methods were called as expected
+        ///     when retrieving the claims principal and user ID.
+        /// </summary>
+        /// <param name="claimsPrincipal">
+        ///     The <see cref="ClaimsPrincipal"/> instance representing the user's identity in the test context.
+        /// </param>
+        private void VerifyCallsToUserContextService(ClaimsPrincipal claimsPrincipal)
+        {
+            _userContextServiceMock.Verify(p => p.GetClaimsPrincipal(), Times.Once);
+            _userContextServiceMock.Verify(u => u.GetUserId(claimsPrincipal), Times.Once);
+        }
+
+
+        /// <summary>
+        ///     Verifies that the <see cref="_userContextServiceMock"/> mock method for retrieving user roles
+        ///     was called exactly once.
+        /// </summary>
+        /// <param name="claimsPrincipal">
+        ///     The <see cref="ClaimsPrincipal"/> instance representing the user's identity in the test context.
+        /// </param>
+        private void VerifyCallsToUserContextServiceForRoles(ClaimsPrincipal claimsPrincipal)
+        {
+            _userContextServiceMock.Verify(r => r.GetRoles(claimsPrincipal), Times.Once);
+        }
+
+
+        /// <summary>
+        ///     Verifies that the <see cref="_userLookupServiceMock"/> mock method for finding a user by ID
+        ///     was called exactly once.
+        /// </summary>
+        /// <param name="id">
+        ///     The unique identifier of the user to be retrieved.
+        /// </param>
+        private void VerifyCallsToUserLookupService(string id)
+        {
+            _userLookupServiceMock.Verify(x => x.FindUserById(id), Times.Once);
         }
     }
 }

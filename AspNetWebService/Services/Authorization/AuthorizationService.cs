@@ -58,7 +58,7 @@ namespace AspNetWebService.Services.Authorization
         ///     - Returns true if the current user is a regular user accessing their own data.
         ///     - Returns true if the current user is an admin accessing their own data or non-admin data.
         ///     - Returns false if an admin attempts to access another admin's data.
-        ///     -Returns false if id is not provided or user context is not availible.
+        ///     -Returns false if id is not provided or user context is not available.
         /// </returns>
         public async Task<bool> ValidatePermission(string id)
         {

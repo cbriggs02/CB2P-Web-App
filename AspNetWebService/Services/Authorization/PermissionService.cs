@@ -30,7 +30,7 @@ namespace AspNetWebService.Services.Authorization
         ///     log service used for logging authorization breaches with audit logger service.
         /// </param>
         /// <param name="parameterValidator">
-        ///     The paramter validator service used for defense checking service paramters.
+        ///     The parameter validator service used for defense checking service parameters.
         /// </param>
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
