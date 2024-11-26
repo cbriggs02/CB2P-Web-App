@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AspNetWebService\IdentityServiceApi.csproj" />
+    <ProjectReference Include="..\IdentityServiceApi\IdentityServiceApi.csproj" />
   </ItemGroup>
 
 </Project>

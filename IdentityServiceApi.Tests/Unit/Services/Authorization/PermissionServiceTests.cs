@@ -3,7 +3,6 @@ using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.ServiceResultModels.Common;
-using IdentityServiceApi.Services.Authentication;
 using IdentityServiceApi.Services.Authorization;
 using Moq;
 

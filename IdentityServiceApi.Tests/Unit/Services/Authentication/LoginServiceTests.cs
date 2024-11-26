@@ -6,7 +6,6 @@ using IdentityServiceApi.Models.RequestModels.Authentication;
 using IdentityServiceApi.Models.ServiceResultModels.Authentication;
 using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 using IdentityServiceApi.Services.Authentication;
-using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
