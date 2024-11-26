@@ -126,7 +126,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
         ///     A task representing the asynchronous test operation.
         /// </returns>
         [Fact]
-        public async Task Login_NullCredentials_ThrowsArgumentNullException()
+        public async Task Login_NullCredentialsObject_ThrowsArgumentNullException()
         {
             // Arrange
             _parameterValidatorMock
@@ -141,133 +141,22 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
 
 
         /// <summary>
-        ///     Verifies that calling the login method with null username throws an ArgumentNullException.
+        ///     Verifies that calling the login method with null, empty or whitespace username or password throws an ArgumentNullException.
         /// </summary>
+        /// <param name="input">
+        ///     Used to test for invalid data like ( null, empty or whitespace )
+        /// </param>
         /// <returns>
         ///     A task representing the asynchronous test operation.
         /// </returns>
-        [Fact]
-        public async Task Login_NullUserName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task Login_InvalidCredentials_ThrowsArgumentNullException(string input)
         {
             // Arrange
-            var request = new LoginRequest { UserName = null, Password = TestPassword };
-
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
-        /// <summary>
-        ///     Verifies that calling the login method with null password throws an ArgumentNullException.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous test operation.
-        /// </returns>
-        [Fact]
-        public async Task Login_NullPassword_ThrowsArgumentNullException()
-        {
-            // Arrange
-            const string userName = "name";
-            var request = new LoginRequest { UserName = userName, Password = null };
-
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
-        /// <summary>
-        ///     Verifies that calling the login method with null username and password throws an ArgumentNullException.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous test operation.
-        /// </returns>
-        [Fact]
-        public async Task Login_NullUsernameAndPassword_ThrowsArgumentNullException()
-        {
-            // Arrange
-            var request = new LoginRequest { UserName = null, Password = null };
-
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
-        /// <summary>
-        ///     Verifies that calling the login method with empty username throws an ArgumentNullException.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous test operation.
-        /// </returns>
-        [Fact]
-        public async Task Login_EmptyUserName_ThrowsArgumentNullException()
-        {
-            // Arrange
-            var request = new LoginRequest { UserName = "", Password = TestPassword };
-
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
-        /// <summary>
-        ///     Verifies that calling the login method with empty password throws an ArgumentNullException.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous test operation.
-        /// </returns>
-        [Fact]
-        public async Task Login_EmptyPassword_ThrowsArgumentNullException()
-        {
-            // Arrange
-            const string userName = "name";
-            var request = new LoginRequest { UserName = userName, Password = "" };
-
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _loginService.Login(request));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
-        /// <summary>
-        ///     Verifies that calling the login method with empty username and password throws an ArgumentNullException.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous test operation.
-        /// </returns>
-        [Fact]
-        public async Task Login_EmptyUsernameAndPassword_ThrowsArgumentNullException()
-        {
-            // Arrange
-            var request = new LoginRequest { UserName = "", Password = "" };
+            var request = new LoginRequest { UserName = input, Password = input };
 
             _parameterValidatorMock
                 .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
@@ -310,6 +199,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             var result = await _loginService.Login(request);
 
             // Assert
+            Assert.NotNull(result);
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
 
@@ -341,6 +231,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             var result = await _loginService.Login(request);
 
             // Assert
+            Assert.NotNull(result);
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
 
@@ -357,7 +248,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
         ///     A task representing the asynchronous operation.
         /// </returns>
         [Fact]
-        public async Task Login_InvalidCredentials_ReturnsInvalidCredentialsResult()
+        public async Task Login_WrongPassword_ReturnsInvalidCredentialsResult()
         {
             // Arrange
             const string wrongPassword = "wrong-password";
@@ -379,6 +270,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             var result = await _loginService.Login(request);
 
             // Assert
+            Assert.NotNull(result);
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
 
@@ -429,6 +321,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             var result = await _loginService.Login(request);
 
             // Assert
+            Assert.NotNull(result);
             Assert.True(expectedResult.Success);
             Assert.NotNull(expectedResult.Token);
 

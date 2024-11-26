@@ -28,23 +28,24 @@ namespace IdentityServiceApi
 {
     /// <summary>
     ///     Entry point class for the ASP.NET Core application,
-    ///     containing the <see cref="Main"/> method to set up and configure the application.
     /// </summary>
     /// <remarks>
+    ///     This application is designed to provide secure and scalable web services for managing user accounts, roles, 
+    ///     and permissions. It includes features like authentication, role-based access control, and CRUD operations for user data.
+    /// -----------------------------------------------------------------------------------------------
+    ///     Key configurations in this file include:
+    ///     - Middleware for request handling (e.g., exception handling, performance monitoring, token validating).
+    ///     - ASP.NET Identity, JWT Bearer Authentication.
+    ///     - Dependency injection setup for services.
+    ///     - Integration of Swagger for API documentation.
+    ///     - API Versioning and integration of an API Health Checks UI.
+    ///     - Database initialization and migration.
+    /// -----------------------------------------------------------------------------------------------
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
     public class Program
     {
-        /// <summary>
-        ///     Asynchronous entry point of the application that initializes and configures the Web API.
-        /// </summary>
-        /// <param name="args">
-        ///     Command-line arguments passed to the application.
-        /// </param>
-        /// <returns>
-        ///     A task representing the asynchronous operation of starting the application.
-        /// </returns>
         public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
@@ -201,7 +202,7 @@ namespace IdentityServiceApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "IdentityServiceApi API V1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "IdentityServiceApi V1");
                     c.RoutePrefix = string.Empty;
                 });
             }

@@ -140,14 +140,20 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.CreateRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when a null role name is provided.
+        ///     when a null role name is provided, or a empty string is provided.
         ///     This verifies that the service correctly validates input parameters before proceeding with role creation.
         /// </summary>
+        /// <param name="roleName">
+        ///     Used to test for invalid data like ( null, empty or whitespace )
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        [Fact]
-        public async Task CreateRole_NullRoleName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task CreateRole_NullAndEmptyRoleName_ThrowsArgumentNullException(string roleName)
         {
             // Arrange
             _parameterValidatorMock
@@ -155,30 +161,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.CreateRole(null));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
-        /// <summary>
-        ///     Tests that the <see cref="RoleService.CreateRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when an empty string is provided as the role name.
-        ///     This ensures that the service correctly handles and validates input parameters for role creation.
-        /// </summary>
-        /// <returns>
-        ///     A task that represents the asynchronous operation.
-        /// </returns>
-        [Fact]
-        public async Task CreateRole_EmptyRoleName_ThrowsArgumentNullException()
-        {
-            // Arrange
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.CreateRole(""));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.CreateRole(roleName));
 
             VerifyCallsToParameterService(1);
         }
@@ -186,16 +169,21 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.CreateRole"/> returns a error message 
-        ///     <see cref="ErrorMessages.Role.AlreadyExist"/> when providing a already existing role to the creation method.
+        ///     <see cref="ErrorMessages.Role.AlreadyExist"/> when providing a already existing roles to the creation method.
         /// </summary>
+        /// <param name="roleName">
+        ///     Used to test cases for all existing roles.
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous test operation.
         /// </returns>
-        [Fact]
-        public async Task CreateRole_ExistentRole_ReturnsRoleAlreadyExistsError()
+        [Theory]
+        [InlineData(Roles.Admin)]
+        [InlineData(Roles.SuperAdmin)]
+        [InlineData(Roles.User)]
+        public async Task CreateRole_ExistentRole_ReturnsRoleAlreadyExistsError(string roleName)
         {
             // Arrange
-            const string roleName = Roles.Admin;
             const string expectedErrorMessage = ErrorMessages.Role.AlreadyExist;
 
             _roleManagerMock
@@ -208,6 +196,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             var result = await _roleServiceMock.CreateRole(roleName);
 
             // Assert
+            Assert.NotNull(result);
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
 
@@ -243,6 +232,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             var result = await _roleServiceMock.CreateRole(roleName);
 
             // Assert
+            Assert.NotNull(result);
             Assert.True(result.Success);
 
             _roleManagerMock.Verify(c => c.CreateAsync(It.Is<IdentityRole>(role => role.Name == roleName)), Times.Once);
@@ -256,11 +246,17 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
         ///     when a null role name is provided.
         ///     This ensures that the service correctly validates the role name parameter before attempting to delete a role.
         /// </summary>
+        /// <param name="id">
+        ///     Used to test for invalid data like ( null, empty or whitespace )
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        [Fact]
-        public async Task DeleteRole_NullRoleName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task DeleteRole_NullAndEmptyId_ThrowsArgumentNullException(string id)
         {
             // Arrange
             _parameterValidatorMock
@@ -268,35 +264,12 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.DeleteRole(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.DeleteRole(id));
 
             VerifyCallsToParameterService(1);
         }
 
-
-        /// <summary>
-        ///     Tests that the <see cref="RoleService.DeleteRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when an empty string is provided as the role name.
-        ///     This verifies that the service correctly validates the role name parameter before attempting to delete a role.
-        /// </summary>
-        /// <returns>
-        ///     A task that represents the asynchronous operation.
-        /// </returns>
-        [Fact]
-        public async Task DeleteRole_EmptyRoleName_ThrowsArgumentNullException()
-        {
-            // Arrange
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.DeleteRole(""));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
+        
         /// <summary>
         ///     Tests that the <see cref="RoleService.DeleteRole"/> returns a <see cref="ErrorMessages.Role.NotFound"/> when providing a invalid role id to the deletion method.
         /// </summary>
@@ -320,6 +293,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             var result = await _roleServiceMock.DeleteRole(roleId);
 
             // Assert
+            Assert.NotNull(result);
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
 
@@ -356,6 +330,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             var result = await _roleServiceMock.DeleteRole(roleId);
 
             // Assert
+            Assert.NotNull(result);
             Assert.True(result.Success);
 
             _roleManagerMock.Verify(c => c.DeleteAsync(It.Is<IdentityRole>(role => role.Id == roleId)), Times.Once);
@@ -366,517 +341,365 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.AssignRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when a null role name is provided while a valid user ID is specified.
-        ///     This ensures that the service correctly validates the role name parameter before attempting to assign a role.
+        ///     when a null, empty or white space parameters are provided.
+        ///     This ensures that the service correctly validates the role name and id parameter before attempting to assign a role.
         /// </summary>
+        /// <param name="input">
+        ///     Used to test for invalid data like ( null, empty or whitespace )
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        [Fact]
-        public async Task AssignRole_NullRoleName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task AssignRole_InvalidRoleNamesAndId_ThrowsArgumentNullException(string input)
         {
             // Arrange
-            const string userId = "id-test";
-
             _parameterValidatorMock
                 .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole(userId, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole(input, input));
 
             VerifyCallsToParameterService(1);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.AssignRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when an empty string is provided as the role name while a valid user ID is specified.
-        ///     This verifies that the service correctly validates the role name parameter before attempting to assign a role.
+        ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.User.NotFound"/> when 
+        ///     providing a invalid user id to the method.
         /// </summary>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
         [Fact]
-        public async Task AssignRole_EmptyRoleName_ThrowsArgumentNullException()
+        public async Task AssignRole_NonExistentUserId_ReturnsNotFoundResult()
         {
-            // Arrange
-            const string userId = "id-test";
+            // Arrange 
+            const string userId = "non-existent-id";
+            const string roleName = Roles.User;
+            const string expectedErrorMessage = ErrorMessages.User.NotFound;
 
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            ArrangeUserLookupServiceMock(null, userId, expectedErrorMessage);
+            ArrangeFailureServiceResult(expectedErrorMessage);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole(userId, ""));
+            // Act
+            var result = await _roleServiceMock.AssignRole(userId, roleName);
 
-            VerifyCallsToParameterService(1);
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.Success);
+            Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(userId);
+            VerifyCallsToParameterService(2);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.AssignRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when a null user ID is provided while a valid role name is specified.
-        ///     This ensures that the service correctly validates the user ID parameter before attempting to assign a role.
+        ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.Role.InactiveUser"/> when 
+        ///     assigning a role to a user who is not activated in the system.
         /// </summary>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
         [Fact]
-        public async Task AssignRole_NullId_ThrowsArgumentNullException()
+        public async Task AssignRole_UserNotActivated_ReturnsInactiveUserError()
         {
-            // Arrange
-            const string role = Roles.User;
+            // Arrange 
+            const string userId = "existing-id";
+            const string roleName = Roles.User;
+            const string expectedErrorMessage = ErrorMessages.Role.InactiveUser;
 
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            var user = CreateMockUser(false);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole(null, role));
+            ArrangeUserLookupServiceMock(user, userId, "");
+            ArrangeFailureServiceResult(expectedErrorMessage);
 
-            VerifyCallsToParameterService(1);
+            // Act
+            var result = await _roleServiceMock.AssignRole(userId, roleName);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.Success);
+            Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(userId);
+            VerifyCallsToParameterService(2);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.AssignRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when an empty string is provided as the user ID while a valid role name is given.
-        ///     This ensures that the service correctly validates the user ID parameter before attempting to assign a role.
+        ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.Role.InvalidRole"/> when 
+        ///     providing a role that does not exist in the system.
         /// </summary>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
         [Fact]
-        public async Task AssignRole_EmptyId_ThrowsArgumentNullException()
+        public async Task AssignRole_NonExistentRole_ReturnsInvalidRoleError()
         {
-            // Arrange
-            const string role = Roles.User;
+            // Arrange 
+            const string userId = "existing-id";
+            const string roleName = "non-existent-role";
+            const string expectedErrorMessage = ErrorMessages.Role.InvalidRole;
 
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            var user = CreateMockUser(true);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole("", role));
+            ArrangeUserLookupServiceMock(user, userId, "");
+            ArrangeFailureServiceResult(expectedErrorMessage);
 
-            VerifyCallsToParameterService(1);
+            // Act
+            var result = await _roleServiceMock.AssignRole(userId, roleName);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.Success);
+            Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(userId);
+            VerifyCallsToParameterService(2);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.AssignRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when both the user ID and role name are null.
-        ///     This verifies that the service correctly validates both parameters before attempting to assign a role.
+        ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.Role.HasRole"/> when 
+        ///     assigning a role to a user whom already has that role.
         /// </summary>
+        /// <param name="roleName">
+        ///     Used to hold data for all roles a user could have.
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        [Fact]
-        public async Task AssignRole_NullIdAndRoleName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(Roles.SuperAdmin)]
+        [InlineData(Roles.Admin)]
+        [InlineData(Roles.User)]
+        public async Task AssignRole_UserAlreadyHasRole_ReturnsAlreadyHasRoleError(string roleName)
         {
-            // Arrange
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            // Arrange 
+            const string userId = "existing-id";
+            const string expectedErrorMessage = ErrorMessages.Role.HasRole;
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole(null, null));
+            var user = CreateMockUser(true);
 
-            VerifyCallsToParameterService(1);
+            ArrangeUserLookupServiceMock(user, userId, "");
+
+            _roleManagerMock
+                .Setup(r => r.RoleExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _userManagerMock
+                .Setup(u => u.GetRolesAsync(user))
+                .ReturnsAsync(new List<string> { roleName });
+
+            ArrangeFailureServiceResult(expectedErrorMessage);
+
+            // Act
+            var result = await _roleServiceMock.AssignRole(userId, roleName);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.Success);
+            Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(userId);
+            VerifyCallsToParameterService(2);
+
+            _userManagerMock.Verify(u => u.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Never);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.AssignRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when both the user ID and role name are empty strings.
-        ///     This ensures that the service validates both parameters before attempting to assign a role.
+        ///     Tests that the <see cref="RoleService.AssignRole"/> returns success when 
+        ///     assigning a role to a user.
         /// </summary>
+        /// <param name="roleName">
+        ///     Used to hold data for all roles a user could be assigned.
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        [Fact]
-        public async Task AssignRole_EmptyIdAndRoleName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(Roles.SuperAdmin)]
+        [InlineData(Roles.Admin)]
+        [InlineData(Roles.User)]
+        public async Task AssignRole_ValidCase_ReturnsSuccess(string roleName)
         {
-            // Arrange
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            // Arrange 
+            const string userId = "existing-id";
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole("", ""));
+            var user = CreateMockUser(true);
 
-            VerifyCallsToParameterService(1);
-        }
+            ArrangeUserLookupServiceMock(user, userId, "");
 
+            _roleManagerMock
+              .Setup(r => r.RoleExistsAsync(It.IsAny<string>()))
+              .ReturnsAsync(true);
+            _userManagerMock
+                .Setup(u => u.GetRolesAsync(user))
+                .ReturnsAsync(new List<string>());
+            _userManagerMock
+                .Setup(a => a.AddToRoleAsync(user, roleName))
+                .ReturnsAsync(IdentityResult.Success);
 
-        /// <summary>
-        ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.User.NotFound"/> when providing a invalid user id to the method.
-        /// </summary>
-        /// <returns>
-        ///     A task that represents the asynchronous operation.
-        /// </returns>
-        //[Fact]
-        //public async Task AssignRole_NonExistentUserId_ReturnsNotFoundResult()
-        //{
-        //    // Arrange 
-        //    const string userId = "non-existent-id";
-        //    const string roleName = Roles.User;
-        //    const string expectedErrorMessage = ErrorMessages.User.NotFound;
+            ArrangeSuccessServiceResult();
 
-        //    ArrangeUserLookupServiceMock(null, userId, expectedErrorMessage);
-        //    ArrangeFailureServiceResult(expectedErrorMessage);
+            // Act
+            var result = await _roleServiceMock.AssignRole(userId, roleName);
 
-        //    // Act
-        //    var result = await _roleServiceMock.AssignRole(userId, roleName);
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.Success);
 
-        //    // Assert
-        //    Assert.False(result.Success);
-        //    Assert.Contains(expectedErrorMessage, result.Errors);
+            VerifyCallsToParameterService(2);
+            VerifyCallsToLookupService(userId);
 
-        //    VerifyCallsToLookupService(userId);
-        //    VerifyCallsToParameterService(2);
-        //}
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //[Fact]
-        //public async Task AssignRole_UserNotActivated_ReturnsInactiveUserError()
-        //{
-        //    // Arrange 
-        //    const string userId = "existing-id";
-        //    const string roleName = Roles.User;
-        //    const string expectedErrorMessage = ErrorMessages.Role.InactiveUser;
-
-        //    var user = CreateMockUser(false);
-
-        //    ArrangeUserLookupServiceMock(user, userId, "");
-        //    ArrangeFailureServiceResult(expectedErrorMessage);
-
-        //    // Act
-        //    var result = await _roleServiceMock.AssignRole(userId, roleName);
-
-        //    // Assert
-        //    Assert.False(result.Success);
-        //    Assert.Contains(expectedErrorMessage, result.Errors);
-
-        //    VerifyCallsToLookupService(userId);
-        //    VerifyCallsToParameterService(2);
-        //}
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //[Fact]
-        //public async Task AssignRole_NonExistentRole_ReturnsInvalidRoleError()
-        //{
-        //    // Arrange 
-        //    const string userId = "existing-id";
-        //    const string roleName = "non-existent-role";
-        //    const string expectedErrorMessage = ErrorMessages.Role.InvalidRole;
-
-        //    var user = CreateMockUser(true);
-
-        //    ArrangeUserLookupServiceMock(user, userId, "");
-        //    ArrangeFailureServiceResult(expectedErrorMessage);
-
-        //    // Act
-        //    var result = await _roleServiceMock.AssignRole(userId, roleName);
-
-        //    // Assert
-        //    Assert.False(result.Success);
-        //    Assert.Contains(expectedErrorMessage, result.Errors);
-
-        //    VerifyCallsToLookupService(userId);
-        //    VerifyCallsToParameterService(2);
-        //}
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //[Fact]
-        //public async Task AssignRole_UserAlreadyHasRoleUser_ReturnsAlreadyHasRoleError()
-        //{
-        //    // Arrange 
-        //    const string userId = "existing-id";
-        //    const string roleName = Roles.User;
-        //    const string expectedErrorMessage = ErrorMessages.Role.HasRole;
-
-        //    var user = CreateMockUser(true);
-
-        //    ArrangeUserLookupServiceMock(user, userId, "");
-
-        //    _userManagerMock
-        //        .Setup(a => a.AddToRoleAsync(user, roleName))
-        //        .ReturnsAsync(IdentityResult.Success);
-
-        //    ArrangeFailureServiceResult(expectedErrorMessage);
-
-        //    // Act
-        //    var result = await _roleServiceMock.AssignRole(userId, roleName);
-
-        //    // Assert
-        //    Assert.False(result.Success);
-        //    Assert.Contains(expectedErrorMessage, result.Errors);
-
-        //    VerifyCallsToLookupService(userId);
-        //    VerifyCallsToParameterService(2);
-        //}
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //[Fact]
-        //public async Task AssignRole_UserAlreadyHasRoleAdmin_ReturnsAlreadyHasRoleError()
-        //{
-        //    // Arrange 
-        //    const string userId = "existing-id";
-        //    const string roleName = Roles.Admin;
-        //    const string expectedErrorMessage = ErrorMessages.Role.HasRole;
-
-        //    var user = CreateMockUser(true);
-
-        //    ArrangeUserLookupServiceMock(user, userId, "");
-
-        //    _userManagerMock
-        //        .Setup(a => a.AddToRoleAsync(user, roleName))
-        //        .ReturnsAsync(IdentityResult.Success);
-
-        //    ArrangeFailureServiceResult(expectedErrorMessage);
-
-        //    // Act
-        //    var result = await _roleServiceMock.AssignRole(userId, roleName);
-
-        //    // Assert
-        //    Assert.False(result.Success);
-        //    Assert.Contains(expectedErrorMessage, result.Errors);
-
-        //    VerifyCallsToLookupService(userId);
-        //    VerifyCallsToParameterService(2);
-        //}
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //[Fact]
-        //public async Task AssignRole_UserAlreadyHasRoleSuperAdmin_ReturnsAlreadyHasRoleError()
-        //{
-        //    // Arrange 
-        //    const string userId = "existing-id";
-        //    const string roleName = Roles.SuperAdmin;
-        //    const string expectedErrorMessage = ErrorMessages.Role.HasRole;
-
-        //    var user = CreateMockUser(true);
-
-        //    ArrangeUserLookupServiceMock(user, userId, "");
-
-        //    _userManagerMock
-        //        .Setup(a => a.AddToRoleAsync(user, roleName))
-        //        .ReturnsAsync(IdentityResult.Success);
-
-        //    ArrangeFailureServiceResult(expectedErrorMessage);
-
-        //    // Act
-        //    var result = await _roleServiceMock.AssignRole(userId, roleName);
-
-        //    // Assert
-        //    Assert.False(result.Success);
-        //    Assert.Contains(expectedErrorMessage, result.Errors);
-
-        //    VerifyCallsToLookupService(userId);
-        //    VerifyCallsToParameterService(2);
-        //}
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //[Fact]
-        //public async Task AssignRole_UserActivatedDoesNotHaveRoleNotNullIdOrRoleName_ReturnsSuccess()
-        //{
-        //    // Arrange 
-        //    const string userId = "existing-id";
-        //    const string roleName = Roles.Admin;
-
-        //    var user = CreateMockUser(true);
-
-        //    ArrangeUserLookupServiceMock(user, userId, "");
-
-        //    _userManagerMock
-        //        .Setup(a => a.AddToRoleAsync(user, roleName))
-        //        .ReturnsAsync(IdentityResult.Success);
-
-        //    ArrangeSuccessServiceResult();
-
-        //    // Act
-        //    var result = await _roleServiceMock.AssignRole(userId, roleName);
-
-        //    // Assert
-        //    Assert.True(result.Success);
-
-        //    VerifyCallsToParameterService(2);
-        //    VerifyCallsToLookupService(userId);
-
-        //    _userManagerMock.Verify(a => a.AddToRoleAsync(user, roleName), Times.Once);
-        //}
-
-
-        /// <summary>
-        ///     Tests that the <see cref="RoleService.RemoveRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when a null role name is provided while a valid user ID is given.
-        ///     This verifies that the service correctly validates the role name parameter before attempting to remove a role.
-        /// </summary>
-        /// <returns>
-        ///     A task that represents the asynchronous operation.
-        /// </returns>
-        [Fact]
-        public async Task RemoveRole_NullRoleName_ThrowsArgumentNullException()
-        {
-            // Arrange
-            const string userId = "id-test";
-
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole(userId, null));
-
-            VerifyCallsToParameterService(1);
+            _userManagerMock.Verify(a => a.AddToRoleAsync(user, roleName), Times.Once);
         }
 
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.RemoveRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when an empty string is provided as the role name while a valid user ID is given.
-        ///     This ensures that the service validates the role name parameter before attempting to remove a role.
+        ///     when a null, empty or white space parameters role are provided.
+        ///     This verifies that the service correctly validates the role name and id parameter before attempting to remove a role.
         /// </summary>
+        /// <param name="input">
+        ///     Used to test for invalid data like ( null, empty or whitespace )
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        [Fact]
-        public async Task RemoveRole_EmptyRoleName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task RemoveRole_InvalidRoleNameAndId_ThrowsArgumentNullException(string input)
         {
             // Arrange
-            const string userId = "id-test";
-
             _parameterValidatorMock
                 .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole(userId, ""));
-
-            VerifyCallsToParameterService(1);
-        }
-
-
-
-        /// <summary>
-        ///     Tests that the <see cref="RoleService.RemoveRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when a null user ID is provided while a valid role name is given.
-        ///     This verifies that the service correctly validates the user ID parameter before attempting to remove a role.
-        /// </summary>
-        /// <returns>
-        ///     A task that represents the asynchronous operation.
-        /// </returns>
-        [Fact]
-        public async Task RemoveRole_NullId_ThrowsArgumentNullException()
-        {
-            // Arrange
-            const string role = Roles.User;
-
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole(null, role));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole(input, input));
 
             VerifyCallsToParameterService(1);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.RemoveRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when an empty string is provided as the role ID.
-        ///     This ensures that the service validates the role ID parameter before attempting to remove a role.
+        ///     Tests that the <see cref="RoleService.RemoveRole"/> returns a <see cref="ErrorMessages.User.NotFound"/> when 
+        ///     providing a invalid user id to the method.
         /// </summary>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
         [Fact]
-        public async Task RemoveRole_EmptyId_ThrowsArgumentNullException()
+        public async Task RemoveRole_NonExistentUserId_ReturnsNotFoundResult()
         {
-            // Arrange
-            const string role = Roles.User;
+            // Arrange 
+            const string userId = "non-existent-id";
+            const string roleName = Roles.User;
+            const string expectedErrorMessage = ErrorMessages.User.NotFound;
 
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            ArrangeUserLookupServiceMock(null, userId, expectedErrorMessage);
+            ArrangeFailureServiceResult(expectedErrorMessage);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole("", role));
+            // Act
+            var result = await _roleServiceMock.RemoveRole(userId, roleName);
 
-            VerifyCallsToParameterService(1);
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.Success);
+            Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(userId);
+            VerifyCallsToParameterService(2);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.RemoveRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when both the role ID and role name are null.
-        ///     This verifies that the service correctly handles and validates input parameters for role removal.
+        ///     Tests that the <see cref="RoleService.RemoveRole"/> returns a <see cref="ErrorMessages.Role.InvalidRole"/> when 
+        ///     providing a role that does not exist in the system.
         /// </summary>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
         [Fact]
-        public async Task RemoveRole_NullIdAndRoleName_ThrowsArgumentNullException()
+        public async Task RemoveRole_NonExistentRole_ReturnsInvalidRoleError()
         {
-            // Arrange
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            // Arrange 
+            const string userId = "existing-id";
+            const string roleName = "non-existent-role";
+            const string expectedErrorMessage = ErrorMessages.Role.InvalidRole;
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole(null, null));
+            var user = CreateMockUser(true);
 
-            VerifyCallsToParameterService(1);
+            ArrangeUserLookupServiceMock(user, userId, "");
+            ArrangeFailureServiceResult(expectedErrorMessage);
+
+            // Act
+            var result = await _roleServiceMock.RemoveRole(userId, roleName);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.Success);
+            Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(userId);
+            VerifyCallsToParameterService(2);
         }
 
 
         /// <summary>
-        ///     Tests that the <see cref="RoleService.RemoveRole"/> method throws an <see cref="ArgumentNullException"/>
-        ///     when both the role ID and role name are empty strings.
-        ///     This ensures that the service correctly validates input parameters before proceeding with role removal.
+        ///     Tests that the <see cref="RoleService.RemoveRole"/> returns a <see cref="ErrorMessages.Role.MissingRole"/> when 
+        ///     removing a role from a user who is not assigned that role.
         /// </summary>
+        /// <param name="roleName">
+        ///     Used to hold data for all roles that could be removed.
+        /// </param>
         /// <returns>
         ///     A task that represents the asynchronous operation.
         /// </returns>
-        [Fact]
-        public async Task RemoveRole_EmptyIdAndRoleName_ThrowsArgumentNullException()
+        [Theory]
+        [InlineData(Roles.SuperAdmin)]
+        [InlineData(Roles.Admin)]
+        [InlineData(Roles.User)]
+        public async Task RemoveRole_NonAssignedRole_ReturnsAlreadyMissingRoleError(string roleName)
         {
-            // Arrange
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
+            // Arrange 
+            const string userId = "existing-id";
+            const string expectedErrorMessage = ErrorMessages.Role.MissingRole;
 
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole("", ""));
+            var user = CreateMockUser(true);
 
-            VerifyCallsToParameterService(1);
+            ArrangeUserLookupServiceMock(user, userId, "");
+
+            _roleManagerMock
+                .Setup(r => r.RoleExistsAsync(It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _userManagerMock
+                .Setup(u => u.GetRolesAsync(user))
+                .ReturnsAsync(new List<string>());
+
+            ArrangeFailureServiceResult(expectedErrorMessage);
+
+            // Act
+            var result = await _roleServiceMock.RemoveRole(userId, roleName);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.Success);
+            Assert.Contains(expectedErrorMessage, result.Errors);
+
+            VerifyCallsToLookupService(userId);
+            VerifyCallsToParameterService(2);
+
+            _userManagerMock.Verify(u => u.RemoveFromRoleAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Never);
         }
 
 

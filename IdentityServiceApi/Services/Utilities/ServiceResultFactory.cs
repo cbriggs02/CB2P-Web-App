@@ -73,7 +73,6 @@ namespace IdentityServiceApi.Services.Utilities
         {
             _parameterValidator.ValidateObjectNotNull(user, nameof(user));
             ValidateUserProperties(user);
-
             return new UserServiceResult { Success = true, User = user };
         }
 

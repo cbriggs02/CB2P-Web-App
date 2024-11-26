@@ -25,7 +25,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
         private readonly Mock<IParameterValidator> _parameterValidatorMock;
         private readonly Mock<IServiceResultFactory> _serviceResultFactoryMock;
         private readonly PermissionService _permissionServiceMock;
-        private const string UserId = "testid";
+        private const string UserId = "test-id";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PermissionServiceTests"/> class
@@ -55,13 +55,19 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
 
         /// <summary>
-        ///     Verifies that calling the validate permissions method with null id throws an ArgumentNullException.
+        ///     Verifies that calling the validate permissions method with null, empty or whitespace id throws an ArgumentNullException.
         /// </summary>
+        /// <param name="id">
+        ///     Used to test for invalid data like ( null, empty or whitespace )
+        /// </param>
         /// <returns>
         ///     A task representing the asynchronous test operation.
         /// </returns>
-        [Fact]
-        public async Task ValidatePermission_NullId_ReturnsArgumentNullException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task ValidatePermission_NullAndEmptyId_ReturnsArgumentNullException(string id)
         {
             // Arrange
             _parameterValidatorMock
@@ -69,28 +75,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _permissionServiceMock.ValidatePermissions(null));
-
-            VerifyCallsToParameterService();
-        }
-
-
-        /// <summary>
-        ///     Verifies that calling the validate permissions method with empty id throws an ArgumentNullException.
-        /// </summary>
-        /// <returns>
-        ///     A task representing the asynchronous test operation.
-        /// </returns>
-        [Fact]
-        public async Task ValidatePermission_EmptyId_ReturnsArgumentNullException()
-        {
-            // Arrange
-            _parameterValidatorMock
-                .Setup(x => x.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()))
-                .Throws<ArgumentNullException>();
-
-            // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _permissionServiceMock.ValidatePermissions(""));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _permissionServiceMock.ValidatePermissions(id));
 
             VerifyCallsToParameterService();
         }
@@ -123,6 +108,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             var result = await _permissionServiceMock.ValidatePermissions(UserId);
 
             // Assert
+            Assert.NotNull(result);
             Assert.False(result.Success);
             Assert.Contains(expectedErrorMessage, result.Errors);
 
@@ -152,6 +138,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             var result = await _permissionServiceMock.ValidatePermissions(UserId);
 
             // Assert
+            Assert.NotNull(result);
             Assert.True(result.Success);
 
             _loggerServiceMock.VerifyNoOtherCalls();

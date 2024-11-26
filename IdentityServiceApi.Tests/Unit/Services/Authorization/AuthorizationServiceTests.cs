@@ -119,6 +119,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             var result = await _authorizationService.ValidatePermission(targetUserId);
 
             // Assert
+            Assert.NotNull(result);
             Assert.True(result);
 
             VerifyCallsToUserContextService(claimsPrincipal);
