@@ -1,12 +1,13 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
 
-namespace AspNetWebService.Models.ServiceResultModels.Authorization
+namespace IdentityServiceApi.Models.ServiceResultModels.Authorization
 {
     /// <summary>
     ///     Represents the result of a service operation that retrieves a list of roles.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class RoleServiceListResult
     {

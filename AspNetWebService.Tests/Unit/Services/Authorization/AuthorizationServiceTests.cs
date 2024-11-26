@@ -1,16 +1,17 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.ServiceResultModels.UserManagement;
-using AspNetWebService.Services.Authorization;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authentication;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Services.Authentication;
+using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using System.Security.Claims;
 
-namespace AspNetWebService.Tests.Unit.Services.Authorization
+namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 {
     /// <summary>
     ///     Unit tests for the <see cref="AuthorizationService"/> class.
@@ -18,7 +19,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
     ///     behavior of the authorization functionality.
     /// </summary>
     /// <remarks>
-    ///     Author: Christian Briglio
+    ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [Trait("Category", "UnitTest")]
     public class AuthorizationServiceTests
@@ -71,6 +73,18 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
             _userLookupServiceMock = new Mock<IUserLookupService>();
 
             _authorizationService = new AuthorizationService(_userManagerMock.Object, _userContextServiceMock.Object, _userLookupServiceMock.Object);
+        }
+
+
+        /// <summary>
+        ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="AuthorizationService"/> is 
+        ///     instantiated with a null dependencies.
+        /// </summary>
+        [Fact]
+        public void AuthorizationService_NullDependencies_ThrowsArgumentNullException()
+        {
+            //Act & Assert
+            Assert.Throws<ArgumentNullException>(() => new AuthorizationService(null, null, null));
         }
 
 

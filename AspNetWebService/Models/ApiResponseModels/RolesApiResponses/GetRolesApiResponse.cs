@@ -1,12 +1,13 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
 
-namespace AspNetWebService.Models.ApiResponseModels.RolesApiResponses
+namespace IdentityServiceApi.Models.ApiResponseModels.RolesApiResponses
 {
     /// <summary>
     ///     Represents the response returned by the roles API when retrieving roles.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class GetRolesApiResponse
     {

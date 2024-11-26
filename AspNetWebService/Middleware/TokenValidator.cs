@@ -1,9 +1,9 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Interfaces.UserManagement;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Interfaces.UserManagement;
 using System.Security.Claims;
 
-namespace AspNetWebService.Middleware
+namespace IdentityServiceApi.Middleware
 {
     /// <summary>
     ///     Middleware for validating JWT tokens to ensure that tokens belonging to recently deleted users are unauthorized.
@@ -12,6 +12,7 @@ namespace AspNetWebService.Middleware
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class TokenValidator
     {

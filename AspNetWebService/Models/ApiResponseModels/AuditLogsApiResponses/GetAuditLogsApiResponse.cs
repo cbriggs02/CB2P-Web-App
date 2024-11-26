@@ -1,14 +1,15 @@
-﻿using AspNetWebService.Models.PaginationModels;
-using AspNetWebService.Models.EntityModels;
-using AspNetWebService.Models.DataTransferObjectModels;
+﻿using IdentityServiceApi.Models.PaginationModels;
+using IdentityServiceApi.Models.EntityModels;
+using IdentityServiceApi.Models.DataTransferObjectModels;
 
-namespace AspNetWebService.Models.ApiResponseModels.AuditLogsApiResponses
+namespace IdentityServiceApi.Models.ApiResponseModels.AuditLogsApiResponses
 {
     /// <summary>
     ///     Represents the response returned by the audit log API when retrieving audit logs with pagination.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class GetAuditLogsApiResponse
     {

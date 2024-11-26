@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Models.RequestModels.Authentication
+namespace IdentityServiceApi.Models.RequestModels.Authentication
 {
     /// <summary>
     ///     Represents the model that encapsulates data used for user authentication.
     ///     This model contains the credentials of a user requesting a token from the login API and service,
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class LoginRequest
     {

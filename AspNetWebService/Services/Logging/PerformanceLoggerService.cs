@@ -1,8 +1,8 @@
-﻿using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Models.RequestModels.Logging;
+﻿using IdentityServiceApi.Interfaces.Authentication;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Models.RequestModels.Logging;
 
-namespace AspNetWebService.Services.Logging
+namespace IdentityServiceApi.Services.Logging
 {
     /// <summary>
     ///     Service for logging slow performance metrics. This service captures user-related information 
@@ -10,6 +10,7 @@ namespace AspNetWebService.Services.Logging
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class PerformanceLoggerService : IPerformanceLoggerService
     {

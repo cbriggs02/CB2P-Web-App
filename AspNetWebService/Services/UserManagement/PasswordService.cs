@@ -1,19 +1,20 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.UserManagement;
-using AspNetWebService.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authorization;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
 using Microsoft.AspNetCore.Identity;
 
-namespace AspNetWebService.Services.UserManagement
+namespace IdentityServiceApi.Services.UserManagement
 {
     /// <summary>
     ///     Service responsible for interacting with password-related data and business logic.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class PasswordService : IPasswordService
     {

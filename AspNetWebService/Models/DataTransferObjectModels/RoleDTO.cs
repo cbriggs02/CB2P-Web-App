@@ -1,10 +1,11 @@
-﻿namespace AspNetWebService.Models.DataTransferObjectModels
+﻿namespace IdentityServiceApi.Models.DataTransferObjectModels
 {
     /// <summary>
     ///     Represents a Data Transfer Object (DTO) for a role in the system.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class RoleDTO
     {

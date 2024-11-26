@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AspNetWebService.Models.Entities
+namespace IdentityServiceApi.Models.Entities
 {
     /// <summary>
     ///     Represents an entity that stores historical user password information 
@@ -10,6 +10,7 @@ namespace AspNetWebService.Models.Entities
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class PasswordHistory
     {

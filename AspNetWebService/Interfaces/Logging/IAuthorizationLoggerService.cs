@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Interfaces.Logging
+﻿namespace IdentityServiceApi.Interfaces.Logging
 {
     /// <summary>
     ///     Defines a contract for logging authorization breaches within the application
@@ -6,6 +6,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IAuthorizationLoggerService
     {

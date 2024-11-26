@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Interfaces.Logging
+﻿namespace IdentityServiceApi.Interfaces.Logging
 {
     /// <summary>
     ///     Defines a contract for logging performance metrics related to the application's operations
@@ -6,6 +6,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IPerformanceLoggerService
     {

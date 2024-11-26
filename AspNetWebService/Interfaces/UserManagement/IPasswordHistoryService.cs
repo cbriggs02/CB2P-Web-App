@@ -1,12 +1,13 @@
-﻿using AspNetWebService.Models.RequestModels.UserManagement;
+﻿using IdentityServiceApi.Models.RequestModels.UserManagement;
 
-namespace AspNetWebService.Interfaces.UserManagement
+namespace IdentityServiceApi.Interfaces.UserManagement
 {
     /// <summary>
     ///     Interface defining the contract for a service responsible for PasswordHistory-related operations.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IPasswordHistoryService
     {

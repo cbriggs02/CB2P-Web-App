@@ -1,13 +1,14 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.PaginationModels;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.PaginationModels;
 
-namespace AspNetWebService.Models.ServiceResultModels.Logging
+namespace IdentityServiceApi.Models.ServiceResultModels.Logging
 {
     /// <summary>
     ///     Represents the result of a service operation that retrieves a list of audit logs.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AuditLogServiceListResult
     {

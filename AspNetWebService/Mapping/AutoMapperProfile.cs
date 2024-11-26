@@ -1,9 +1,9 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.EntityModels;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.EntityModels;
 using AutoMapper;
 
-namespace AspNetWebService.Mapping
+namespace IdentityServiceApi.Mapping
 {
     /// <summary>
     ///     AutoMapper profile used to define mappings between entity classes and Data Transfer Objects (DTOs).
@@ -11,6 +11,7 @@ namespace AspNetWebService.Mapping
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AutoMapperProfile : Profile
     {

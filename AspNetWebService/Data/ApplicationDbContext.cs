@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.EntityModels;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.EntityModels;
 
-namespace AspNetWebService.Data
+namespace IdentityServiceApi.Data
 {
     /// <summary>
     ///     Represents the database context for the application, inheriting from <see cref="IdentityDbContext{TUser}"/> to provide 
@@ -11,6 +11,7 @@ namespace AspNetWebService.Data
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class ApplicationDbContext : IdentityDbContext<User>
     {

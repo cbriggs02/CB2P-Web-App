@@ -1,10 +1,11 @@
-﻿namespace AspNetWebService.Models.ServiceResultModels.Common
+﻿namespace IdentityServiceApi.Models.ServiceResultModels.Common
 {
     /// <summary>
-    ///     Represents the uniform model repersenting the result of a service operation.
+    ///     Represents the uniform model representing the result of a service operation.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class ServiceResult
     {

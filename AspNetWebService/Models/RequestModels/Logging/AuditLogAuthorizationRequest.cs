@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Models.RequestModels.Logging
+﻿namespace IdentityServiceApi.Models.RequestModels.Logging
 {
     /// <summary>
     ///     Request model for logging audit data related to authorization breaches.
@@ -6,6 +6,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AuditLogAuthorizationRequest
     {

@@ -1,15 +1,16 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.RequestModels.UserManagement;
-using AspNetWebService.Models.ServiceResultModels.Common;
-using AspNetWebService.Models.ServiceResultModels.UserManagement;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 
-namespace AspNetWebService.Interfaces.UserManagement
+namespace IdentityServiceApi.Interfaces.UserManagement
 {
     /// <summary>
     ///     Interface defining the contract for a service responsible for user-related operations.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IUserService
     {

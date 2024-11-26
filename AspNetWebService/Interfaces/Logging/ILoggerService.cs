@@ -1,10 +1,11 @@
-﻿namespace AspNetWebService.Interfaces.Logging
+﻿namespace IdentityServiceApi.Interfaces.Logging
 {
     /// <summary>
     ///     Defines a contract for logging various application events, such as authorization breaches, exceptions, and performance metrics.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface ILoggerService
     {

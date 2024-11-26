@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AspNetWebService.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.DataTransferObjectModels;
 using Swashbuckle.AspNetCore.Annotations;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
-using AspNetWebService.Constants;
-using AspNetWebService.Models.ApiResponseModels.UsersApiResponses;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Models.RequestModels.UserManagement;
-using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
+using IdentityServiceApi.Constants;
+using IdentityServiceApi.Models.ApiResponseModels.UsersApiResponses;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.ApiResponseModels.CommonApiResponses;
 using Asp.Versioning;
 
-namespace AspNetWebService.Controllers
+namespace IdentityServiceApi.Controllers
 {
     /// <summary>
     ///     Controller for handling API operations related to users.
@@ -20,6 +20,7 @@ namespace AspNetWebService.Controllers
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[Controller]")]

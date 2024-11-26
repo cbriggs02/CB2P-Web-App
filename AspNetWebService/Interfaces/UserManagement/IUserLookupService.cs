@@ -1,6 +1,6 @@
-﻿using AspNetWebService.Models.ServiceResultModels.UserManagement;
+﻿using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 
-namespace AspNetWebService.Interfaces.UserManagement
+namespace IdentityServiceApi.Interfaces.UserManagement
 {
     /// <summary>
     ///     Defines the contract for user lookup operations within the 
@@ -10,6 +10,7 @@ namespace AspNetWebService.Interfaces.UserManagement
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IUserLookupService
     {

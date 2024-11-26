@@ -1,17 +1,17 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Data;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.EntityModels;
-using AspNetWebService.Models.PaginationModels;
-using AspNetWebService.Models.RequestModels.Logging;
-using AspNetWebService.Models.ServiceResultModels.Common;
-using AspNetWebService.Models.ServiceResultModels.Logging;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Data;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.EntityModels;
+using IdentityServiceApi.Models.PaginationModels;
+using IdentityServiceApi.Models.RequestModels.Logging;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.ServiceResultModels.Logging;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspNetWebService.Services.Logging
+namespace IdentityServiceApi.Services.Logging
 {
     /// <summary>
     ///     Provides functionality to log actions and exceptions within the application,
@@ -20,6 +20,7 @@ namespace AspNetWebService.Services.Logging
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AuditLoggerService : IAuditLoggerService
     {

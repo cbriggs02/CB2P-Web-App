@@ -1,9 +1,9 @@
-﻿using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.RequestModels.Logging;
+﻿using IdentityServiceApi.Interfaces.Authentication;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.RequestModels.Logging;
 
-namespace AspNetWebService.Services.Logging
+namespace IdentityServiceApi.Services.Logging
 {
     /// <summary>
     ///     Service for logging exceptions and sending audit log requests.
@@ -12,6 +12,7 @@ namespace AspNetWebService.Services.Logging
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class ExceptionLoggerService : IExceptionLoggerService
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Constants;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Constants;
 
-namespace AspNetWebService.Data
+namespace IdentityServiceApi.Data
 {
     /// <summary>
     ///     Provides functionality for database initialization and seeding.
@@ -12,6 +12,7 @@ namespace AspNetWebService.Data
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class DbInitializer
     {

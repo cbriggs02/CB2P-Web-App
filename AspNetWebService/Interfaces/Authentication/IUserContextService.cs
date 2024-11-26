@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Security.Claims;
 
-namespace AspNetWebService.Interfaces.Authentication
+namespace IdentityServiceApi.Interfaces.Authentication
 {
     /// <summary>
     ///     Defines methods for retrieving user context information, such as claims, user ID,
@@ -10,6 +10,7 @@ namespace AspNetWebService.Interfaces.Authentication
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IUserContextService
     {

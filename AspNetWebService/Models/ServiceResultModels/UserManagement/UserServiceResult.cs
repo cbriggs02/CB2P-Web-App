@@ -1,7 +1,7 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
 
-namespace AspNetWebService.Models.ServiceResultModels.UserManagement
+namespace IdentityServiceApi.Models.ServiceResultModels.UserManagement
 {
     /// <summary>
     ///     Represents the result of a user-related operation 
@@ -9,6 +9,7 @@ namespace AspNetWebService.Models.ServiceResultModels.UserManagement
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserServiceResult : ServiceResult
     {

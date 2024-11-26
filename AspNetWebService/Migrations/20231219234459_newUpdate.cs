@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace AspNetWebService.Migrations
+namespace IdentityServiceApi.Migrations
 {
     public partial class newUpdate : Migration
     {

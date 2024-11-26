@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Models.RequestModels.Logging
+﻿namespace IdentityServiceApi.Models.RequestModels.Logging
 {
     /// <summary>
     ///     Model for capturing exception-related information for auditing purposes.
@@ -7,6 +7,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AuditLogExceptionRequest
     {

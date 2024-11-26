@@ -1,13 +1,14 @@
-﻿using AspNetWebService.Models.ServiceResultModels.Authorization;
-using AspNetWebService.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Models.ServiceResultModels.Authorization;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
 
-namespace AspNetWebService.Interfaces.Authorization
+namespace IdentityServiceApi.Interfaces.Authorization
 {
     /// <summary>
     ///     Interface defining the contract for a service responsible for role-related operations.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IRoleService
     {

@@ -1,7 +1,7 @@
-﻿using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Interfaces.Utilities;
+﻿using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Interfaces.Utilities;
 
-namespace AspNetWebService.Services.Logging
+namespace IdentityServiceApi.Services.Logging
 {
     /// <summary>
     ///     Provides a centralized logging service for various types of logging events. This service acts as a wrapper 
@@ -9,6 +9,7 @@ namespace AspNetWebService.Services.Logging
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class LoggerService : ILoggerService
     {

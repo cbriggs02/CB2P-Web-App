@@ -1,12 +1,13 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
 
-namespace AspNetWebService.Models.ApiResponseModels.UsersApiResponses
+namespace IdentityServiceApi.Models.ApiResponseModels.UsersApiResponses
 {
     /// <summary>
     ///     Represents the response returned by the users API when retrieving a user, or creating a user.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserApiResponse
     {

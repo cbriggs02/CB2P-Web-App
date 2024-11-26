@@ -1,16 +1,16 @@
 ﻿using Asp.Versioning;
-using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Models.ApiResponseModels.AuditLogsApiResponses;
-using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
-using AspNetWebService.Models.RequestModels.Logging;
+using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Models.ApiResponseModels.AuditLogsApiResponses;
+using IdentityServiceApi.Models.ApiResponseModels.CommonApiResponses;
+using IdentityServiceApi.Models.RequestModels.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Controllers
+namespace IdentityServiceApi.Controllers
 {
     /// <summary>
     ///     Controller for handling API operations related to audit logs.
@@ -19,6 +19,7 @@ namespace AspNetWebService.Controllers
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[Controller]")]

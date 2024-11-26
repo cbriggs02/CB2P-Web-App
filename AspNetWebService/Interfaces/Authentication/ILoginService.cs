@@ -1,13 +1,14 @@
-﻿using AspNetWebService.Models.RequestModels.Authentication;
-using AspNetWebService.Models.ServiceResultModels.Authentication;
+﻿using IdentityServiceApi.Models.RequestModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.Authentication;
 
-namespace AspNetWebService.Interfaces.Authentication
+namespace IdentityServiceApi.Interfaces.Authentication
 {
     /// <summary>
     ///     Interface defining the contract for a service responsible for login-related operations.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface ILoginService
     {

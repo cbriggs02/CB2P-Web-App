@@ -1,5 +1,5 @@
 ﻿
-namespace AspNetWebService.Models.PaginationModels
+namespace IdentityServiceApi.Models.PaginationModels
 {
     /// <summary>
     ///     Represents metadata used to assist with pagination in API responses,
@@ -8,6 +8,7 @@ namespace AspNetWebService.Models.PaginationModels
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class PaginationMetadata
     {

@@ -1,15 +1,19 @@
-﻿using AspNetWebService.Models.Entities;
+﻿using IdentityServiceApi.Models.Entities;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AspNetWebService.Models.EntityModels
+namespace IdentityServiceApi.Models.EntityModels
 {
     /// <summary>
     ///     Represents the type of action logged in the audit log.
     ///     This enum captures specific operations, such as security breaches or exceptions, 
     ///     that are recorded for auditing purposes.
     /// </summary>
+    /// <remarks>
+    ///     @Author: Christian Briglio
+    ///     @Created: 2024
+    /// </remarks>
     public enum AuditAction
     {
         AuthorizationBreach,
@@ -22,6 +26,7 @@ namespace AspNetWebService.Models.EntityModels
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AuditLog
     {

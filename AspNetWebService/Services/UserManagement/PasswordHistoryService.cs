@@ -1,18 +1,19 @@
-﻿using AspNetWebService.Data;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.UserManagement;
+﻿using IdentityServiceApi.Data;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspNetWebService.Services.UserManagement
+namespace IdentityServiceApi.Services.UserManagement
 {
     /// <summary>
     ///     Service responsible for interacting with passwordHistory-related data and business logic.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class PasswordHistoryService : IPasswordHistoryService
     {

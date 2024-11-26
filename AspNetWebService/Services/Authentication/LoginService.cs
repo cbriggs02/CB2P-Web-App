@@ -1,23 +1,24 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.Authentication;
-using AspNetWebService.Models.ServiceResultModels.Authentication;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authentication;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.RequestModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AspNetWebService.Services.Authentication
+namespace IdentityServiceApi.Services.Authentication
 {
     /// <summary>
     ///     Service responsible for interacting with login-related data and business logic.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class LoginService : ILoginService
     {

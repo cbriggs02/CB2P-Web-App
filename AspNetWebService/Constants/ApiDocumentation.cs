@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Constants
+﻿namespace IdentityServiceApi.Constants
 {
     /// <summary>
     ///     Contains constants related to API documentation.
@@ -7,6 +7,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public static class ApiDocumentation
     {

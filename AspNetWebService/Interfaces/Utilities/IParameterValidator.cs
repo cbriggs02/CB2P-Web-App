@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Interfaces.Utilities
+﻿namespace IdentityServiceApi.Interfaces.Utilities
 {
     /// <summary>
     ///     Defines a contract for parameter validation methods.
@@ -8,6 +8,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IParameterValidator
     {

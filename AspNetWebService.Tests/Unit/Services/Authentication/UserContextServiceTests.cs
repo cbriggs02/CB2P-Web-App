@@ -1,11 +1,12 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Services.Authentication;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Services.Authentication;
+using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using System.Net;
 using System.Security.Claims;
 
-namespace AspNetWebService.Tests.Unit.Services.Authentication
+namespace IdentityServiceApi.Tests.Unit.Services.Authentication
 {
     /// <summary>
     ///     Unit tests for the <see cref="UserContextService"/> class.
@@ -13,7 +14,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
     ///     in the UserContextService, ensuring correct behavior under various scenarios.
     /// </summary>
     /// <remarks>
-    ///     Author: Christian Briglio
+    ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [Trait("Category", "UnitTest")]
     public class UserContextServiceTests
@@ -30,6 +32,18 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         {
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _userContextService = new UserContextService(_httpContextAccessorMock.Object);
+        }
+
+
+        /// <summary>
+        ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="UserContextService"/> is 
+        ///     instantiated with a null dependencies.
+        /// </summary>
+        [Fact]
+        public void UserContextService_NullDependencies_ThrowsArgumentNullException()
+        {
+            //Act & Assert
+            Assert.Throws<ArgumentNullException>(() => new UserContextService(null));
         }
 
 

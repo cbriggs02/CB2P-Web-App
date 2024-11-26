@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Constants
+﻿namespace IdentityServiceApi.Constants
 {
     /// <summary>
     ///     Contains constants for error messages used throughout the application.
@@ -6,6 +6,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public static class ErrorMessages
     {

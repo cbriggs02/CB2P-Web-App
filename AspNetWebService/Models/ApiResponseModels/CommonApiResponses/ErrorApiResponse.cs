@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Models.ApiResponseModels.CommonApiResponses
+﻿namespace IdentityServiceApi.Models.ApiResponseModels.CommonApiResponses
 {
     /// <summary>
     ///     Represents errors encountered during service operations.
@@ -7,6 +7,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class ErrorApiResponse
     {

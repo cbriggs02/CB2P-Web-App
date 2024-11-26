@@ -1,10 +1,10 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authorization;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
 
-namespace AspNetWebService.Services.Authorization
+namespace IdentityServiceApi.Services.Authorization
 {
     /// <summary>
     ///     Service responsible for interacting with authorization-related data and business logic.
@@ -12,6 +12,7 @@ namespace AspNetWebService.Services.Authorization
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class PermissionService : IPermissionService
     {

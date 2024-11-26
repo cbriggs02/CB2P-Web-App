@@ -1,7 +1,7 @@
-﻿using AspNetWebService.Models.EntityModels;
+﻿using IdentityServiceApi.Models.EntityModels;
 using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Models.RequestModels.Logging
+namespace IdentityServiceApi.Models.RequestModels.Logging
 {
     /// <summary>
     ///     Represents the model used when requesting a paginated list of audit logs.
@@ -9,6 +9,7 @@ namespace AspNetWebService.Models.RequestModels.Logging
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AuditLogListRequest
     {

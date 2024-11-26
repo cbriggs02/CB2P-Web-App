@@ -1,4 +1,4 @@
-﻿namespace AspNetWebService.Models.RequestModels.UserManagement
+﻿namespace IdentityServiceApi.Models.RequestModels.UserManagement
 {
     /// <summary>
     ///     Represents the model for searching a user's password history,
@@ -6,6 +6,7 @@
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class SearchPasswordHistoryRequest
     {

@@ -1,17 +1,18 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Models.Entities;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authentication;
+using IdentityServiceApi.Interfaces.Authorization;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace AspNetWebService.Services.Authorization
+namespace IdentityServiceApi.Services.Authorization
 {
     /// <summary>
     ///     Service responsible for interacting with authorization-related data and business logic.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class AuthorizationService : IAuthorizationService
     {

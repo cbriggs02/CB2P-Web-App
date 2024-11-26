@@ -1,21 +1,22 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.ServiceResultModels.Authorization;
-using AspNetWebService.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authorization;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.ServiceResultModels.Authorization;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspNetWebService.Services.Authorization
+namespace IdentityServiceApi.Services.Authorization
 {
     /// <summary>
     ///     Service responsible for interacting with role-related data and business logic.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class RoleService : IRoleService
     {
@@ -35,7 +36,7 @@ namespace AspNetWebService.Services.Authorization
         ///     The user manager for handling user operations within the system.
         /// </param>
         /// <param name="parameterValidator">
-        ///     The paramter validator service used for defense checking service paramters.
+        ///     The parameter validator service used for defense checking service parameters.
         /// </param>
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
@@ -92,7 +93,7 @@ namespace AspNetWebService.Services.Authorization
         {
             _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
-            if (await _roleManager.RoleExistsAsync(roleName))
+            if (await DoesRoleExist(roleName))
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.AlreadyExist });
             }
@@ -179,7 +180,7 @@ namespace AspNetWebService.Services.Authorization
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InactiveUser });
             }
 
-            if (!await _roleManager.RoleExistsAsync(roleName))
+            if (!await DoesRoleExist(roleName))
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InvalidRole });
             }
@@ -230,7 +231,7 @@ namespace AspNetWebService.Services.Authorization
 
             var user = userLookupResult.UserFound;
 
-            if (!await _roleManager.RoleExistsAsync(roleName))
+            if (!await DoesRoleExist(roleName))
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InvalidRole });
             }
@@ -248,6 +249,22 @@ namespace AspNetWebService.Services.Authorization
             }
 
             return _serviceResultFactory.GeneralOperationSuccess();
+        }
+
+
+        /// <summary>
+        ///     Asynchronously determines whether the specified role exists in the system.
+        /// </summary>
+        /// <param name="roleName">
+        ///     The name of the role to check for existence.
+        /// </param>
+        /// <returns>
+        ///     A Boolean value indicating whether the specified role exists.
+        ///     Returns true if the role exists; otherwise, false.
+        /// </returns>
+        private async Task<bool> DoesRoleExist(string roleName)
+        {
+            return await _roleManager.RoleExistsAsync(roleName);
         }
 
 

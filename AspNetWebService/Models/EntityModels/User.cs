@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using AspNetWebService.Models.EntityModels;
+using IdentityServiceApi.Models.EntityModels;
 using Microsoft.AspNetCore.Identity;
 
-namespace AspNetWebService.Models.Entities
+namespace IdentityServiceApi.Models.Entities
 {
     /// <summary>
     ///     Represents the user entity, extending the IdentityUser class from ASP.NET Core Identity.
@@ -10,6 +10,7 @@ namespace AspNetWebService.Models.Entities
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class User : IdentityUser
     {

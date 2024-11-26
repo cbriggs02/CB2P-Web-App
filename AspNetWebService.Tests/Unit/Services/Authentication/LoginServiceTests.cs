@@ -1,11 +1,12 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.RequestModels.Authentication;
-using AspNetWebService.Models.ServiceResultModels.Authentication;
-using AspNetWebService.Models.ServiceResultModels.UserManagement;
-using AspNetWebService.Services.Authentication;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.RequestModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Services.Authentication;
+using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,7 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace AspNetWebService.Tests.Unit.Services.Authentication
+namespace IdentityServiceApi.Tests.Unit.Services.Authentication
 {
     /// <summary>
     ///     Unit tests for the <see cref="LoginService"/> class.
@@ -22,7 +23,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
     ///     behavior of the login functionality.
     /// </summary>
     /// <remarks>
-    ///     Author: Christian Briglio
+    ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [Trait("Category", "UnitTest")]
     public class LoginServiceTests
@@ -48,7 +50,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         private readonly Mock<IAuthenticationSchemeProvider> _schemesMock;
         private readonly Mock<IUserConfirmation<User>> _confirmationMock;
         private readonly LoginService _loginService;
-        private const string TestPassword = "testpassword";
+        private const string TestPassword = "test-password";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="LoginServiceTests"/> class.
@@ -103,6 +105,18 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
             _userLookupServiceMock = new Mock<IUserLookupService>();
 
             _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _configurationMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object, _userLookupServiceMock.Object);
+        }
+
+
+        /// <summary>
+        ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="LoginService"/> is 
+        ///     instantiated with a null dependencies.
+        /// </summary>
+        [Fact]
+        public void LoginService_NullDependencies_ThrowsArgumentNullException()
+        {
+            //Act & Assert
+            Assert.Throws<ArgumentNullException>(() => new LoginService(null, null, null, null, null, null));
         }
 
 
@@ -347,7 +361,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         public async Task Login_InvalidCredentials_ReturnsInvalidCredentialsResult()
         {
             // Arrange
-            const string wrongPassword = "wrongpassword";
+            const string wrongPassword = "wrong-password";
             const string expectedErrorMessage = ErrorMessages.Password.InvalidCredentials;
 
             var user = CreateMockUser(true);
@@ -385,7 +399,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         public async Task Login_SuccessfulLogin_ReturnsToken()
         {
             // Arrange
-            const string correctPassword = "correctpassword";
+            const string correctPassword = "correct-password";
             const string validIssuer = "issuer";
             const string validAudience = "audience";
             const string secretKey = "superSecretKey123!";
@@ -481,7 +495,7 @@ namespace AspNetWebService.Tests.Unit.Services.Authentication
         /// </returns>
         private static User CreateMockUser(bool accountStatus)
         {
-            const string mockUserName = "testuser";
+            const string mockUserName = "test-user";
             return new User { UserName = mockUserName, AccountStatus = accountStatus ? 1 : 0};
         }
 

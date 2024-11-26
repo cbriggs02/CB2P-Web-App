@@ -1,8 +1,8 @@
-﻿using AspNetWebService.Interfaces.Authentication;
+﻿using IdentityServiceApi.Interfaces.Authentication;
 using System.Net;
 using System.Security.Claims;
 
-namespace AspNetWebService.Services.Authentication
+namespace IdentityServiceApi.Services.Authentication
 {
     /// <summary>
     ///     Provides methods for accessing user context information from the HTTP context,
@@ -12,6 +12,7 @@ namespace AspNetWebService.Services.Authentication
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserContextService : IUserContextService
     {

@@ -1,13 +1,14 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.PaginationModels;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.PaginationModels;
 
-namespace AspNetWebService.Models.ApiResponseModels.UsersApiResponses
+namespace IdentityServiceApi.Models.ApiResponseModels.UsersApiResponses
 {
     /// <summary>
     ///     Represents the response returned by the users API when retrieving users with pagination.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class GetUsersApiResponse
     {

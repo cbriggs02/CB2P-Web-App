@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace AspNetWebService.Migrations.HealthChecksDb
+namespace IdentityServiceApi.Migrations.HealthChecksDb
 {
     public partial class healthcheckdb : Migration
     {

@@ -1,8 +1,7 @@
-﻿using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Services.Logging;
+﻿using IdentityServiceApi.Interfaces.Logging;
 using System.Diagnostics;
 
-namespace AspNetWebService.Middleware
+namespace IdentityServiceApi.Middleware
 {
     /// <summary>
     ///     Middleware for monitoring the performance of HTTP requests, including request duration and CPU usage.
@@ -10,6 +9,7 @@ namespace AspNetWebService.Middleware
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class PerformanceMonitor
     {

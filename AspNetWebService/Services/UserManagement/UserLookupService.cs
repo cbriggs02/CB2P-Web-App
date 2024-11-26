@@ -1,11 +1,11 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.ServiceResultModels.UserManagement;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 
-namespace AspNetWebService.Services.UserManagement
+namespace IdentityServiceApi.Services.UserManagement
 {
     /// <summary>
     ///     Provides services for looking up user information within the application. 
@@ -15,6 +15,7 @@ namespace AspNetWebService.Services.UserManagement
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserLookupService : IUserLookupService
     {
@@ -29,7 +30,7 @@ namespace AspNetWebService.Services.UserManagement
         ///     The user manager used for managing user-related operations.
         /// </param>
         /// <param name="parameterValidator">
-        ///     The paramter validator service used for defense checking service paramters.
+        ///     The parameter validator service used for defense checking service parameters.
         /// </param>
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
@@ -59,7 +60,6 @@ namespace AspNetWebService.Services.UserManagement
         public async Task<UserLookupServiceResult> FindUserById(string id)
         {
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
-
             var user = await _userManager.FindByIdAsync(id);
             return HandleLookupResult(user);
         }
@@ -79,7 +79,6 @@ namespace AspNetWebService.Services.UserManagement
         public async Task<UserLookupServiceResult> FindUserByUsername(string userName)
         {
             _parameterValidator.ValidateNotNullOrEmpty(userName, nameof(userName));
-
             var user = await _userManager.FindByNameAsync(userName);
             return HandleLookupResult(user);
         }
@@ -101,7 +100,6 @@ namespace AspNetWebService.Services.UserManagement
             {
                 return _serviceResultFactory.UserLookupOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
-
             return _serviceResultFactory.UserLookupOperationSuccess(user);
         }
     }

@@ -1,8 +1,8 @@
-﻿using AspNetWebService.Models.RequestModels.Logging;
-using AspNetWebService.Models.ServiceResultModels.Common;
-using AspNetWebService.Models.ServiceResultModels.Logging;
+﻿using IdentityServiceApi.Models.RequestModels.Logging;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.ServiceResultModels.Logging;
 
-namespace AspNetWebService.Interfaces.Logging
+namespace IdentityServiceApi.Interfaces.Logging
 {
     /// <summary>
     ///     Defines the contract for audit log services that manage logging of various actions 
@@ -10,6 +10,7 @@ namespace AspNetWebService.Interfaces.Logging
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IAuditLoggerService
     {

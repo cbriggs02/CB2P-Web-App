@@ -1,24 +1,25 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.PaginationModels;
-using AspNetWebService.Models.RequestModels.UserManagement;
-using AspNetWebService.Models.ServiceResultModels.Common;
-using AspNetWebService.Models.ServiceResultModels.UserManagement;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authorization;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.PaginationModels;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AspNetWebService.Services.UserManagement
+namespace IdentityServiceApi.Services.UserManagement
 {
     /// <summary>
     ///     Service responsible for interacting with user-related data and business logic.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserService : IUserService
     {

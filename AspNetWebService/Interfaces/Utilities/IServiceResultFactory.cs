@@ -1,10 +1,10 @@
-﻿using AspNetWebService.Models.DataTransferObjectModels;
-using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.ServiceResultModels.Authentication;
-using AspNetWebService.Models.ServiceResultModels.Common;
-using AspNetWebService.Models.ServiceResultModels.UserManagement;
+﻿using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.ServiceResultModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 
-namespace AspNetWebService.Interfaces.Utilities
+namespace IdentityServiceApi.Interfaces.Utilities
 {
     /// <summary>
     ///     Provides methods for creating uniform service result objects 
@@ -14,6 +14,7 @@ namespace AspNetWebService.Interfaces.Utilities
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IServiceResultFactory
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace AspNetWebService.Data
+namespace IdentityServiceApi.Data
 {
     /// <summary>
     ///     Represents the DbContext for HealthChecks UI.
@@ -8,6 +8,7 @@ namespace AspNetWebService.Data
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class HealthChecksDbContext : DbContext
     {

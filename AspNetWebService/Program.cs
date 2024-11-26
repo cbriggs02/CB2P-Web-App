@@ -2,36 +2,37 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AspNetWebService.Mapping;
-using AspNetWebService.Data;
+using IdentityServiceApi.Mapping;
+using IdentityServiceApi.Data;
 using System.Text;
 using Serilog;
-using AspNetWebService.Middleware;
-using AspNetWebService.Models.Entities;
+using IdentityServiceApi.Middleware;
+using IdentityServiceApi.Models.Entities;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Mvc;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Services.Logging;
-using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Services.Authentication;
-using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Services.Authorization;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Services.UserManagement;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Services.Utilities;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Services.Logging;
+using IdentityServiceApi.Interfaces.Authentication;
+using IdentityServiceApi.Services.Authentication;
+using IdentityServiceApi.Interfaces.Authorization;
+using IdentityServiceApi.Services.Authorization;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Services.UserManagement;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Services.Utilities;
 using Asp.Versioning;
 
-namespace AspNetWebService
+namespace IdentityServiceApi
 {
     /// <summary>
     ///     Entry point class for the ASP.NET Core application,
     ///     containing the <see cref="Main"/> method to set up and configure the application.
     /// </summary>
     /// <remarks>
-    ///     Author: Christian Briglio
+    ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class Program
     {
@@ -131,7 +132,7 @@ namespace AspNetWebService
 
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AspNetWebService", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "IdentityServiceApi", Version = "v1" });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -200,7 +201,7 @@ namespace AspNetWebService
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AspNetWebService API V1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "IdentityServiceApi API V1");
                     c.RoutePrefix = string.Empty;
                 });
             }

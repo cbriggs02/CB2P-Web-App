@@ -1,13 +1,14 @@
-﻿using AspNetWebService.Models.Entities;
-using AspNetWebService.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Models.Entities;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
 
-namespace AspNetWebService.Models.ServiceResultModels.UserManagement
+namespace IdentityServiceApi.Models.ServiceResultModels.UserManagement
 {
     /// <summary>
     ///     Represents the result of a user lookup operation.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserLookupServiceResult : ServiceResult
     {

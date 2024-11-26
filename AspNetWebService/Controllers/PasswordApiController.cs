@@ -1,14 +1,14 @@
 ﻿using Asp.Versioning;
-using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.UserManagement;
-using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
-using AspNetWebService.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.UserManagement;
+using IdentityServiceApi.Models.ApiResponseModels.CommonApiResponses;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Controllers
+namespace IdentityServiceApi.Controllers
 {
     /// <summary>
     ///     Controller for handling API operations related to passwords.
@@ -17,6 +17,7 @@ namespace AspNetWebService.Controllers
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[Controller]")]

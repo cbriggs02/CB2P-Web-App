@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Models.RequestModels.UserManagement
+namespace IdentityServiceApi.Models.RequestModels.UserManagement
 {
     /// <summary>
     ///     Represents the model used when requesting a paginated list of users.
@@ -8,6 +8,7 @@ namespace AspNetWebService.Models.RequestModels.UserManagement
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserListRequest
     {

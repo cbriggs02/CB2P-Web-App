@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AspNetWebService.Models.DataTransferObjectModels
+namespace IdentityServiceApi.Models.DataTransferObjectModels
 {
     /// <summary>
     ///     Data Transfer Object (DTO) representing a user with essential information.
@@ -9,6 +9,7 @@ namespace AspNetWebService.Models.DataTransferObjectModels
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class UserDTO
     {

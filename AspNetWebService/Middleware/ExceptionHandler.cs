@@ -1,8 +1,8 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Logging;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Logging;
 using Newtonsoft.Json;
 
-namespace AspNetWebService.Middleware
+namespace IdentityServiceApi.Middleware
 {
     /// <summary>
     ///     Middleware for handling exceptions globally and providing a standardized error response.
@@ -10,6 +10,7 @@ namespace AspNetWebService.Middleware
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class ExceptionHandler
     {

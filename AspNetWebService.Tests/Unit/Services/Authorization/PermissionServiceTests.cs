@@ -1,12 +1,13 @@
-﻿using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authorization;
-using AspNetWebService.Interfaces.Logging;
-using AspNetWebService.Interfaces.Utilities;
-using AspNetWebService.Models.ServiceResultModels.Common;
-using AspNetWebService.Services.Authorization;
+﻿using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authorization;
+using IdentityServiceApi.Interfaces.Logging;
+using IdentityServiceApi.Interfaces.Utilities;
+using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Services.Authentication;
+using IdentityServiceApi.Services.Authorization;
 using Moq;
 
-namespace AspNetWebService.Tests.Unit.Services.Authorization
+namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 {
     /// <summary>
     ///     Unit tests for the <see cref="PermissionService"/> class.
@@ -14,7 +15,8 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
     ///     behavior of the permission functionality.
     /// </summary>
     /// <remarks>
-    ///     Author: Christian Briglio
+    ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [Trait("Category", "UnitTest")]
     public class PermissionServiceTests
@@ -38,6 +40,18 @@ namespace AspNetWebService.Tests.Unit.Services.Authorization
             _serviceResultFactoryMock = new Mock<IServiceResultFactory>();
 
             _permissionServiceMock = new PermissionService(_authServiceMock.Object, _loggerServiceMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object);
+        }
+
+
+        /// <summary>
+        ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="PermissionService"/> is 
+        ///     instantiated with a null dependencies.
+        /// </summary>
+        [Fact]
+        public void PermissionService_NullDependencies_ThrowsArgumentNullException()
+        {
+            //Act & Assert
+            Assert.Throws<ArgumentNullException>(() => new PermissionService(null, null, null, null));
         }
 
 

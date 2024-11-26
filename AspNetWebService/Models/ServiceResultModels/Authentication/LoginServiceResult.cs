@@ -1,12 +1,13 @@
-﻿using AspNetWebService.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Models.ServiceResultModels.Common;
 
-namespace AspNetWebService.Models.ServiceResultModels.Authentication
+namespace IdentityServiceApi.Models.ServiceResultModels.Authentication
 {
     /// <summary>
     ///     Represents the result of a login-related operation performed by the login service.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public class LoginServiceResult : ServiceResult
     {

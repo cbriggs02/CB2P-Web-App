@@ -1,14 +1,14 @@
 ﻿using Asp.Versioning;
-using AspNetWebService.Constants;
-using AspNetWebService.Interfaces.Authentication;
-using AspNetWebService.Models.ApiResponseModels.CommonApiResponses;
-using AspNetWebService.Models.ApiResponseModels.LoginApiResponses;
-using AspNetWebService.Models.RequestModels.Authentication;
+using IdentityServiceApi.Constants;
+using IdentityServiceApi.Interfaces.Authentication;
+using IdentityServiceApi.Models.ApiResponseModels.CommonApiResponses;
+using IdentityServiceApi.Models.ApiResponseModels.LoginApiResponses;
+using IdentityServiceApi.Models.RequestModels.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace AspNetWebService.Controllers
+namespace IdentityServiceApi.Controllers
 {
     /// <summary>
     ///     Controller for handling API operations related to user authentication.
@@ -17,6 +17,7 @@ namespace AspNetWebService.Controllers
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[Controller]")]
@@ -50,7 +51,7 @@ namespace AspNetWebService.Controllers
         /// <returns>
         ///     Returns an action result:
         ///     - <see cref="StatusCodes.Status200OK"/> (OK) with a JWT token if the login is successful.
-        ///     
+    
         ///     - <see cref="StatusCodes.Status400BadRequest"/> (Bad Request) with a list of errors 
         ///         returned by the login service that occurred during the login attempt.
         ///       

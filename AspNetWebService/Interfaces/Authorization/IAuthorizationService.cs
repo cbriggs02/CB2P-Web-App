@@ -1,10 +1,11 @@
-﻿namespace AspNetWebService.Interfaces.Authorization
+﻿namespace IdentityServiceApi.Interfaces.Authorization
 {
     /// <summary>
     ///     Interface defining the contract for a service responsible for authorization-related operations.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
+    ///     @Created: 2024
     /// </remarks>
     public interface IAuthorizationService
     {
