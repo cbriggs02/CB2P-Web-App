@@ -5,7 +5,7 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServiceApi", "IdentityServiceApi.csproj", "{C498F2EF-D97C-4A08-AF8A-3B00FE15D5E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServiceApi.Tests", "..\AspNetWebService.Tests\IdentityServiceApi.Tests.csproj", "{2CD4B543-35DC-4B3D-BD61-8D94F7FE1E6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServiceApi.Tests", "..\IdentityServiceApi.Tests\IdentityServiceApi.Tests.csproj", "{2CD4B543-35DC-4B3D-BD61-8D94F7FE1E6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
