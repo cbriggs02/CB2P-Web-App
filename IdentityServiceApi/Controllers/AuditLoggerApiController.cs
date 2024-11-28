@@ -1,4 +1,4 @@
-﻿using Asp.Versioning;
+using Asp.Versioning;
 using IdentityServiceApi.Constants;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Models.ApiResponseModels.AuditLogsApiResponses;
@@ -117,7 +117,7 @@ namespace IdentityServiceApi.Controllers
 
             if (!result.Success)
             {
-                if (result.Errors.Any(error => error.Contains(ErrorMessages.User.NotFound, StringComparison.OrdinalIgnoreCase)))
+                if (result.Errors.Any(error => error.Contains(ErrorMessages.AuditLog.NotFound, StringComparison.OrdinalIgnoreCase)))
                 {
                     return NotFound();
                 }
