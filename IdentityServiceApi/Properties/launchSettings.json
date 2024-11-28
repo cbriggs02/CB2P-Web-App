@@ -1,4 +1,4 @@
-﻿{
+{
     "iisSettings": {
         "windowsAuthentication": false,
         "anonymousAuthentication": true,
@@ -8,7 +8,7 @@
         }
     },
     "profiles": {
-        "AspNetWebService": {
+        "IdentityServiceApi": {
             "commandName": "Project",
             "dotnetRunMessages": true,
             "launchBrowser": true,
@@ -17,7 +17,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }
         },
-        "PromPlannerApi-Staging": {
+        "IdentityServiceApi-Staging": {
             "commandName": "Project",
             "dotnetRunMessages": true,
             "launchBrowser": true,
@@ -28,7 +28,7 @@
                 "ASPNETCORE_SHUTDOWNTIMEOUTSECONDS": "3"
             }
         },
-        "PromPlannerApi-Production": {
+        "IdentityServiceApi-Production": {
             "commandName": "Project",
             "dotnetRunMessages": false,
             "launchBrowser": true,
