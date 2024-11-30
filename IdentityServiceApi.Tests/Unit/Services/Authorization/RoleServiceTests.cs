@@ -2,8 +2,8 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
-using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
 using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -41,7 +41,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
         private readonly Mock<ILogger<RoleManager<IdentityRole>>> _roleManagerLoggerMock;
         private readonly Mock<IRoleStore<IdentityRole>> _roleStoreMock;
         private readonly List<IRoleValidator<IdentityRole>> _roleValidatorsMock;
-        private readonly RoleService _roleServiceMock;
+        private readonly RoleService _roleService;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RoleServiceTests"/> class.
@@ -88,9 +88,8 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             _serviceResultFactoryMock = new Mock<IServiceResultFactory>();
             _userLookupServiceMock = new Mock<IUserLookupService>();
 
-            _roleServiceMock = new RoleService(_roleManagerMock.Object, _userManagerMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object, _userLookupServiceMock.Object);
+            _roleService = new RoleService(_roleManagerMock.Object, _userManagerMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object, _userLookupServiceMock.Object);
         }
-
 
         /// <summary>
         ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="RoleService"/> is 
@@ -102,41 +101,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             //Act & Assert
             Assert.Throws<ArgumentNullException>(() => new RoleService(null, null, null, null, null));
         }
-
-
-        /// <summary>
-        ///     Tests that the <see cref="RoleService.GetRoles"/> method returns a list of roles ordered by name.
-        ///     The test verifies that the returned roles match the expected order of "Admin", "SuperAdmin", and "User".
-        /// </summary>
-        /// <returns>
-        ///     A task that represents the asynchronous operation.
-        /// </returns>
-        // Need to look into error with roles list
-        //[Fact]
-        //public async Task RoleService_ReturnsOrderedRoles()
-        //{
-        //    // Arrange
-        //    var rolesList = new List<IdentityRole>
-        //    {
-        //        new() { Id = "1", Name = Roles.User },
-        //        new() { Id = "2", Name = Roles.Admin },
-        //        new() { Id = "3", Name = Roles.SuperAdmin }
-        //    }.AsQueryable();
-
-        //    _roleManagerMock.Setup(r => r.Roles).Returns(rolesList);
-
-        //    // Act
-        //    var result = await _roleServiceMock.GetRoles();
-
-        //    // Assert
-        //    Assert.NotNull(result);
-        //    var roleList = result.Roles.ToList();
-        //    Assert.Equal(3, roleList.Count);
-        //    Assert.Equal(Roles.Admin, roleList[0].Name);
-        //    Assert.Equal(Roles.SuperAdmin, roleList[1].Name);
-        //    Assert.Equal(Roles.User, roleList[2].Name);
-        //}
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.CreateRole"/> method throws an <see cref="ArgumentNullException"/>
@@ -161,11 +125,10 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.CreateRole(roleName));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleService.CreateRole(roleName));
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.CreateRole"/> returns a error message 
@@ -193,7 +156,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.CreateRole(roleName);
+            var result = await _roleService.CreateRole(roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -204,7 +167,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.CreateRole"/> returns a <see cref="ServiceResult"/>
@@ -229,7 +191,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeSuccessServiceResult();
 
             // Act
-            var result = await _roleServiceMock.CreateRole(roleName);
+            var result = await _roleService.CreateRole(roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -239,7 +201,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.DeleteRole"/> method throws an <see cref="ArgumentNullException"/>
@@ -264,14 +225,14 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.DeleteRole(id));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleService.DeleteRole(id));
 
             VerifyCallsToParameterService(1);
         }
-
         
         /// <summary>
-        ///     Tests that the <see cref="RoleService.DeleteRole"/> returns a <see cref="ErrorMessages.Role.NotFound"/> when providing a invalid role id to the deletion method.
+        ///     Tests that the <see cref="RoleService.DeleteRole"/> returns a <see cref="ErrorMessages.Role.NotFound"/> 
+        ///     when providing a invalid role id to the deletion method.
         /// </summary>
         /// <returns>
         ///     A task that represents the asynchronous operation.
@@ -290,7 +251,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.DeleteRole(roleId);
+            var result = await _roleService.DeleteRole(roleId);
 
             // Assert
             Assert.NotNull(result);
@@ -301,7 +262,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.DeleteRole"/> returns a <see cref="ServiceResult"/>
@@ -327,7 +287,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeSuccessServiceResult();
 
             // Act
-            var result = await _roleServiceMock.DeleteRole(roleId);
+            var result = await _roleService.DeleteRole(roleId);
 
             // Assert
             Assert.NotNull(result);
@@ -337,7 +297,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.AssignRole"/> method throws an <see cref="ArgumentNullException"/>
@@ -362,11 +321,10 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.AssignRole(input, input));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleService.AssignRole(input, input));
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.User.NotFound"/> when 
@@ -387,7 +345,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.AssignRole(userId, roleName);
+            var result = await _roleService.AssignRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -397,7 +355,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToLookupService(userId);
             VerifyCallsToParameterService(2);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.Role.InactiveUser"/> when 
@@ -420,7 +377,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.AssignRole(userId, roleName);
+            var result = await _roleService.AssignRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -430,7 +387,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToLookupService(userId);
             VerifyCallsToParameterService(2);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.Role.InvalidRole"/> when 
@@ -453,7 +409,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.AssignRole(userId, roleName);
+            var result = await _roleService.AssignRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -463,7 +419,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToLookupService(userId);
             VerifyCallsToParameterService(2);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.AssignRole"/> returns a <see cref="ErrorMessages.Role.HasRole"/> when 
@@ -499,7 +454,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.AssignRole(userId, roleName);
+            var result = await _roleService.AssignRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -511,7 +466,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             _userManagerMock.Verify(u => u.AddToRoleAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Never);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.AssignRole"/> returns success when 
@@ -549,7 +503,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeSuccessServiceResult();
 
             // Act
-            var result = await _roleServiceMock.AssignRole(userId, roleName);
+            var result = await _roleService.AssignRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -560,7 +514,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             _userManagerMock.Verify(a => a.AddToRoleAsync(user, roleName), Times.Once);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.RemoveRole"/> method throws an <see cref="ArgumentNullException"/>
@@ -585,11 +538,10 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleServiceMock.RemoveRole(input, input));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _roleService.RemoveRole(input, input));
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.RemoveRole"/> returns a <see cref="ErrorMessages.User.NotFound"/> when 
@@ -610,7 +562,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.RemoveRole(userId, roleName);
+            var result = await _roleService.RemoveRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -620,7 +572,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToLookupService(userId);
             VerifyCallsToParameterService(2);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.RemoveRole"/> returns a <see cref="ErrorMessages.Role.InvalidRole"/> when 
@@ -643,7 +594,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.RemoveRole(userId, roleName);
+            var result = await _roleService.RemoveRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -653,7 +604,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToLookupService(userId);
             VerifyCallsToParameterService(2);
         }
-
 
         /// <summary>
         ///     Tests that the <see cref="RoleService.RemoveRole"/> returns a <see cref="ErrorMessages.Role.MissingRole"/> when 
@@ -689,7 +639,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             ArrangeFailureServiceResult(expectedErrorMessage);
 
             // Act
-            var result = await _roleServiceMock.RemoveRole(userId, roleName);
+            var result = await _roleService.RemoveRole(userId, roleName);
 
             // Assert
             Assert.NotNull(result);
@@ -701,7 +651,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             _userManagerMock.Verify(u => u.RemoveFromRoleAsync(It.IsAny<User>(), It.IsAny<string>()), Times.Never);
         }
-
 
         /// <summary>
         ///     Sets up a mock for the user lookup service to simulate finding a user by their ID.
@@ -732,7 +681,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                     });
         }
 
-
         /// <summary>
         ///     Creates a mock <see cref="User"/> object with the specified account status.
         /// </summary>
@@ -747,7 +695,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             const string mockUserName = "test-user";
             return new User { UserName = mockUserName, AccountStatus = accountStatus ? 1 : 0 };
         }
-
 
         /// <summary>
         ///     Sets up the mock service factory result to return a 
@@ -770,7 +717,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Returns(result);
         }
 
-
         /// <summary>
         ///     Sets up the mock service factory result to return a 
         ///     <see cref="ServiceResult"/> indicating a success..
@@ -781,7 +727,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Setup(x => x.GeneralOperationSuccess())
                 .Returns(new ServiceResult { Success = true });
         }
-
 
         /// <summary>
         ///     Verifies that the <see cref="_userLookupServiceMock"/> mock was called once
@@ -794,7 +739,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
         {
             _userLookupServiceMock.Verify(l => l.FindUserById(id), Times.Once);
         }
-
 
         /// <summary>
         ///     Verifies that the <see cref="_parameterValidatorMock"/> mock was called with 

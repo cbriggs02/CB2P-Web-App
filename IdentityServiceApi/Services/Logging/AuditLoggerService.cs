@@ -2,21 +2,19 @@
 using IdentityServiceApi.Data;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.DataTransferObjectModels;
-using IdentityServiceApi.Models.EntityModels;
-using IdentityServiceApi.Models.PaginationModels;
-using IdentityServiceApi.Models.RequestModels.Logging;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
-using IdentityServiceApi.Models.ServiceResultModels.Logging;
+using IdentityServiceApi.Models.DTO;
+using IdentityServiceApi.Models.Entities;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Logging;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.Internal.RequestModels.Logging;
+using IdentityServiceApi.Models.Shared;
 
 namespace IdentityServiceApi.Services.Logging
 {
     /// <summary>
-    ///     Provides functionality to log actions and exceptions within the application,
-    ///     including retrieving audit logs with pagination, logging unauthorized access attempts,
-    ///     and logging exceptions that occur during execution.
+    ///     Service responsible for interacting with audit-log-related data and business logic.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
@@ -25,8 +23,8 @@ namespace IdentityServiceApi.Services.Logging
     public class AuditLoggerService : IAuditLoggerService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IParameterValidator _parameterValidator;
         private readonly IServiceResultFactory _serviceResultFactory;
+        private readonly IParameterValidator _parameterValidator;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -37,7 +35,7 @@ namespace IdentityServiceApi.Services.Logging
         ///     The database context used for accessing audit logs.
         /// </param>
         /// <param name="parameterValidator">
-        ///     The paramter validator service used for defense checking service paramters.
+        ///     The parameter validator service used for defense checking service parameters.
         /// </param>
         /// <param name="mapper">
         ///     Object mapper for converting between entities and data transfer objects (DTOs).
@@ -56,7 +54,6 @@ namespace IdentityServiceApi.Services.Logging
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-
         /// <summary>
         ///     Asynchronously retrieves a paginated list of audit logs from the database.
         /// </summary>
@@ -72,14 +69,12 @@ namespace IdentityServiceApi.Services.Logging
             _parameterValidator.ValidateObjectNotNull(request, nameof(request));
 
             var query = _context.AuditLogs.AsQueryable();
-
             if (request.Action.HasValue)
             {
                 query = query.Where(x => x.Action == request.Action.Value);
             }
 
             var totalCount = await query.CountAsync();
-
             var auditLogs = await query
                 .OrderBy(x => x.Id)
                 .Skip((request.Page - 1) * request.PageSize)
@@ -88,10 +83,9 @@ namespace IdentityServiceApi.Services.Logging
                 .ToListAsync();
 
             var logDTOs = auditLogs.Select(log => _mapper.Map<AuditLogDTO>(log)).ToList();
-
             var totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize);
 
-            PaginationMetadata paginationMetadata = new()
+            PaginationModel paginationMetadata = new()
             {
                 TotalCount = totalCount,
                 PageSize = request.PageSize,
@@ -101,7 +95,6 @@ namespace IdentityServiceApi.Services.Logging
 
             return new AuditLogServiceListResult { Logs = logDTOs, PaginationMetadata = paginationMetadata };
         }
-
 
         /// <summary>
         ///     Asynchronously deletes an audit log entry by its unique identifier.
@@ -119,15 +112,14 @@ namespace IdentityServiceApi.Services.Logging
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var log = await _context.AuditLogs.FindAsync(id);
-
             if (log == null)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.AuditLog.NotFound });
             }
 
             _context.AuditLogs.Remove(log);
-            int result = await _context.SaveChangesAsync();
 
+            int result = await _context.SaveChangesAsync();
             if (result == 0)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.AuditLog.DeletionFailed });
@@ -136,100 +128,61 @@ namespace IdentityServiceApi.Services.Logging
             return _serviceResultFactory.GeneralOperationSuccess();
         }
 
-
         /// <summary>
-        ///     Asynchronously logs an authorization breach event into the audit logs. This method captures details 
-        ///     of unauthorized access attempts including user ID, action attempted, timestamp, and IP address.
+        ///     Adds an audit log to the database after validating its properties.
         /// </summary>
-        /// <param name="request">
-        ///     The request model containing details of the unauthorized access attempt, 
-        ///     such as user ID, action, and IP address.
+        /// <param name="log">
+        ///     The audit log entry to be added.
         /// </param>
         /// <returns>
-        ///     A task representing the asynchronous operation of logging the breach.
+        ///     Asynchronous task representing the operation.
         /// </returns>
-        public async Task LogAuthorizationBreach(AuditLogAuthorizationRequest request)
+        protected async Task AddLog(AuditLog log)
         {
-            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
-            _parameterValidator.ValidateNotNullOrEmpty(request.UserId, nameof(request.UserId));
-            _parameterValidator.ValidateNotNullOrEmpty(request.ActionAttempted, nameof(request.ActionAttempted));
-            _parameterValidator.ValidateNotNullOrEmpty(request.IpAddress, nameof(request.IpAddress));
+            _parameterValidator.ValidateObjectNotNull(log, nameof(log));
+            _parameterValidator.ValidateNotNullOrEmpty(log.UserId, nameof(log.UserId));
+            _parameterValidator.ValidateNotNullOrEmpty(log.Details, nameof(log.Details));
+            _parameterValidator.ValidateNotNullOrEmpty(log.IpAddress, nameof(log.IpAddress));
 
-            var log = new AuditLog
-            {
-                Action = AuditAction.AuthorizationBreach,
-                UserId = request.UserId,
-                TimeStamp = DateTime.UtcNow,
-                Details = $"Unauthorized access attempt to {request.ActionAttempted}",
-                IpAddress = request.IpAddress
-            };
+            ValidateAuditAction(log.Action);
+            ValidateTimestamp(log.TimeStamp);
 
             await _context.AuditLogs.AddAsync(log);
             await _context.SaveChangesAsync();
         }
 
-
         /// <summary>
-        ///     Asynchronously logs an exception to the audit logs. This method captures the 
-        ///     exception details, including the message, stack trace, the user ID associated 
-        ///     with the operation, and the IP address from which the request originated.
+        ///     Validates the timestamp to ensure it matches the current UTC time.
         /// </summary>
-        /// <param name="request">
-        ///     The request model containing the exception details, user ID, and IP address.
+        /// <param name="timeStamp">
+        ///     The timestamp to validate.
         /// </param>
-        /// <returns>
-        ///     A task representing the asynchronous operation of logging the exception.
-        /// </returns>
-        public async Task LogException(AuditLogExceptionRequest request)
+        /// <exception cref="ArgumentException">
+        ///     Thrown if the timestamp is not UTC now.
+        /// </exception>
+        private static void ValidateTimestamp(DateTime timeStamp)
         {
-            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
-            _parameterValidator.ValidateObjectNotNull(request.Exception, nameof(request.Exception));
-            _parameterValidator.ValidateNotNullOrEmpty(request.UserId, nameof(request.UserId));
-            _parameterValidator.ValidateNotNullOrEmpty(request.IpAddress, nameof(request.IpAddress));
-
-            var log = new AuditLog
+            if (Math.Abs((DateTime.UtcNow - timeStamp).TotalSeconds) > 30)  // Allow up to 30 seconds tolerance
             {
-                Action = AuditAction.Exception,
-                UserId = request.UserId,
-                TimeStamp = DateTime.UtcNow,
-                Details = $"{request.Exception.Message}\n{request.Exception.StackTrace}",
-                IpAddress = request.IpAddress
-            };
-
-            await _context.AuditLogs.AddAsync(log);
-            await _context.SaveChangesAsync();
+                throw new ArgumentException(ErrorMessages.AuditLog.InvalidDate);
+            }
         }
 
-
         /// <summary>
-        ///     Asynchronously logs performance metrics for requests that exceed the acceptable response time threshold.
-        ///     This method creates an audit log entry for slow performance, capturing relevant details
-        ///     such as the user ID, action performed, response time, and IP address.
+        ///     Validates the audit action to ensure it is a defined value.
         /// </summary>
-        /// <param name="request">
-        ///     The request model containing details about the slow performance like user ID, Action, Response time and Ip Address.
+        /// <param name="action">
+        ///     The action to validate.
         /// </param>
-        /// <returns>
-        ///     A task representing the asynchronous operation of logging the performance metrics.
-        /// </returns>
-        public async Task LogSlowPerformance(AuditLogPerformanceRequest request)
+        /// <exception cref="ArgumentException">
+        ///     Thrown if the action is not defined in the enum.
+        /// </exception>
+        private static void ValidateAuditAction(AuditAction action)
         {
-            _parameterValidator.ValidateObjectNotNull(request, nameof(request));
-            _parameterValidator.ValidateNotNullOrEmpty(request.UserId , nameof(request.UserId));
-            _parameterValidator.ValidateNotNullOrEmpty(request.Action, nameof(request.Action));
-            _parameterValidator.ValidateNotNullOrEmpty(request.IpAddress , nameof(request.IpAddress));
-
-            var log = new AuditLog
+            if (!Enum.IsDefined(typeof(AuditAction), action))
             {
-                Action = AuditAction.SlowPerformance,
-                UserId = request.UserId,
-                TimeStamp = DateTime.UtcNow,
-                Details = $"Action: {request.Action}\nResponse Time: {request.ResponseTime} ms",
-                IpAddress = request.IpAddress
-            };
-
-            await _context.AuditLogs.AddAsync(log);
-            await _context.SaveChangesAsync();
+                throw new ArgumentException(ErrorMessages.AuditLog.InvalidAction);
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
-﻿using IdentityServiceApi.Models.DataTransferObjectModels;
+﻿using IdentityServiceApi.Models.DTO;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.EntityModels;
 using AutoMapper;
 
 namespace IdentityServiceApi.Mapping
@@ -16,7 +15,8 @@ namespace IdentityServiceApi.Mapping
     public class AutoMapperProfile : Profile
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="AutoMapperProfile"/> class and defines the mappings between the entity and DTO types.
+        ///     Initializes a new instance of the <see cref="AutoMapperProfile"/> class and defines the mappings 
+        ///     between the entity and DTO types.
         /// </summary>
         public AutoMapperProfile()
         {

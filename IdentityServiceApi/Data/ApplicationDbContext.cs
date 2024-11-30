@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.EntityModels;
 
 namespace IdentityServiceApi.Data
 {
@@ -17,6 +16,14 @@ namespace IdentityServiceApi.Data
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="ApplicationDbContext"/> class.
+        ///     This is the parameterless constructor used when no options are provided, typically for use with in-memory databases or during testing.
+        /// </summary>
+        public ApplicationDbContext() 
+        { 
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ApplicationDbContext"/> class.
         /// </summary>
         /// <param name="options">
         ///     The options to be used by the database context, including configuration for the database provider and connection string.
@@ -30,13 +37,13 @@ namespace IdentityServiceApi.Data
         ///     Gets or sets the <see cref="DbSet{PasswordHistory}"/> representing the collection of password history records in the database.
         ///     This table is used to track changes to user passwords over time, facilitating password history management and security.
         /// </summary>
-        public DbSet<PasswordHistory> PasswordHistories { get; set; }
+        public virtual DbSet<PasswordHistory> PasswordHistories { get; set; }
 
         /// <summary>
         ///     Gets or sets the <see cref="DbSet{AuditLog}"/> representing the collection of audit log records in the database.
         ///     This table captures actions performed within the application for auditing purposes, including user actions and system events.
         /// </summary>
-        public DbSet<AuditLog> AuditLogs { get; set; }
+        public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
         /// <summary>
         ///     Configures relationships and keys for entities in the database using the <paramref name="modelBuilder"/>.

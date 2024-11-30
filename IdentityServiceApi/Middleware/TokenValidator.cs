@@ -42,7 +42,6 @@ namespace IdentityServiceApi.Middleware
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         }
 
-
         /// <summary>
         ///     Asynchronously validates if the JWT token in the request belongs to a user who still exists in the system.
         ///     If the user no longer exists, the request is marked as unauthorized, and an appropriate response is returned.
@@ -83,7 +82,6 @@ namespace IdentityServiceApi.Middleware
             await _next(context);
         }
 
-
         /// <summary>
         ///     Extracts the user ID from the claims contained in the <see cref="ClaimsPrincipal"/>.
         /// </summary>
@@ -100,7 +98,6 @@ namespace IdentityServiceApi.Middleware
             var userClaim = identity?.FindFirst(ClaimTypes.NameIdentifier);
             return userClaim?.Value;
         }
-
 
         /// <summary>
         ///     Asynchronously logs an unauthorized access attempt and responds with a 401 Unauthorized status code.

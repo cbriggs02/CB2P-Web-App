@@ -24,7 +24,6 @@ namespace IdentityServiceApi.Interfaces.Authentication
         /// </returns>
         ClaimsPrincipal GetClaimsPrincipal();
 
-
         /// <summary>
         ///     Extracts the ID of the currently authenticated user from the provided 
         ///     claims principal. This ID is typically used for identifying the user
@@ -37,7 +36,6 @@ namespace IdentityServiceApi.Interfaces.Authentication
         ///     The user's ID as a string, or null if not found in the claims.
         /// </returns>
         string GetUserId(ClaimsPrincipal principal);
-
 
         /// <summary>
         ///     Retrieves a list of roles associated with the currently authenticated user
@@ -52,7 +50,6 @@ namespace IdentityServiceApi.Interfaces.Authentication
         /// </returns>
         List<string> GetRoles(ClaimsPrincipal principal);
 
-
         /// <summary>
         ///     Retrieves the remote IP address of the client making the current
         ///     HTTP request. This information can be useful for logging,
@@ -62,7 +59,6 @@ namespace IdentityServiceApi.Interfaces.Authentication
         ///     The remote IP address of the client as an <see cref="IPAddress"/>.
         /// </returns>
         IPAddress GetAddress();
-
 
         /// <summary>
         ///     Retrieves the request path from the current HTTP context. This 

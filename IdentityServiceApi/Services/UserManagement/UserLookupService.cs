@@ -2,7 +2,7 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServiceApi.Services.UserManagement
@@ -20,8 +20,8 @@ namespace IdentityServiceApi.Services.UserManagement
     public class UserLookupService : IUserLookupService
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserLookupServiceResultFactory _userLookupServiceResultFactory;
         private readonly IParameterValidator _parameterValidator;
-        private readonly IServiceResultFactory _serviceResultFactory;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="UserLookupService"/> class.
@@ -29,22 +29,21 @@ namespace IdentityServiceApi.Services.UserManagement
         /// <param name="userManager">
         ///     The user manager used for managing user-related operations.
         /// </param>
+        /// <param name="userLookupServiceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
+        /// </param>
         /// <param name="parameterValidator">
         ///     The parameter validator service used for defense checking service parameters.
-        /// </param>
-        /// <param name="serviceResultFactory">
-        ///     The service used for creating the result objects being returned in operations.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the provided parameters are null.
         /// </exception>
-        public UserLookupService(UserManager<User> userManager, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory)
+        public UserLookupService(UserManager<User> userManager, IUserLookupServiceResultFactory userLookupServiceResultFactory, IParameterValidator parameterValidator)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _userLookupServiceResultFactory = userLookupServiceResultFactory ?? throw new ArgumentNullException(nameof(userLookupServiceResultFactory));
             _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
-            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
         }
-
 
         /// <summary>
         ///     Asynchronously retrieves a user by their unique identifier.
@@ -60,10 +59,10 @@ namespace IdentityServiceApi.Services.UserManagement
         public async Task<UserLookupServiceResult> FindUserById(string id)
         {
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
+
             var user = await _userManager.FindByIdAsync(id);
             return HandleLookupResult(user);
         }
-
 
         /// <summary>
         ///     Asynchronously retrieves a user by their user name.
@@ -79,10 +78,10 @@ namespace IdentityServiceApi.Services.UserManagement
         public async Task<UserLookupServiceResult> FindUserByUsername(string userName)
         {
             _parameterValidator.ValidateNotNullOrEmpty(userName, nameof(userName));
+
             var user = await _userManager.FindByNameAsync(userName);
             return HandleLookupResult(user);
         }
-
 
         /// <summary>
         ///     Handles the result of a user lookup operation.
@@ -98,9 +97,9 @@ namespace IdentityServiceApi.Services.UserManagement
         {
             if (user == null)
             {
-                return _serviceResultFactory.UserLookupOperationFailure(new[] { ErrorMessages.User.NotFound });
+                return _userLookupServiceResultFactory.UserLookupOperationFailure(new[] { ErrorMessages.User.NotFound });
             }
-            return _serviceResultFactory.UserLookupOperationSuccess(user);
+            return _userLookupServiceResultFactory.UserLookupOperationSuccess(user);
         }
     }
 }

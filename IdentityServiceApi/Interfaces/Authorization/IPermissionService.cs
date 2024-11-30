@@ -1,4 +1,4 @@
-﻿using IdentityServiceApi.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Interfaces.Authorization
 {

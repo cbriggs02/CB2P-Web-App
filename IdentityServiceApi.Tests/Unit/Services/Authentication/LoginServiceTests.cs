@@ -2,9 +2,9 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.RequestModels.Authentication;
-using IdentityServiceApi.Models.ServiceResultModels.Authentication;
-using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.Internal.RequestModels.Authentication;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Authentication;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
 using IdentityServiceApi.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +32,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
         private readonly Mock<SignInManager<User>> _signInManagerMock;
         private readonly Mock<IConfiguration> _configurationMock;
         private readonly Mock<IParameterValidator> _parameterValidatorMock;
-        private readonly Mock<IServiceResultFactory> _serviceResultFactoryMock;
+        private readonly Mock<ILoginServiceResultFactory> _loginServiceResultFactoryMock;
         private readonly Mock<IUserLookupService> _userLookupServiceMock;
         private readonly Mock<ILogger<UserManager<User>>> _userManagerLoggerMock;
         private readonly Mock<ILogger<SignInManager<User>>> _signInManagerLoggerMock;
@@ -100,12 +100,11 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
 
             _configurationMock = new Mock<IConfiguration>();
             _parameterValidatorMock = new Mock<IParameterValidator>();
-            _serviceResultFactoryMock = new Mock<IServiceResultFactory>();
+            _loginServiceResultFactoryMock = new Mock<ILoginServiceResultFactory>();
             _userLookupServiceMock = new Mock<IUserLookupService>();
 
-            _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _configurationMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object, _userLookupServiceMock.Object);
+            _loginService = new LoginService(_signInManagerMock.Object, _userManagerMock.Object, _loginServiceResultFactoryMock.Object, _parameterValidatorMock.Object, _userLookupServiceMock.Object, _configurationMock.Object);
         }
-
 
         /// <summary>
         ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="LoginService"/> is 
@@ -117,7 +116,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             //Act & Assert
             Assert.Throws<ArgumentNullException>(() => new LoginService(null, null, null, null, null, null));
         }
-
 
         /// <summary>
         ///     Verifies that calling the login method with null credentials throws an ArgumentNullException.
@@ -138,7 +136,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
 
             VerifyCallsToParameterService(0);
         }
-
 
         /// <summary>
         ///     Verifies that calling the login method with null, empty or whitespace username or password throws an ArgumentNullException.
@@ -167,7 +164,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
 
             VerifyCallsToParameterService(1);
         }
-
 
         /// <summary>
         ///     Tests the login functionality when the user is not found.
@@ -207,7 +203,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             VerifyCallsToParameterService(2);
         }
 
-
         /// <summary>
         ///     Tests the login functionality when the user is not activated.
         ///     Expects a result indicating the user is not activated.
@@ -238,7 +233,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             VerifyCallsToLookupService(inactiveUser.UserName);
             VerifyCallsToParameterService(2);
         }
-
 
         /// <summary>
         ///     Tests the login functionality with invalid credentials.
@@ -278,7 +272,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             VerifyCallsToParameterService(2);
         }
 
-
         /// <summary>
         ///     Tests the login functionality for a successful login.
         ///     Expects a result indicating success and a valid JWT token.
@@ -311,7 +304,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
                 Token = "token" // Mocked placeholder token
             };
 
-            _serviceResultFactoryMock
+            _loginServiceResultFactoryMock
                 .Setup(x => x.LoginOperationSuccess(It.IsAny<string>()))
                 .Returns(expectedResult);
 
@@ -330,7 +323,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             VerifyCallsToLookupService(mockUser.UserName);
             VerifyCallsToParameterService(2);
         }
-
 
         /// <summary>
         ///     Sets up the configuration mock with the given JWT settings.
@@ -357,7 +349,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
                 .Returns(secretKey);
         }
 
-
         /// <summary>
         ///     Creates a new <see cref="LoginRequest"/> object with the specified password and user information.
         /// </summary>
@@ -375,7 +366,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             return new LoginRequest { UserName = user.UserName, Password = password };
         }
 
-
         /// <summary>
         ///     Creates a mock <see cref="User"/> object with the specified account status.
         /// </summary>
@@ -390,7 +380,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             const string mockUserName = "test-user";
             return new User { UserName = mockUserName, AccountStatus = accountStatus ? 1 : 0};
         }
-
 
         /// <summary>
         ///     Sets up the mock service factory result to return a 
@@ -408,11 +397,10 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
                 Errors = new List<string> { expectedErrorMessage }
             };
 
-            _serviceResultFactoryMock
+            _loginServiceResultFactoryMock
                 .Setup(x => x.LoginOperationFailure(new[] { expectedErrorMessage }))
                 .Returns(result);
         }
-
 
         /// <summary>
         ///     Prepares a mock result for the user lookup service to return a successful user lookup operation.
@@ -433,7 +421,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
                 .ReturnsAsync(result);
         }
 
-
         /// <summary>
         ///     Verifies that the <see cref="_parameterValidatorMock"/> mock was called with 
         ///     expected validation methods during test execution.
@@ -446,7 +433,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             _parameterValidatorMock.Verify(v => v.ValidateObjectNotNull(It.IsAny<object>(), It.IsAny<string>()), Times.Once);
             _parameterValidatorMock.Verify(v => v.ValidateNotNullOrEmpty(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(numberOfTimes));
         }
-
 
         /// <summary>
         ///     Verifies that the <see cref="_userLookupServiceMock"/> mock was called once

@@ -2,15 +2,15 @@
 using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.DTO;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.PaginationModels;
-using IdentityServiceApi.Models.RequestModels.UserManagement;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
-using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
+using IdentityServiceApi.Models.Shared;
 
 namespace IdentityServiceApi.Services.UserManagement
 {
@@ -24,10 +24,10 @@ namespace IdentityServiceApi.Services.UserManagement
     public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserServiceResultFactory _userServiceResultFactory;
         private readonly IPasswordHistoryService _passwordHistoryService;
         private readonly IPermissionService _permissionService;
         private readonly IParameterValidator _parameterValidator;
-        private readonly IServiceResultFactory _serviceResultFactory;
         private readonly IUserLookupService _userLookupService;
         private readonly IMapper _mapper;
 
@@ -37,6 +37,9 @@ namespace IdentityServiceApi.Services.UserManagement
         /// <param name="userManager">
         ///     The user manager responsible for handling user management operations.
         /// </param>
+        /// <param name="userServiceResultFactory">
+        ///     The service used for creating the result objects being returned in operations.
+        /// </param>
         /// <param name="passwordHistoryService">
         ///     Service for managing password history, such as removing old passwords after a user is deleted.
         /// </param>
@@ -44,12 +47,9 @@ namespace IdentityServiceApi.Services.UserManagement
         ///     Service for validating and checking user permissions within the system.
         /// </param>
         /// <param name="parameterValidator">
-        ///     The paramter validator service used for defense checking service paramters.
+        ///     The parameter validator service used for defense checking service parameters.
         /// </param>
-        /// <param name="serviceResultFactory">
-        ///     The service used for creating the result objects being returned in operations.
-        /// </param>
-        /// <param name="userLookupService">'
+        /// <param name="userLookupService">
         ///     The service used for looking up users in the system.
         /// </param>
         /// <param name="mapper">
@@ -58,17 +58,16 @@ namespace IdentityServiceApi.Services.UserManagement
         /// <exception cref="ArgumentNullException">
         ///     Thrown when any of the provided service parameters are null.
         /// </exception>
-        public UserService(UserManager<User> userManager, IPasswordHistoryService passwordHistoryService, IPermissionService permissionService, IParameterValidator parameterValidator, IServiceResultFactory serviceResultFactory, IUserLookupService userLookupService, IMapper mapper)
+        public UserService(UserManager<User> userManager, IUserServiceResultFactory userServiceResultFactory, IPasswordHistoryService passwordHistoryService, IPermissionService permissionService, IParameterValidator parameterValidator, IUserLookupService userLookupService, IMapper mapper)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _userServiceResultFactory = userServiceResultFactory ?? throw new ArgumentNullException(nameof(userServiceResultFactory));
             _passwordHistoryService = passwordHistoryService ?? throw new ArgumentNullException(nameof(passwordHistoryService));
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
             _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
-            _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
             _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
-
 
         /// <summary>
         ///     Asynchronously retrieves a paginated list of users from the database based on the request parameters.
@@ -86,14 +85,12 @@ namespace IdentityServiceApi.Services.UserManagement
             _parameterValidator.ValidateObjectNotNull(request, nameof(request));
 
             var query = _userManager.Users.AsQueryable();
-
             if (request.AccountStatus.HasValue)
             {
                 query = query.Where(user => user.AccountStatus == request.AccountStatus.Value);
             }
 
             var totalCount = await query.CountAsync();
-
             var users = await query
                 .OrderBy(user => user.LastName)
                 .Skip((request.Page - 1) * request.PageSize)
@@ -102,10 +99,9 @@ namespace IdentityServiceApi.Services.UserManagement
                 .ToListAsync();
 
             var userDTOs = users.Select(user => _mapper.Map<UserDTO>(user)).ToList();
-
             var totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize);
 
-            PaginationMetadata paginationMetadata = new()
+            PaginationModel paginationMetadata = new()
             {
                 TotalCount = totalCount,
                 PageSize = request.PageSize,
@@ -115,7 +111,6 @@ namespace IdentityServiceApi.Services.UserManagement
 
             return new UserServiceListResult { Users = userDTOs, PaginationMetadata = paginationMetadata };
         }
-
 
         /// <summary>
         ///     Asynchronously retrieves a specific user from the database by their unique identifier.
@@ -132,25 +127,22 @@ namespace IdentityServiceApi.Services.UserManagement
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
-
             if (!permissionResult.Success)
             {
-                return _serviceResultFactory.UserOperationFailure(permissionResult.Errors.ToArray());
+                return _userServiceResultFactory.UserOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var userLookupResult = await _userLookupService.FindUserById(id);
-
             if(!userLookupResult.Success)
             {
-                return _serviceResultFactory.UserOperationFailure(userLookupResult.Errors.ToArray());
+                return _userServiceResultFactory.UserOperationFailure(userLookupResult.Errors.ToArray());
             }
 
             var user = userLookupResult.UserFound;
             var userDTO = _mapper.Map<UserDTO>(user);
 
-            return _serviceResultFactory.UserOperationSuccess(userDTO);
+            return _userServiceResultFactory.UserOperationSuccess(userDTO);
         }
-
 
         /// <summary>
         ///     Asynchronously creates a new user in the system and stores their details in the database.
@@ -181,27 +173,23 @@ namespace IdentityServiceApi.Services.UserManagement
             };
 
             var result = await _userManager.CreateAsync(newUser);
-
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                var returnUser = new UserDTO
-                {
-                    UserName = newUser.UserName,
-                    FirstName = newUser.FirstName,
-                    LastName = newUser.LastName,
-                    Email = newUser.Email,
-                    PhoneNumber = newUser.PhoneNumber,
-                    Country = newUser.Country
-                };
+                return _userServiceResultFactory.UserOperationFailure(result.Errors.Select(e => e.Description).ToArray());
+            }
 
-                return _serviceResultFactory.UserOperationSuccess(returnUser);
-            }
-            else
+            var returnUser = new UserDTO
             {
-                return _serviceResultFactory.UserOperationFailure(result.Errors.Select(e => e.Description).ToArray());
-            }
+                UserName = newUser.UserName,
+                FirstName = newUser.FirstName,
+                LastName = newUser.LastName,
+                Email = newUser.Email,
+                PhoneNumber = newUser.PhoneNumber,
+                Country = newUser.Country
+            };
+
+            return _userServiceResultFactory.UserOperationSuccess(returnUser);
         }
-
 
         /// <summary>
         ///     Asynchronously updates an existing user's details in the system based on their unique identifier.
@@ -222,21 +210,18 @@ namespace IdentityServiceApi.Services.UserManagement
             ValidateUserDTO(user);
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
-
             if (!permissionResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var userLookupResult = await _userLookupService.FindUserById(id);
-
             if(!userLookupResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
             }
 
             var existingUser = userLookupResult.UserFound;
-
             existingUser.UserName = user.UserName;
             existingUser.FirstName = user.FirstName;
             existingUser.LastName = user.LastName;
@@ -246,15 +231,13 @@ namespace IdentityServiceApi.Services.UserManagement
             existingUser.UpdatedAt = DateTime.UtcNow;
 
             var result = await _userManager.UpdateAsync(existingUser);
-
             if (!result.Succeeded)
             {
-                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
 
-            return _serviceResultFactory.GeneralOperationSuccess();
+            return _userServiceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously deletes a user from the system based on their unique identifier.
@@ -273,33 +256,29 @@ namespace IdentityServiceApi.Services.UserManagement
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
-
             if (!permissionResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var userLookupServiceResult = await _userLookupService.FindUserById(id);
-
             if (!userLookupServiceResult.Success)
             {
-                return _serviceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
+                return _userServiceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
             }
 
             var user = userLookupServiceResult.UserFound;
 
             var result = await _userManager.DeleteAsync(user);
-
             if (!result.Succeeded)
             {
-                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
 
             // delete all stored passwords for user once user is deleted for data clean up.
             await _passwordHistoryService.DeletePasswordHistory(id);
-            return _serviceResultFactory.GeneralOperationSuccess();
+            return _userServiceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously activates a user account in the system based on their unique identifier.
@@ -316,38 +295,33 @@ namespace IdentityServiceApi.Services.UserManagement
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
-
             if (!permissionResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var userLookupServiceResult = await _userLookupService.FindUserById(id);
-
             if (!userLookupServiceResult.Success)
             {
-                return _serviceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
+                return _userServiceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
             }
 
             var user = userLookupServiceResult.UserFound;
-
             if (user.AccountStatus == 1)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.AlreadyActivated });
+                return _userServiceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.AlreadyActivated });
             }
 
             user.AccountStatus = 1;
 
             var result = await _userManager.UpdateAsync(user);
-
             if (!result.Succeeded)
             {
-                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
 
-            return _serviceResultFactory.GeneralOperationSuccess();
+            return _userServiceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously deactivates a user account in the system based on their unique identifier.
@@ -364,38 +338,33 @@ namespace IdentityServiceApi.Services.UserManagement
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
-
             if (!permissionResult.Success)
             {
-                return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var userLookupServiceResult = await _userLookupService.FindUserById(id);
-
             if (!userLookupServiceResult.Success)
             {
-                return _serviceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
+                return _userServiceResultFactory.UserOperationFailure(userLookupServiceResult.Errors.ToArray());
             }
 
             var user = userLookupServiceResult.UserFound;
-
             if (user.AccountStatus == 0)
             {
-                return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotActivated });
+                return _userServiceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotActivated });
             }
 
             user.AccountStatus = 0;
 
             var result = await _userManager.UpdateAsync(user);
-
             if (!result.Succeeded)
             {
-                return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
+                return _userServiceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
             }
 
-            return _serviceResultFactory.GeneralOperationSuccess();
+            return _userServiceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Validates the properties of the provided <see cref="UserDTO"/> object to ensure

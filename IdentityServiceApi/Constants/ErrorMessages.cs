@@ -19,7 +19,6 @@
             public const string NotFound = "The requested resource was not found.";
         }
 
-
         /// <summary>
         ///     Error messages related to database operations.
         /// </summary>
@@ -28,7 +27,6 @@
             public const string UpdateFailed = "An error occurred while updating the database.";
             public const string InitializationFailed = "An unexpected error occurred during database initialization.";
         }
-
 
         /// <summary>
         ///     Error messages related to authorization and authentication.
@@ -41,7 +39,6 @@
             public const string MissingUserIdClaim = "User ID claim is missing in the authentication token.";
         }
 
-
         /// <summary>
         ///     Error messages related to user operations.
         /// </summary>
@@ -51,7 +48,6 @@
             public const string AlreadyActivated = "User account is already activated.";
             public const string NotActivated = "User account is not activated.";
         }
-
 
         /// <summary>
         ///     Error messages related to role management.
@@ -66,7 +62,6 @@
             public const string HasRole = "The user is already assigned this role.";
         }
 
-
         /// <summary>
         ///     Error messages related to password operations.
         /// </summary>
@@ -78,7 +73,6 @@
             public const string CannotReuse = "Cannot reuse the previous password. Please choose a new one.";
         }
 
-
         /// <summary>
         ///     Error messages related to audit log operations.
         /// </summary>
@@ -86,6 +80,16 @@
         {
             public const string NotFound = "Audit log not found.";
             public const string DeletionFailed = "Failed to delete the audit log.";
+            public const string InvalidDate = "The timestamp in the audit log must match the current UTC time.";
+            public const string InvalidAction = "The provided audit action is invalid. Please ensure it is a valid value from the AuditAction enum.";
+
+            /// <summary>
+            ///     Error messages specific to performance log operations.
+            /// </summary>
+            public static class PerformanceLog
+            {
+                public const string InvalidResponseTime = "Invalid response time. Please ensure the response time is greater than zero.";
+            }
         }
     }
 }

@@ -17,7 +17,6 @@
         /// </returns>
         Task LogAuthorizationBreach();
 
-
         /// <summary>
         ///      Asynchronously logs an exception that occurred within the application.
         /// </summary>
@@ -28,7 +27,6 @@
         ///     A task representing the asynchronous operation of logging the exception.
         /// </returns>
         Task LogException(Exception exception);
-
 
         /// <summary>
         ///      Asynchronously logs a slow performance event, typically associated with a long response time for a request.

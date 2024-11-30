@@ -32,7 +32,6 @@ namespace IdentityServiceApi.Services.Authentication
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
-
         /// <summary>
         ///     Retrieves the claims principal of the currently authenticated user.
         ///     This includes all claims associated with the user, which can be used for
@@ -45,7 +44,6 @@ namespace IdentityServiceApi.Services.Authentication
         {
             return _httpContextAccessor.HttpContext?.User;
         }
-
 
         /// <summary>
         ///     Extracts the ID of the currently authenticated user from the provided claims principal.
@@ -65,7 +63,6 @@ namespace IdentityServiceApi.Services.Authentication
             }
             return principal.FindFirstValue(ClaimTypes.NameIdentifier);
         }
-
 
         /// <summary>
         ///     Retrieves a list of roles associated with the currently authenticated user
@@ -87,7 +84,6 @@ namespace IdentityServiceApi.Services.Authentication
             return principal.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
         }
 
-
         /// <summary>
         ///     Retrieves the remote IP address of the client making the current HTTP request.
         ///     This information is useful for logging, security, and auditing purposes.
@@ -99,7 +95,6 @@ namespace IdentityServiceApi.Services.Authentication
         {
             return _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress;
         }
-
 
         /// <summary>
         ///     Retrieves the request path from the current HTTP context. This information is 

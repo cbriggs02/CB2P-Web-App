@@ -35,7 +35,6 @@ namespace IdentityServiceApi.Services.Utilities
             }
         }
 
-
         /// <summary>
         ///     Validates that an object parameter is not null and if it is an IEnumerable, 
         ///     checks that it is not empty. If the parameter is null, an <see cref="ArgumentNullException"/>

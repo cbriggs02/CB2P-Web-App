@@ -25,7 +25,6 @@
         /// </param>
         void ValidateNotNullOrEmpty(string parameter, string parameterName);
 
-
         /// <summary>
         ///     Validates that an object parameter is not null.
         ///     Implementations should throw an exception if the 

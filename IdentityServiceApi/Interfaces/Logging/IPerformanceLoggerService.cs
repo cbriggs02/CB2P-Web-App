@@ -8,7 +8,7 @@
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
-    public interface IPerformanceLoggerService
+    public interface IPerformanceLoggerService : IAuditLoggerService
     {
         /// <summary>
         ///     Asynchronously logs a performance issue when the response time exceeds a defined threshold.

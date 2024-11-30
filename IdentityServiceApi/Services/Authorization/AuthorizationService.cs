@@ -43,7 +43,6 @@ namespace IdentityServiceApi.Services.Authorization
             _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
         }
 
-
         /// <summary>
         ///     Asynchronously validates permissions based on the current user's role and the target user's data:
         ///     - Regular users can only access their own data.
@@ -69,15 +68,14 @@ namespace IdentityServiceApi.Services.Authorization
             }
 
             var principal = _userContextService.GetClaimsPrincipal();
-
             if (principal == null)
             {
                 return false; // No user context available, so permission cannot be validated
             }
 
             var currentUserId = _userContextService.GetUserId(principal);
-            var roles = _userContextService.GetRoles(principal);
 
+            var roles = _userContextService.GetRoles(principal);
             if (roles == null || !roles.Any())
             {
                 return false; // No roles assigned, deny access
@@ -96,7 +94,6 @@ namespace IdentityServiceApi.Services.Authorization
             return IsSelfAccess(id, currentUserId);
         }
 
-
         /// <summary>
         ///     Determines if the current user is accessing their own data.
         /// </summary>
@@ -113,7 +110,6 @@ namespace IdentityServiceApi.Services.Authorization
         {
             return userId.Equals(currentUserId, StringComparison.OrdinalIgnoreCase);
         }
-
 
         /// <summary>
         ///     Asynchronously validates whether an admin user has permission to perform actions on another user.
@@ -140,7 +136,6 @@ namespace IdentityServiceApi.Services.Authorization
             }
 
             var userLookupResult = await _userLookupService.FindUserById(id);
-
             if(!userLookupResult.Success)
             {
                 return false;
@@ -162,7 +157,6 @@ namespace IdentityServiceApi.Services.Authorization
             return true;
         }
 
-
         /// <summary>
         ///     Asynchronously checks if the target user is an admin.
         /// </summary>
@@ -177,7 +171,6 @@ namespace IdentityServiceApi.Services.Authorization
             var targetUserRoles = await _userManager.GetRolesAsync(user);
             return targetUserRoles.Any(role => role == Roles.Admin);
         }
-
 
         /// <summary>
         ///     Asynchronously checks if the target user is an super admin.

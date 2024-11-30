@@ -2,10 +2,10 @@
 using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.DataTransferObjectModels;
+using IdentityServiceApi.Models.DTO;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.ServiceResultModels.Authorization;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Authorization;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,7 +56,6 @@ namespace IdentityServiceApi.Services.Authorization
             _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
         }
 
-
         /// <summary>
         ///     Asynchronously retrieves all roles from the database, ordered by name.
         /// </summary>
@@ -74,7 +73,6 @@ namespace IdentityServiceApi.Services.Authorization
 
             return new RoleServiceListResult { Roles = roles };
         }
-
 
         /// <summary>
         ///     Asynchronously creates a new role in the system with the specified name.
@@ -99,7 +97,6 @@ namespace IdentityServiceApi.Services.Authorization
             }
 
             var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
-
             if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
@@ -107,7 +104,6 @@ namespace IdentityServiceApi.Services.Authorization
 
             return _serviceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously deletes a role from the system based on its unique ID.
@@ -127,14 +123,12 @@ namespace IdentityServiceApi.Services.Authorization
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
 
             var role = await _roleManager.FindByIdAsync(id);
-
             if (role == null)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.NotFound });
             }
 
             var result = await _roleManager.DeleteAsync(role);
-
             if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
@@ -142,7 +136,6 @@ namespace IdentityServiceApi.Services.Authorization
 
             return _serviceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously assigns a specified role to a user identified by their unique ID.
@@ -167,14 +160,12 @@ namespace IdentityServiceApi.Services.Authorization
             _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
             var userLookupResult = await _userLookupService.FindUserById(id);
-
             if (!userLookupResult.Success)
             {
                 return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
             }
 
             var user = userLookupResult.UserFound;
-
             if (!IsUserActive(user))
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InactiveUser });
@@ -191,7 +182,6 @@ namespace IdentityServiceApi.Services.Authorization
             }
 
             var result = await _userManager.AddToRoleAsync(user, roleName);
-
             if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
@@ -199,7 +189,6 @@ namespace IdentityServiceApi.Services.Authorization
 
             return _serviceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously removes a specified role to a user identified by their unique ID.
@@ -223,7 +212,6 @@ namespace IdentityServiceApi.Services.Authorization
             _parameterValidator.ValidateNotNullOrEmpty(roleName, nameof(roleName));
 
             var userLookupResult = await _userLookupService.FindUserById(id);
-
             if (!userLookupResult.Success)
             {
                 return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
@@ -242,7 +230,6 @@ namespace IdentityServiceApi.Services.Authorization
             }
 
             var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-
             if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
@@ -250,7 +237,6 @@ namespace IdentityServiceApi.Services.Authorization
 
             return _serviceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously determines whether the specified role exists in the system.
@@ -266,7 +252,6 @@ namespace IdentityServiceApi.Services.Authorization
         {
             return await _roleManager.RoleExistsAsync(roleName);
         }
-
 
         /// <summary>
         ///     Asynchronously verifies if the specified user is assigned to the given role.
@@ -285,7 +270,6 @@ namespace IdentityServiceApi.Services.Authorization
             var roles = await _userManager.GetRolesAsync(user);
             return roles.Any(role => role == roleName);
         }
-
 
         /// <summary>
         ///     Determines if the specified user is active based on their account status.

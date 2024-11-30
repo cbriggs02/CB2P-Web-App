@@ -1,5 +1,5 @@
-﻿using IdentityServiceApi.Models.ServiceResultModels.Authorization;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
+﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.Authorization;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Interfaces.Authorization
 {
@@ -20,7 +20,6 @@ namespace IdentityServiceApi.Interfaces.Authorization
         /// </returns>
         Task<RoleServiceListResult> GetRoles();
 
-
         /// <summary>
         ///     Asynchronously creates a new role in the system with the specified name.
         /// </summary>
@@ -32,7 +31,6 @@ namespace IdentityServiceApi.Interfaces.Authorization
         /// </returns>
         Task<ServiceResult> CreateRole(string roleName);
 
-
         /// <summary>
         ///     Asynchronously deletes a role identified by its ID from the system.
         /// </summary>
@@ -43,7 +41,6 @@ namespace IdentityServiceApi.Interfaces.Authorization
         ///     A task that represents the asynchronous operation, returning a result object indicating the outcome of the role deletion.
         /// </returns>
         Task<ServiceResult> DeleteRole(string id);
-
 
         /// <summary>
         ///     Asynchronously assigns a specified role to a user identified by their ID.
@@ -58,7 +55,6 @@ namespace IdentityServiceApi.Interfaces.Authorization
         ///     A task that represents the asynchronous operation, returning a result object indicating the outcome of the role assignment.
         /// </returns>
         Task<ServiceResult> AssignRole(string id, string roleName);
-
 
         /// <summary>
         ///     Asynchronously removes a specified role to a user identified by their ID.

@@ -2,8 +2,7 @@
 using IdentityServiceApi.Interfaces.Authentication;
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
-using IdentityServiceApi.Services.Authentication;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
 using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -75,7 +74,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             _authorizationService = new AuthorizationService(_userManagerMock.Object, _userContextServiceMock.Object, _userLookupServiceMock.Object);
         }
 
-
         /// <summary>
         ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="AuthorizationService"/> is 
         ///     instantiated with a null dependencies.
@@ -86,7 +84,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             //Act & Assert
             Assert.Throws<ArgumentNullException>(() => new AuthorizationService(null, null, null));
         }
-
 
         /// <summary>
         ///     Tests if an admin user is able to access data of a non-admin user.
@@ -127,7 +124,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserLookupService(targetUser.Id);
         }
 
-
         /// <summary>
         ///     Tests if an admin user is able to access data of a admin user.
         ///     Ensuring admins cannot access other admin data.
@@ -167,7 +163,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserLookupService(targetUser.Id);
         }
 
-
         /// <summary>
         ///     Tests if an super admin user is able to access data of a admin user.
         /// </summary>
@@ -204,7 +199,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextService(claimsPrincipal);
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
-
 
         /// <summary>
         ///     Tests if an super admin user is able to access data of a user.
@@ -243,7 +237,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
-
         /// <summary>
         ///     Tests if an super admin user is able to access data of a super admin.
         /// </summary>
@@ -281,7 +274,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
-
         /// <summary>
         ///     Tests if an super admin user is able to access their own data.
         /// </summary>
@@ -318,7 +310,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextService(claimsPrincipal);
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
-
 
         /// <summary>
         ///     Tests if an admin user is able to access their own data.
@@ -358,7 +349,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserLookupService(targetUser.Id);
         }
 
-
         /// <summary>
         ///     Tests if a user is able to access their own data.
         /// </summary>
@@ -396,7 +386,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
-
         /// <summary>
         ///     Tests if a user is able to access their own data when they have no roles assigned.
         ///     Ensures users who have no assigned role can access any data.
@@ -429,7 +418,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextService(claimsPrincipal);
         }
 
-
         /// <summary>
         ///     Tests if a user is able to access other users data when they have no roles assigned.
         ///     Ensures users who have no assigned role can access any data.
@@ -461,7 +449,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
 
             VerifyCallsToUserContextService(claimsPrincipal);
         }
-
 
         /// <summary>
         ///     Tests if a user is able to access another users data.
@@ -501,7 +488,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
-
         /// <summary>
         ///     Tests if a user is able to access a admins data.
         ///     Ensures users cannot access admin data.
@@ -540,7 +526,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
-
         /// <summary>
         ///     Tests if a user is able to access a super admins data.
         ///     Ensures users cannot access super admin data.
@@ -578,7 +563,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextService(claimsPrincipal);
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
-
 
         /// <summary>
         ///     Tests if accessing a non-existent user returns false.
@@ -619,7 +603,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             VerifyCallsToUserContextServiceForRoles(claimsPrincipal);
         }
 
-
         /// <summary>
         ///     Tests that the <see cref="AuthorizationService.ValidatePermission(string)"/> method
         ///     returns false when the claims principal is null.
@@ -652,7 +635,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             _userContextServiceMock.Verify(p => p.GetClaimsPrincipal(), Times.Once);
         }
 
-
         /// <summary>
         ///     Tests that the <see cref="AuthorizationService.ValidatePermission(string)"/> method
         ///     returns false when the target user ID is null.
@@ -678,7 +660,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             Assert.False(result);
         }
 
-
         /// <summary>
         ///     Tests that the <see cref="AuthorizationService.ValidatePermission(string)"/> method
         ///     returns false when both the claims principal and target user ID are null.
@@ -701,7 +682,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             Assert.False(result);
         }
 
-
         /// <summary>
         ///     Creates a <see cref="ClaimsPrincipal"/> instance with the specified user ID and role.
         /// </summary>
@@ -723,7 +703,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             }));
         }
 
-
         /// <summary>
         ///     Sets up a mock for retrieving the current <see cref="ClaimsPrincipal"/> 
         ///     from the user context service to be used in tests.
@@ -737,7 +716,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Setup(x => x.GetClaimsPrincipal())
                 .Returns(claimsPrincipal);
         }
-
 
         /// <summary>
         ///     Sets up a mock for retrieving a user ID from a specified <see cref="ClaimsPrincipal"/> 
@@ -756,7 +734,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Returns(currentUserId);
         }
 
-
         /// <summary>
         ///     Sets up a mock for retrieving a role associated with a specified <see cref="ClaimsPrincipal"/> 
         ///     in the user context service.
@@ -774,7 +751,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Returns(new List<string> { role });
         }
 
-
         /// <summary>
         ///     Sets up a mock for retrieving roles assigned to a specific <see cref="User"/> 
         ///     in the user manager service.
@@ -791,7 +767,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Setup(x => x.GetRolesAsync(targetUser))
                 .ReturnsAsync(new List<string> { role });
         }
-
 
         /// <summary>
         ///     Prepares a mock result for the user lookup service to return a successful user lookup operation.
@@ -812,7 +787,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .ReturnsAsync(result);
         }
 
-
         /// <summary>
         ///     Verifies that the <see cref="_userContextServiceMock"/> mock methods were called as expected
         ///     when retrieving the claims principal and user ID.
@@ -826,7 +800,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             _userContextServiceMock.Verify(u => u.GetUserId(claimsPrincipal), Times.Once);
         }
 
-
         /// <summary>
         ///     Verifies that the <see cref="_userContextServiceMock"/> mock method for retrieving user roles
         ///     was called exactly once.
@@ -838,7 +811,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
         {
             _userContextServiceMock.Verify(r => r.GetRoles(claimsPrincipal), Times.Once);
         }
-
 
         /// <summary>
         ///     Verifies that the <see cref="_userLookupServiceMock"/> mock method for finding a user by ID

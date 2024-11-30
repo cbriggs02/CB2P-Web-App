@@ -1,4 +1,4 @@
-﻿using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
 
 namespace IdentityServiceApi.Interfaces.UserManagement
 {
@@ -26,7 +26,6 @@ namespace IdentityServiceApi.Interfaces.UserManagement
         ///     which includes the user information if found, or error details if not.
         /// </returns>
         Task<UserLookupServiceResult> FindUserById(string id);
-
 
         /// <summary>
         ///     Asynchronously retrieves a user by their user name.

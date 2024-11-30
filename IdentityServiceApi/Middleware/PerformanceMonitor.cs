@@ -39,7 +39,6 @@ namespace IdentityServiceApi.Middleware
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         }
 
-
         /// <summary>
         ///     Asynchronously invokes the performance monitoring middleware.
         ///     Starts a timer, passes the request down the pipeline, and logs the request duration and CPU usage after completion.
@@ -68,7 +67,6 @@ namespace IdentityServiceApi.Middleware
             ConsoleLogPerformanceMetrics(context, requestId, requestDuration, cpuUsage);
         }
 
-
         /// <summary>
         ///     Starts the <see cref="Stopwatch"/> to measure the duration of the HTTP request.
         /// </summary>
@@ -79,7 +77,6 @@ namespace IdentityServiceApi.Middleware
         {
             return Stopwatch.StartNew();
         }
-
 
         /// <summary>
         ///     Stops the <see cref="Stopwatch"/> and returns the elapsed time in milliseconds.
@@ -96,7 +93,6 @@ namespace IdentityServiceApi.Middleware
             return stopwatch.ElapsedMilliseconds;
         }
 
-
         /// <summary>
         ///     Retrieves the total CPU usage of the current process.
         /// </summary>
@@ -107,7 +103,6 @@ namespace IdentityServiceApi.Middleware
         {
             return Process.GetCurrentProcess().TotalProcessorTime.TotalMilliseconds;
         }
-
 
         /// <summary>
         ///     Asynchronously checks the performance of the request based on the request duration.
@@ -132,7 +127,6 @@ namespace IdentityServiceApi.Middleware
             }
 
         }
-
 
         /// <summary>
         ///     Logs the performance metrics, including request ID, request path, response status code, request duration, and CPU usage.

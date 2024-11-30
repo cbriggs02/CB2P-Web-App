@@ -8,7 +8,7 @@
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
-    public interface IExceptionLoggerService
+    public interface IExceptionLoggerService : IAuditLoggerService
     {
         /// <summary>
         ///     Asynchronously logs an exception that has been thrown in the application.

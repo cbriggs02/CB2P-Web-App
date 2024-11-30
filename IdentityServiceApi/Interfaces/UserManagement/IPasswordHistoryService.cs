@@ -1,4 +1,4 @@
-﻿using IdentityServiceApi.Models.RequestModels.UserManagement;
+﻿using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
 
 namespace IdentityServiceApi.Interfaces.UserManagement
 {
@@ -24,7 +24,6 @@ namespace IdentityServiceApi.Interfaces.UserManagement
         /// </returns>
         Task AddPasswordHistory(StorePasswordHistoryRequest request);
 
-
         /// <summary>
         ///     Asynchronously checks the user's password history for potentially reused passwords.
         /// </summary>
@@ -39,7 +38,6 @@ namespace IdentityServiceApi.Interfaces.UserManagement
         ///     - false if the password hash is not found in the user's history, indicating that the password is not reused.
         /// </returns>
         Task<bool> FindPasswordHash(SearchPasswordHistoryRequest request);
-
 
         /// <summary>
         ///     Asynchronously removes the password history for a specified user.

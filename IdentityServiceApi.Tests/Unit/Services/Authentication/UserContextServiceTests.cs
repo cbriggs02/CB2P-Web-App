@@ -1,6 +1,5 @@
 ﻿using IdentityServiceApi.Constants;
 using IdentityServiceApi.Services.Authentication;
-using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using System.Net;
@@ -34,7 +33,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             _userContextService = new UserContextService(_httpContextAccessorMock.Object);
         }
 
-
         /// <summary>
         ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="UserContextService"/> is 
         ///     instantiated with a null dependencies.
@@ -45,7 +43,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             //Act & Assert
             Assert.Throws<ArgumentNullException>(() => new UserContextService(null));
         }
-
 
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetClaimsPrincipal"/> returns a valid 
@@ -73,7 +70,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             Assert.Equal(userName, result.Identity.Name);
         }
 
-
         /// <summary>
         ///     Verifies that <see cref="UserContextService.GetClaimsPrincipal"/> returns null
         ///     when the HttpContext is null, simulating cases with no active HTTP request.
@@ -92,7 +88,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             // Assert
             Assert.Null(result);
         }
-
 
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetUserId"/> returns the correct 
@@ -116,7 +111,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             Assert.Equal(expectedUserId, result);
         }
 
-
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetUserId"/> returns null when the 
         ///     provided <see cref="ClaimsPrincipal"/> is null.
@@ -132,7 +126,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             // Assert
             Assert.Null(result);
         }
-
 
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetRoles"/> returns a list of roles 
@@ -156,7 +149,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             Assert.Equal(roles, result);
         }
 
-
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetRoles"/> returns an empty list 
         ///     when the claims principal does not have any roles assigned.
@@ -178,7 +170,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             Assert.Empty(result);
         }
 
-
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetRoles"/> returns an empty list 
         ///     when the provided claims principal is null.
@@ -196,7 +187,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             Assert.NotNull(result);
             Assert.Empty(result);
         }
-
 
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetAddress"/> returns the correct 
@@ -228,7 +218,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             Assert.Equal(expectedAddress, result);
         }
 
-
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetAddress"/> returns null 
         ///     when the HTTP context is null. This test ensures that the method can 
@@ -249,7 +238,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             // Assert
             Assert.Null(result);
         }
-
 
         /// <summary>
         ///     Tests that <see cref="UserContextService.GetRequestPath"/> returns the 
@@ -281,7 +269,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             Assert.Equal(expectedPath, result);
         }
 
-
         /// <summary>
         ///     Verifies that <see cref="UserContextService.GetRequestPath"/> returns null
         ///     when the HttpContext is null, simulating cases with no active HTTP request.
@@ -300,7 +287,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             // Assert
             Assert.Null(result);
         }
-
 
         /// <summary>
         ///     Creates a DefaultHttpContext with the specified user's name.
@@ -322,7 +308,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             return httpContext;
         }
 
-
         /// <summary>
         ///     Creates a ClaimsPrincipal with the specified user's ID.
         /// </summary>
@@ -341,7 +326,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             return CreateClaimsPrincipal(claims);
         }
 
-
         /// <summary>
         ///     Creates a ClaimsPrincipal with the specified user's name.
         /// </summary>
@@ -359,7 +343,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             };
             return CreateClaimsPrincipal(claims);
         }
-
 
         /// <summary>
         ///     Creates a ClaimsPrincipal with the specified roles for testing purposes.
@@ -380,7 +363,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authentication
             }
             return CreateClaimsPrincipal(claims);
         }
-
 
         /// <summary>
         ///     Creates a ClaimsPrincipal with the given claims.

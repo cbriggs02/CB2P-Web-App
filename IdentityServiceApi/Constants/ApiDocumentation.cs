@@ -27,7 +27,6 @@
             public const string DeactivateUser = "Deactivates a user by ID in the system.";
         }
 
-
         /// <summary>
         ///     Contains constants for documenting password-related API endpoints.
         ///     These constants define summaries, descriptions, and other documentation details
@@ -39,7 +38,6 @@
             public const string UpdatePassword = "Updates the password for a user by ID in the system.";
         }
 
-
         /// <summary>
         ///     Contains constants for documenting login-related API endpoints.
         ///     These constants define summaries, descriptions, and other documentation details
@@ -49,7 +47,6 @@
         {
             public const string Login = "Logs in a user to the system.";
         }
-
 
         /// <summary>
         ///     Contains constants for documenting role-related API endpoints.
@@ -64,7 +61,6 @@
             public const string CreateRole = "Creates a new role in the system.";
             public const string DeleteRole = "Deletes a role from the system.";
         }
-
 
         /// <summary>
         ///     Contains constants for documenting audit-log-related API endpoints.

@@ -8,7 +8,7 @@
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
-    public interface IAuthorizationLoggerService
+    public interface IAuthorizationLoggerService : IAuditLoggerService
     {
         /// <summary>
         ///     Asynchronously logs an authorization breach by a specific user.

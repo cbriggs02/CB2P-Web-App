@@ -3,8 +3,8 @@ using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.RequestModels.UserManagement;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServiceApi.Services.UserManagement
@@ -38,7 +38,7 @@ namespace IdentityServiceApi.Services.UserManagement
         ///     The service used for validating user permissions.
         /// </param>
         /// <param name="parameterValidator">
-        ///     The paramter validator service used for defense checking service paramters.
+        ///     The parameter validator service used for defense checking service parameters.
         /// </param>
         /// <param name="serviceResultFactory">
         ///     The service used for creating the result objects being returned in operations.
@@ -58,7 +58,6 @@ namespace IdentityServiceApi.Services.UserManagement
             _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
             _userLookupService = userLookupService ?? throw new ArgumentNullException(nameof(userLookupService));
         }
-
 
         /// <summary>
         ///     Asynchronously sets a password for a user in the database based on the provided ID.
@@ -88,21 +87,18 @@ namespace IdentityServiceApi.Services.UserManagement
             }
 
             var userLookupResult = await _userLookupService.FindUserById(id);
-
             if (!userLookupResult.Success)
             {
                 return _serviceResultFactory.GeneralOperationFailure(userLookupResult.Errors.ToArray());
             }
 
             var user = userLookupResult.UserFound;
-
             if (user.PasswordHash != null)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.AlreadySet });
             }
 
             var result = await _userManager.AddPasswordAsync(user, request.Password);
-
             if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
@@ -111,7 +107,6 @@ namespace IdentityServiceApi.Services.UserManagement
             await CreatePasswordHistory(user);
             return _serviceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously updates the password for a user in the database based on the provided ID.
@@ -136,14 +131,12 @@ namespace IdentityServiceApi.Services.UserManagement
             _parameterValidator.ValidateNotNullOrEmpty(request.NewPassword, nameof(request.NewPassword));
 
             var permissionResult = await _permissionService.ValidatePermissions(id);
-
             if (!permissionResult.Success)
             {
                 return _serviceResultFactory.GeneralOperationFailure(permissionResult.Errors.ToArray());
             }
 
             var userLookupResult = await _userLookupService.FindUserById(id);
-
             if (!userLookupResult.Success || userLookupResult.UserFound.PasswordHash == null)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.InvalidCredentials });
@@ -152,7 +145,6 @@ namespace IdentityServiceApi.Services.UserManagement
             var user = userLookupResult.UserFound;
 
             var passwordIsValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
-
             if (!passwordIsValid)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.InvalidCredentials });
@@ -160,14 +152,12 @@ namespace IdentityServiceApi.Services.UserManagement
 
             // Send password to be checked against users history for re-use errors
             var isPasswordReused = await IsPasswordReused(user.Id, request.NewPassword);
-
             if (isPasswordReused)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.CannotReuse });
             }
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-
             if (!result.Succeeded)
             {
                 return _serviceResultFactory.GeneralOperationFailure(result.Errors.Select(e => e.Description).ToArray());
@@ -176,7 +166,6 @@ namespace IdentityServiceApi.Services.UserManagement
             await CreatePasswordHistory(user);
             return _serviceResultFactory.GeneralOperationSuccess();
         }
-
 
         /// <summary>
         ///     Asynchronously records the current password of the user in the password history.
@@ -198,7 +187,6 @@ namespace IdentityServiceApi.Services.UserManagement
 
             await _historyService.AddPasswordHistory(passwordHistoryRequest);
         }
-
 
         /// <summary>
         ///     Asynchronously checks if the specified password has been used previously by the specified user.

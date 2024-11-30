@@ -1,5 +1,5 @@
-﻿using IdentityServiceApi.Models.RequestModels.Authentication;
-using IdentityServiceApi.Models.ServiceResultModels.Authentication;
+﻿using IdentityServiceApi.Models.Internal.RequestModels.Authentication;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Authentication;
 
 namespace IdentityServiceApi.Interfaces.Authentication
 {

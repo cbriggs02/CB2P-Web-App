@@ -37,7 +37,6 @@ namespace IdentityServiceApi.Middleware
             _scopeFactory = scopeFactory;
         }
 
-
         /// <summary>
         ///     Asynchronously invokes the exception handling middleware. If an exception occurs during the HTTP request processing,
         ///     it is caught, logged, and a standardized JSON error response is returned to the client.
@@ -65,7 +64,6 @@ namespace IdentityServiceApi.Middleware
             }
         }
 
-
         /// <summary>
         ///     Logs detailed information about an exception, including the exception type, message, stack trace,
         ///     and HTTP request details, such as method and path. This helps diagnose issues effectively.
@@ -87,7 +85,6 @@ namespace IdentityServiceApi.Middleware
                 "An unhandled exception occurred", exceptionType, timestamp, requestMethod, requestPath, requestQuery,
                 innerExceptionMessage, stackTrace);
         }
-
 
         /// <summary>
         ///     Gathers detailed information about an exception and the associated HTTP request context.
@@ -115,7 +112,6 @@ namespace IdentityServiceApi.Middleware
                 Timestamp: DateTime.UtcNow
             );
         }
-
 
         /// <summary>
         ///     Asynchronously writes a standardized error response to the client with a 500 status code (Internal Server Error)

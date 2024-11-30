@@ -2,7 +2,7 @@
 using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Services.Authorization
 {
@@ -47,7 +47,6 @@ namespace IdentityServiceApi.Services.Authorization
             _serviceResultFactory = serviceResultFactory ?? throw new ArgumentNullException(nameof(serviceResultFactory));
         }
 
-
         /// <summary>
         ///     Asynchronously validates the permissions of a user identified by the specified ID.
         /// </summary>
@@ -66,7 +65,6 @@ namespace IdentityServiceApi.Services.Authorization
 
             // Use the auth service to check permissions
             bool hasPermission = await _authService.ValidatePermission(id);
-
             if (!hasPermission)
             {
                 await _loggerService.LogAuthorizationBreach();

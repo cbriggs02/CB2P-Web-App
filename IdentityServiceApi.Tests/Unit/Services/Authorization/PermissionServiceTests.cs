@@ -2,7 +2,7 @@
 using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
 using IdentityServiceApi.Services.Authorization;
 using Moq;
 
@@ -24,7 +24,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
         private readonly Mock<ILoggerService> _loggerServiceMock;
         private readonly Mock<IParameterValidator> _parameterValidatorMock;
         private readonly Mock<IServiceResultFactory> _serviceResultFactoryMock;
-        private readonly PermissionService _permissionServiceMock;
+        private readonly PermissionService _permissionService;
         private const string UserId = "test-id";
 
         /// <summary>
@@ -38,9 +38,8 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             _parameterValidatorMock = new Mock<IParameterValidator>();
             _serviceResultFactoryMock = new Mock<IServiceResultFactory>();
 
-            _permissionServiceMock = new PermissionService(_authServiceMock.Object, _loggerServiceMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object);
+            _permissionService = new PermissionService(_authServiceMock.Object, _loggerServiceMock.Object, _parameterValidatorMock.Object, _serviceResultFactoryMock.Object);
         }
-
 
         /// <summary>
         ///     Tests that an <see cref="ArgumentNullException"/> is thrown when <see cref="PermissionService"/> is 
@@ -52,7 +51,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             //Act & Assert
             Assert.Throws<ArgumentNullException>(() => new PermissionService(null, null, null, null));
         }
-
 
         /// <summary>
         ///     Verifies that calling the validate permissions method with null, empty or whitespace id throws an ArgumentNullException.
@@ -75,11 +73,10 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Throws<ArgumentNullException>();
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _permissionServiceMock.ValidatePermissions(id));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _permissionService.ValidatePermissions(id));
 
             VerifyCallsToParameterService();
         }
-
 
         /// <summary>
         ///     Tests the validate permissions method to verify that it returns a failure result
@@ -105,7 +102,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 });
 
             // Act
-            var result = await _permissionServiceMock.ValidatePermissions(UserId);
+            var result = await _permissionService.ValidatePermissions(UserId);
 
             // Assert
             Assert.NotNull(result);
@@ -115,7 +112,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             _loggerServiceMock.Verify(l => l.LogAuthorizationBreach(), Times.Once);
             VerifyCallsToParameterService();
         }
-
 
         /// <summary>
         ///     Tests the validate permissions method to confirm it returns a success result
@@ -135,7 +131,7 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Returns(new ServiceResult { Success = true });
 
             // Act
-            var result = await _permissionServiceMock.ValidatePermissions(UserId);
+            var result = await _permissionService.ValidatePermissions(UserId);
 
             // Assert
             Assert.NotNull(result);
@@ -144,7 +140,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
             _loggerServiceMock.VerifyNoOtherCalls();
             VerifyCallsToParameterService();
         }
-
 
         /// <summary>
         ///     Configures the mock for <see cref="IAuthorizationService"/> to return a specified permission result
@@ -159,7 +154,6 @@ namespace IdentityServiceApi.Tests.Unit.Services.Authorization
                 .Setup(a => a.ValidatePermission(UserId))
                 .ReturnsAsync(hasPermission);
         }
-
 
         /// <summary>
         ///     Verifies that the <see cref="IParameterValidator"/> service's <c>ValidateNotNullOrEmpty</c> method 

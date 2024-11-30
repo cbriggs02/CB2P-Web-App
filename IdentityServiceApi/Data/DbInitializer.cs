@@ -31,7 +31,6 @@ namespace IdentityServiceApi.Data
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-
         /// <summary>
         ///     Asynchronously initializes the database and performs seeding if necessary.
         ///     This method is called during the application startup.
@@ -72,7 +71,6 @@ namespace IdentityServiceApi.Data
             }
         }
 
-
         /// <summary>
         ///     Asynchronously initializes users by seeding default users and the admin user if no users exist.
         /// </summary>
@@ -89,7 +87,6 @@ namespace IdentityServiceApi.Data
             await SeedSuper(userManager);
         }
 
-
         /// <summary>
         ///     Asynchronously initializes roles by seeding them if they do not already exist.
         /// </summary>
@@ -103,7 +100,6 @@ namespace IdentityServiceApi.Data
         {
             await SeedRoles(roleManager);
         }
-
 
         /// <summary>
         ///     Asynchronously seeds the database with a list of default users if no users exist.
@@ -138,7 +134,6 @@ namespace IdentityServiceApi.Data
                 }
             }
         }
-
 
         /// <summary>
         ///     Asynchronously seeds an super admin user with a specified email and assigns the "SuperAdmin" role.
@@ -181,7 +176,6 @@ namespace IdentityServiceApi.Data
             }
         }
 
-
         /// <summary>
         ///     Asynchronously seeds an admin user with a specified email and assigns the "Admin" role.
         /// </summary>
@@ -222,7 +216,6 @@ namespace IdentityServiceApi.Data
                 }
             }
         }
-
 
         /// <summary>
         ///     Asynchronously seeds the default roles in the database if they do not already exist.

@@ -2,7 +2,7 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +31,7 @@ namespace IdentityServiceApi.Services.UserManagement
         ///     This is used for comparing hashed passwords and ensuring password security.
         /// </param>
         /// <param name="parameterValidator">
-        ///     The paramter validator service used for defense checking service paramters.
+        ///     The parameter validator service used for defense checking service parameters.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown if the <paramref name="context"/> parameter is null.
@@ -42,7 +42,6 @@ namespace IdentityServiceApi.Services.UserManagement
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
             _parameterValidator = parameterValidator ?? throw new ArgumentNullException(nameof(parameterValidator));
         }
-
 
         /// <summary>
         ///     Asynchronously records the current password hash of the specified user in the password history.
@@ -74,7 +73,6 @@ namespace IdentityServiceApi.Services.UserManagement
             await _context.SaveChangesAsync();
         }
 
-
         /// <summary>
         ///     Asynchronously checks a user's password history for potential reuse of a password.
         /// </summary>
@@ -105,7 +103,6 @@ namespace IdentityServiceApi.Services.UserManagement
                 _passwordHasher.VerifyHashedPassword(dummyUser, storedHash, request.Password) == PasswordVerificationResult.Success);
         }
 
-
         /// <summary>
         ///     Asynchronously deletes all password history entries for the user matching the provided user ID.
         /// </summary>
@@ -133,7 +130,6 @@ namespace IdentityServiceApi.Services.UserManagement
 
             return true;
         }
-
 
         /// <summary>
         ///     Asynchronously removes old password entries for a user, keeping only the most recent five.

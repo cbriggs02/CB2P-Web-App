@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Mvc;
 using IdentityServiceApi.Interfaces.Logging;
-using IdentityServiceApi.Services.Logging;
 using IdentityServiceApi.Interfaces.Authentication;
 using IdentityServiceApi.Services.Authentication;
 using IdentityServiceApi.Interfaces.Authorization;
@@ -23,6 +22,12 @@ using IdentityServiceApi.Services.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Services.Utilities;
 using Asp.Versioning;
+using IdentityServiceApi.Services.Utilities.ResultFactories.UserManagement;
+using IdentityServiceApi.Services.Utilities.ResultFactories.Authentication;
+using IdentityServiceApi.Services.Utilities.ResultFactories.Common;
+using IdentityServiceApi.Services.Logging.Common;
+using IdentityServiceApi.Services.Logging.Implementations;
+using IdentityServiceApi.Services.Logging;
 
 namespace IdentityServiceApi
 {
@@ -103,26 +108,38 @@ namespace IdentityServiceApi
             });
 
             builder.Services.AddHttpContextAccessor();
+
+            // Authentication related services
+            builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<IUserContextService, UserContextService>();
 
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IUserLookupService, UserLookupService>();
-            builder.Services.AddScoped<IPasswordService, PasswordService>();
-            builder.Services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
-
-            builder.Services.AddScoped<ILoginService, LoginService>();
+            // Authorization related services
             builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
             builder.Services.AddScoped<IPermissionService, PermissionService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
 
+            // Logging related services
             builder.Services.AddScoped<IAuditLoggerService, AuditLoggerService>();
             builder.Services.AddScoped<ILoggerService, LoggerService>();
             builder.Services.AddScoped<IAuthorizationLoggerService, AuthorizationLoggerService>();
             builder.Services.AddScoped<IExceptionLoggerService, ExceptionLoggerService>();
             builder.Services.AddScoped<IPerformanceLoggerService, PerformanceLoggerService>();
+            builder.Services.AddScoped<ILoggingValidator, LoggingValidator>();
 
+            // User management related services
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserLookupService, UserLookupService>();
+            builder.Services.AddScoped<IPasswordService, PasswordService>();
+            builder.Services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
+
+            // Utility related services
             builder.Services.AddScoped<IParameterValidator, ParameterValidator>();
+
+            // Service result factory related services
             builder.Services.AddScoped<IServiceResultFactory, ServiceResultFactory>();
+            builder.Services.AddScoped<IUserServiceResultFactory, UserServiceResultFactory>();
+            builder.Services.AddScoped<IUserLookupServiceResultFactory, UserLookupServiceResultFactory>();
+            builder.Services.AddScoped<ILoginServiceResultFactory, LoginServiceResultFactory>();
 
             builder.Services.AddTransient<DbInitializer>();
 

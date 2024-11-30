@@ -1,12 +1,12 @@
-﻿using IdentityServiceApi.Models.RequestModels.Logging;
-using IdentityServiceApi.Models.ServiceResultModels.Common;
-using IdentityServiceApi.Models.ServiceResultModels.Logging;
+﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.Logging;
+using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.Internal.RequestModels.Logging;
 
 namespace IdentityServiceApi.Interfaces.Logging
 {
     /// <summary>
-    ///     Defines the contract for audit log services that manage logging of various actions 
-    ///     within the application, such as logging authorization breaches and exceptions.
+    ///     Interface that defines methods for logging audit entries and managing audit logs.
+    ///     It includes operations for retrieving, deleting, and managing audit log records.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
@@ -26,7 +26,6 @@ namespace IdentityServiceApi.Interfaces.Logging
         /// </returns>
         Task<AuditLogServiceListResult> GetLogs(AuditLogListRequest request);
 
-
         /// <summary>
         ///     Asynchronously deletes a audit log in the system by ID.
         /// </summary>
@@ -37,49 +36,5 @@ namespace IdentityServiceApi.Interfaces.Logging
         ///     A task representing the asynchronous operation that returns a <see cref= ServiceResult"/> object.
         /// </returns>
         Task<ServiceResult> DeleteLog(string id);
-
-
-        /// <summary>
-        ///     Asynchronously logs an authorization breach event. This method captures details 
-        ///     such as the user ID, the action attempted, the timestamp, and the IP address
-        ///     of an unauthorized access attempt for audit logging purposes.
-        /// </summary>
-        /// <param name="request">
-        ///     The request model containing details about the unauthorized access attempt,
-        ///     including user ID, action attempted, and IP address.
-        /// </param>
-        /// <returns>
-        ///     A task representing the asynchronous operation of logging the authorization breach.
-        /// </returns>
-        Task LogAuthorizationBreach(AuditLogAuthorizationRequest request);
-
-
-        /// <summary>
-        ///     Asynchronously logs an exception that occurs during system operations. This method 
-        ///     captures the exception details, the user ID associated with the request, and the 
-        ///     IP address from which the request originated.
-        /// </summary>
-        /// <param name="request">
-        ///     The request model containing details about the exception, including the 
-        ///     exception object, user ID, and IP address.
-        /// </param>
-        /// <returns>
-        ///     A task representing the asynchronous operation of logging the exception.
-        /// </returns>
-        Task LogException(AuditLogExceptionRequest request);
-
-
-        /// <summary>
-        ///     Asynchronously logs performance metrics for slow requests. This method captures the details of a request 
-        ///     that exceeded the acceptable performance threshold.
-        /// </summary>
-        /// <param name="request">
-        ///     An instance of <see cref="AuditLogPerformanceRequest"/> containing details about the performance issue,
-        ///     including user ID, action, response time, and IP address.
-        /// </param>
-        /// <returns>
-        ///     A task repres
-        /// </returns>
-        Task LogSlowPerformance(AuditLogPerformanceRequest request);
     }
 }
