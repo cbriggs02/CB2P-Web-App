@@ -2,7 +2,7 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServiceApi.Services.UserManagement
@@ -59,8 +59,8 @@ namespace IdentityServiceApi.Services.UserManagement
         public async Task<UserLookupServiceResult> FindUserById(string id)
         {
             _parameterValidator.ValidateNotNullOrEmpty(id, nameof(id));
-
             var user = await _userManager.FindByIdAsync(id);
+
             return HandleLookupResult(user);
         }
 
@@ -78,8 +78,8 @@ namespace IdentityServiceApi.Services.UserManagement
         public async Task<UserLookupServiceResult> FindUserByUsername(string userName)
         {
             _parameterValidator.ValidateNotNullOrEmpty(userName, nameof(userName));
-
             var user = await _userManager.FindByNameAsync(userName);
+
             return HandleLookupResult(user);
         }
 

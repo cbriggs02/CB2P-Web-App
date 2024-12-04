@@ -4,7 +4,6 @@ using IdentityServiceApi.Interfaces.Authentication;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Services.Authentication;
 using IdentityServiceApi.Services.Logging.AbstractClasses;
 
 namespace IdentityServiceApi.Services.Logging.Implementations

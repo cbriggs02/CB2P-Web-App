@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IdentityServiceApi.Models.Internal.RequestModels.UserManagement
+namespace IdentityServiceApi.Models.RequestModels.UserManagement
 {
     /// <summary>
     ///     Represents the model used by a user to set a new password.

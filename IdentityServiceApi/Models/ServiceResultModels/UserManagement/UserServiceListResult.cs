@@ -1,7 +1,7 @@
 ﻿using IdentityServiceApi.Models.DTO;
 using IdentityServiceApi.Models.Shared;
 
-namespace IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement
+namespace IdentityServiceApi.Models.ServiceResultModels.UserManagement
 {
     /// <summary>
     ///     Represents the result of a user-related operation 

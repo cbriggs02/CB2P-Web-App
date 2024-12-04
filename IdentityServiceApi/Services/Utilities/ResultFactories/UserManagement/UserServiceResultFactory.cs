@@ -1,6 +1,6 @@
 ﻿using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.DTO;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 using IdentityServiceApi.Services.Utilities.ResultFactories.AbstractClasses;
 
 namespace IdentityServiceApi.Services.Utilities.ResultFactories.UserManagement
@@ -12,7 +12,7 @@ namespace IdentityServiceApi.Services.Utilities.ResultFactories.UserManagement
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
-    public class UserServiceResultFactory : UserServiceResultFactoryBase
+    public class UserServiceResultFactory : UserServiceResultFactoryBase, IUserServiceResultFactory
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="UserServiceResultFactory"/> class.

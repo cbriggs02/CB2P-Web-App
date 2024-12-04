@@ -9,7 +9,7 @@ using IdentityServiceApi.Models.ApiResponseModels.UsersResponses;
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Models.ApiResponseModels.Shared;
 using Asp.Versioning;
-using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
 
 namespace IdentityServiceApi.Controllers
 {
@@ -152,6 +152,7 @@ namespace IdentityServiceApi.Controllers
             }
 
             var response = new UserResponse { User = result.User };
+
             return CreatedAtAction(nameof(GetUser), new { id = response.User.UserName }, response);
         }
 
@@ -198,8 +199,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return NoContent();
         }
 
@@ -243,8 +246,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
 
@@ -288,8 +293,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
 
@@ -333,8 +340,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
     }

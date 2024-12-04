@@ -1,6 +1,6 @@
 ﻿using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 using IdentityServiceApi.Services.Utilities.ResultFactories.Common;
 
 namespace IdentityServiceApi.Services.Utilities.ResultFactories.AbstractClasses

@@ -2,7 +2,7 @@
 using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Services.Authorization
 {

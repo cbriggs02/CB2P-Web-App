@@ -6,7 +6,7 @@ using IdentityServiceApi.Models.ApiResponseModels.LoginResponses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using IdentityServiceApi.Models.Internal.RequestModels.Authentication;
+using IdentityServiceApi.Models.RequestModels.Authentication;
 
 namespace IdentityServiceApi.Controllers
 {
@@ -70,8 +70,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok(new LoginResponse { Token = result.Token });
         }
     }

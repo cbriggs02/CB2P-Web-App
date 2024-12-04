@@ -1,6 +1,6 @@
-﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+﻿using IdentityServiceApi.Models.ServiceResultModels.Shared;
 
-namespace IdentityServiceApi.Models.Internal.ServiceResultModels.Authentication
+namespace IdentityServiceApi.Models.ServiceResultModels.Authentication
 {
     /// <summary>
     ///     Represents the result of a login-related operation performed by the login service.

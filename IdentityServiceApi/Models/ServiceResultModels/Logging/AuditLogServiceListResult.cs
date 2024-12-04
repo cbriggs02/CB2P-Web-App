@@ -1,7 +1,7 @@
 ﻿using IdentityServiceApi.Models.DTO;
 using IdentityServiceApi.Models.Shared;
 
-namespace IdentityServiceApi.Models.Internal.ServiceResultModels.Logging
+namespace IdentityServiceApi.Models.ServiceResultModels.Logging
 {
     /// <summary>
     ///     Represents the result of a service operation that retrieves a list of audit logs.

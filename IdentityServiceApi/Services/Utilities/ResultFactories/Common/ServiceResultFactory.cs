@@ -1,5 +1,5 @@
 ﻿using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Services.Utilities.ResultFactories.Common
 {

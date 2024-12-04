@@ -6,10 +6,10 @@ using IdentityServiceApi.Models.DTO;
 using IdentityServiceApi.Models.Entities;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Logging;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
-using IdentityServiceApi.Models.Internal.RequestModels.Logging;
 using IdentityServiceApi.Models.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.Logging;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.RequestModels.Logging;
 
 namespace IdentityServiceApi.Services.Logging
 {

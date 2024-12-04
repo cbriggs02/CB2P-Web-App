@@ -1,4 +1,4 @@
-﻿using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
+﻿using IdentityServiceApi.Models.RequestModels.UserManagement;
 
 namespace IdentityServiceApi.Interfaces.UserManagement
 {

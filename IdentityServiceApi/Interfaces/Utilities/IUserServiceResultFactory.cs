@@ -1,5 +1,5 @@
 ﻿using IdentityServiceApi.Models.DTO;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 
 namespace IdentityServiceApi.Interfaces.Utilities
 {

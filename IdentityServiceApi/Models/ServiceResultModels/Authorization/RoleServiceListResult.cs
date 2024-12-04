@@ -1,6 +1,6 @@
 ﻿using IdentityServiceApi.Models.DTO;
 
-namespace IdentityServiceApi.Models.Internal.ServiceResultModels.Authorization
+namespace IdentityServiceApi.Models.ServiceResultModels.Authorization
 {
     /// <summary>
     ///     Represents the result of a service operation that retrieves a list of roles.

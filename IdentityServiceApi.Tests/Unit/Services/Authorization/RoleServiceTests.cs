@@ -2,8 +2,8 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 using IdentityServiceApi.Services.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;

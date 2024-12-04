@@ -31,6 +31,8 @@ namespace IdentityServiceApi.Services.Logging
         /// </exception>
         public void ValidateContextData(string value, string fieldName)
         {
+            ValidateNotNullOrEmpty(fieldName, nameof(fieldName));
+
             if (string.IsNullOrEmpty(value))
             {
                 throw new InvalidOperationException($"{fieldName} cannot be null or empty.");

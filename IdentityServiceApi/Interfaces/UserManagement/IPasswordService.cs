@@ -1,5 +1,5 @@
-﻿using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+﻿using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Interfaces.UserManagement
 {

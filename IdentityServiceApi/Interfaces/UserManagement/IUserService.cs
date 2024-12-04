@@ -1,7 +1,7 @@
 ﻿using IdentityServiceApi.Models.DTO;
-using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
 
 namespace IdentityServiceApi.Interfaces.UserManagement
 {

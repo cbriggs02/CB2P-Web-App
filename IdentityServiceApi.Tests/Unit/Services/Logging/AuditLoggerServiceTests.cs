@@ -2,7 +2,7 @@
 using IdentityServiceApi.Data;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 using IdentityServiceApi.Services.Logging;
 using Moq;
 

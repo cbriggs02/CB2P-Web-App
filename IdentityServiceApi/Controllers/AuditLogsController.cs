@@ -3,7 +3,7 @@ using IdentityServiceApi.Constants;
 using IdentityServiceApi.Interfaces.Logging;
 using IdentityServiceApi.Models.ApiResponseModels.AuditLogsResponses;
 using IdentityServiceApi.Models.ApiResponseModels.Shared;
-using IdentityServiceApi.Models.Internal.RequestModels.Logging;
+using IdentityServiceApi.Models.RequestModels.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -113,8 +113,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
     }

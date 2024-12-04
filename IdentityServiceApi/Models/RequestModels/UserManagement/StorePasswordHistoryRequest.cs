@@ -1,4 +1,4 @@
-﻿namespace IdentityServiceApi.Models.Internal.RequestModels.UserManagement
+﻿namespace IdentityServiceApi.Models.RequestModels.UserManagement
 {
     /// <summary>
     ///     Represents the model used for storing a user's password in the password history,

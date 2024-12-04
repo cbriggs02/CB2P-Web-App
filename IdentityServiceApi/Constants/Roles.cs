@@ -11,8 +11,22 @@
     /// </remarks>
     public static class Roles
     {
+        /// <summary>
+        ///     Represents the super administrative role.
+        ///     Users with this role have the highest level of access and control in the system.
+        /// </summary>
         public const string SuperAdmin = "SuperAdmin";
+
+        /// <summary>
+        ///     Represents the administrative role.
+        ///     Users with this role have elevated privileges to manage certain system operations.
+        /// </summary>
         public const string Admin = "Admin";
+
+        /// <summary>
+        ///     Represents the regular user role.
+        ///     Users with this role have standard access to the application's features and functionality.
+        /// </summary>
         public const string User = "User";
     }
 }

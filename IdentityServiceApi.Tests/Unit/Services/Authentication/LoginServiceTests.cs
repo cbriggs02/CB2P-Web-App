@@ -2,9 +2,9 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.RequestModels.Authentication;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Authentication;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.RequestModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.Authentication;
 using IdentityServiceApi.Services.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;

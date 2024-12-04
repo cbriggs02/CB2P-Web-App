@@ -74,8 +74,8 @@ namespace IdentityServiceApi.Services.Authorization
             }
 
             var currentUserId = _userContextService.GetUserId(principal);
-
             var roles = _userContextService.GetRoles(principal);
+
             if (roles == null || !roles.Any())
             {
                 return false; // No roles assigned, deny access

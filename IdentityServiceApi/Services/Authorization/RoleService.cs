@@ -4,8 +4,8 @@ using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.DTO;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Authorization;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.Authorization;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -166,6 +166,7 @@ namespace IdentityServiceApi.Services.Authorization
             }
 
             var user = userLookupResult.UserFound;
+
             if (!IsUserActive(user))
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Role.InactiveUser });

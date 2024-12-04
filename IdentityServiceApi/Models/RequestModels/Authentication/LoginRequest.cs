@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IdentityServiceApi.Models.Internal.RequestModels.Authentication
+namespace IdentityServiceApi.Models.RequestModels.Authentication
 {
     /// <summary>
     ///     Represents the model that encapsulates data used for user authentication.

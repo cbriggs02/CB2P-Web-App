@@ -1,4 +1,4 @@
-﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.Authentication;
+﻿using IdentityServiceApi.Models.ServiceResultModels.Authentication;
 
 namespace IdentityServiceApi.Interfaces.Utilities
 {

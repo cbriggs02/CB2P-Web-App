@@ -1,6 +1,6 @@
-﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.Logging;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
-using IdentityServiceApi.Models.Internal.RequestModels.Logging;
+﻿using IdentityServiceApi.Models.RequestModels.Logging;
+using IdentityServiceApi.Models.ServiceResultModels.Logging;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Interfaces.Logging
 {

@@ -7,10 +7,10 @@ using IdentityServiceApi.Models.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement;
-using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
 using IdentityServiceApi.Models.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.UserManagement;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
 
 namespace IdentityServiceApi.Services.UserManagement
 {
@@ -307,6 +307,7 @@ namespace IdentityServiceApi.Services.UserManagement
             }
 
             var user = userLookupServiceResult.UserFound;
+
             if (user.AccountStatus == 1)
             {
                 return _userServiceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.AlreadyActivated });
@@ -350,6 +351,7 @@ namespace IdentityServiceApi.Services.UserManagement
             }
 
             var user = userLookupServiceResult.UserFound;
+
             if (user.AccountStatus == 0)
             {
                 return _userServiceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.User.NotActivated });

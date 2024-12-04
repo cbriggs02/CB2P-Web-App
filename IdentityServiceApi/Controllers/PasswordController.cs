@@ -2,7 +2,7 @@
 using IdentityServiceApi.Constants;
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Models.ApiResponseModels.Shared;
-using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -73,8 +73,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
 
@@ -122,8 +124,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
     }

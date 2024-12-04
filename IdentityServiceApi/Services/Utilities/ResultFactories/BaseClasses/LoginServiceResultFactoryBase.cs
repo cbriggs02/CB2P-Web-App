@@ -1,5 +1,5 @@
 ﻿using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.Authentication;
 using IdentityServiceApi.Services.Utilities.ResultFactories.Common;
 
 namespace IdentityServiceApi.Services.Utilities.ResultFactories.AbstractClasses

@@ -66,6 +66,7 @@ namespace IdentityServiceApi.Controllers
             {
                 return NoContent();
             }
+
             return Ok(new RolesList { Roles = result.Roles });
         }
 
@@ -97,6 +98,7 @@ namespace IdentityServiceApi.Controllers
             {
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
 
@@ -134,6 +136,7 @@ namespace IdentityServiceApi.Controllers
                 }
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
 
@@ -172,8 +175,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
 
@@ -212,8 +217,10 @@ namespace IdentityServiceApi.Controllers
                 {
                     return NotFound();
                 }
+
                 return BadRequest(new ErrorResponse { Errors = result.Errors });
             }
+
             return Ok();
         }
     }

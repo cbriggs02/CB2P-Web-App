@@ -55,8 +55,32 @@ namespace IdentityServiceApi.Services.Utilities
             {
                 throw new ArgumentNullException(parameterName, $"{parameterName} cannot be null.");
             }
+        }
 
-            if (parameter is IEnumerable enumerable && !enumerable.Cast<object>().Any())
+        /// <summary>
+        ///     Validates that a collection parameter is neither null nor empty.
+        ///     This method ensures that the provided collection contains at least one element.
+        /// </summary>
+        /// <param name="collection">
+        ///     The collection to validate. This parameter must not be null or empty.
+        /// </param>
+        /// <param name="parameterName">
+        ///     The name of the parameter being validated. Used in exception messages to identify the invalid parameter.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when the <paramref name="collection"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="collection"/> is empty (contains no elements).
+        /// </exception>
+        public void ValidateCollectionNotEmpty(IEnumerable collection, string parameterName)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException(parameterName, $"{parameterName} cannot be null.");
+            }
+
+            if (!collection.Cast<object>().Any())
             {
                 throw new ArgumentException($"{parameterName} cannot be an empty collection.", parameterName);
             }

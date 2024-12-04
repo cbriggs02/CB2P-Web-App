@@ -1,4 +1,4 @@
-﻿namespace IdentityServiceApi.Models.Internal.ServiceResultModels.Shared
+﻿namespace IdentityServiceApi.Models.ServiceResultModels.Shared
 {
     /// <summary>
     ///     Represents the uniform model representing the result of a service operation.

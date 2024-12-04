@@ -1,7 +1,7 @@
 ﻿using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 
-namespace IdentityServiceApi.Models.Internal.ServiceResultModels.UserManagement
+namespace IdentityServiceApi.Models.ServiceResultModels.UserManagement
 {
     /// <summary>
     ///     Represents the result of a user lookup operation.

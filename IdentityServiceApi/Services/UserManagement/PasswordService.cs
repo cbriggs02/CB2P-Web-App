@@ -3,8 +3,8 @@ using IdentityServiceApi.Interfaces.Authorization;
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
+using IdentityServiceApi.Models.ServiceResultModels.Shared;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServiceApi.Services.UserManagement
@@ -93,6 +93,7 @@ namespace IdentityServiceApi.Services.UserManagement
             }
 
             var user = userLookupResult.UserFound;
+
             if (user.PasswordHash != null)
             {
                 return _serviceResultFactory.GeneralOperationFailure(new[] { ErrorMessages.Password.AlreadySet });

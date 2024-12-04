@@ -2,7 +2,7 @@
 using IdentityServiceApi.Interfaces.UserManagement;
 using IdentityServiceApi.Interfaces.Utilities;
 using IdentityServiceApi.Models.Entities;
-using IdentityServiceApi.Models.Internal.RequestModels.UserManagement;
+using IdentityServiceApi.Models.RequestModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,5 +1,5 @@
 ﻿using IdentityServiceApi.Interfaces.Utilities;
-using IdentityServiceApi.Models.Internal.ServiceResultModels.Authentication;
+using IdentityServiceApi.Models.ServiceResultModels.Authentication;
 using IdentityServiceApi.Services.Utilities.ResultFactories.AbstractClasses;
 
 namespace IdentityServiceApi.Services.Utilities.ResultFactories.Authentication
@@ -12,7 +12,7 @@ namespace IdentityServiceApi.Services.Utilities.ResultFactories.Authentication
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
-    public class LoginServiceResultFactory : LoginServiceResultFactoryBase
+    public class LoginServiceResultFactory : LoginServiceResultFactoryBase, ILoginServiceResultFactory
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="LoginServiceResultFactory"/> class.

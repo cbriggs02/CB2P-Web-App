@@ -1,4 +1,4 @@
-﻿using IdentityServiceApi.Models.Internal.ServiceResultModels.Shared;
+﻿using IdentityServiceApi.Models.ServiceResultModels.Shared;
 
 namespace IdentityServiceApi.Interfaces.Utilities
 {

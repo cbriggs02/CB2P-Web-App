@@ -1,7 +1,7 @@
 ﻿using IdentityServiceApi.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace IdentityServiceApi.Models.Internal.RequestModels.Logging
+namespace IdentityServiceApi.Models.RequestModels.Logging
 {
     /// <summary>
     ///     Represents the model used when requesting a paginated list of audit logs.
