@@ -225,10 +225,10 @@ namespace IdentityServiceApi
             }
             else
             {
-                app.UseMiddleware<ExceptionHandler>();
+                app.UseMiddleware<GlobalExceptionMiddleware>();
             }
 
-            app.UseMiddleware<PerformanceMonitor>();
+            app.UseMiddleware<PerformanceMonitoringMiddleware>();
 
             app.UseHttpsRedirection();
 
@@ -252,7 +252,7 @@ namespace IdentityServiceApi
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseMiddleware<TokenValidator>();
+            app.UseMiddleware<TokenValidatorMiddleware>();
 
             app.MapControllers();
 

@@ -12,14 +12,14 @@ namespace IdentityServiceApi.Middleware
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
-    public class ExceptionHandler
+    public class GlobalExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionHandler> _logger;
+        private readonly ILogger<GlobalExceptionMiddleware> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExceptionHandler"/> class.
+        ///     Initializes a new instance of the <see cref="GlobalExceptionMiddleware"/> class.
         /// </summary>
         /// <param name="next">
         ///     The delegate representing the next middleware in the pipeline.
@@ -30,7 +30,7 @@ namespace IdentityServiceApi.Middleware
         /// <param name="scopeFactory">
         ///     The factory for creating service scopes to resolve scoped services.
         /// </param>
-        public ExceptionHandler(RequestDelegate next, ILogger<ExceptionHandler> logger, IServiceScopeFactory scopeFactory)
+        public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger, IServiceScopeFactory scopeFactory)
         {
             _next = next;
             _logger = logger;
@@ -58,9 +58,9 @@ namespace IdentityServiceApi.Middleware
             }
             catch (Exception ex)
             {
-                await loggerService.LogException(ex);
-                LogToConsole(context, ex);
-                await WriteErrorResponse(context);
+                await loggerService.LogException(ex); // Log exception in DB with audit logger
+                ConsoleLogExceptionDetails(context, ex);
+                await WriteServerErrorResponse(context); // Return 500 status to client
             }
         }
 
@@ -74,43 +74,21 @@ namespace IdentityServiceApi.Middleware
         /// <param name="ex">
         ///     The <see cref="Exception"/> that was thrown, including details like message, stack trace, and inner exception.
         /// </param>
-        private void LogToConsole(HttpContext context, Exception ex)
+        private void ConsoleLogExceptionDetails(HttpContext context, Exception ex)
         {
-            var (exceptionType, innerExceptionMessage, stackTrace, requestPath,
-                requestQuery, requestMethod, timestamp) = GatherExceptionDetails(context, ex);
+            var exceptionType = ex.GetType().Name;
+            var innerExceptionMessage = ex.InnerException?.Message ?? "No inner exception";
+            var stackTrace = ex.StackTrace ?? "No stack trace available";
+            var requestPath = context.Request.Path.ToString() ?? "No request path";
+            var requestQuery = context.Request.QueryString.ToString() ?? "No query string";
+            var requestMethod = context.Request.Method ?? "No request method";
+            var timestamp = DateTime.UtcNow;
 
             _logger.LogError(ex, "{Message}. Exception of type {ExceptionType} occurred at {Timestamp}. " +
                 "Request: {Method} {Path}{QueryString}, " +
                 "Inner exception: {InnerExceptionMessage}, Stack Trace: {StackTrace}",
                 "An unhandled exception occurred", exceptionType, timestamp, requestMethod, requestPath, requestQuery,
                 innerExceptionMessage, stackTrace);
-        }
-
-        /// <summary>
-        ///     Gathers detailed information about an exception and the associated HTTP request context.
-        /// </summary>
-        /// <param name="context">
-        ///     The <see cref="HttpContext"/> for the current request, providing information about the HTTP request.
-        /// </param>
-        /// <param name="ex">
-        ///     The <see cref="Exception"/> that was thrown, containing details of the error.
-        /// </param>
-        /// <returns>
-        ///   A list of exceptions details used when logging the exception to console.
-        /// </returns>
-        private static (string ExceptionType, string InnerExceptionMessage, string StackTrace, string RequestPath,
-            string RequestQuery, string RequestMethod, DateTime Timestamp)
-         GatherExceptionDetails(HttpContext context, Exception ex)
-        {
-            return (
-                ExceptionType: ex.GetType().Name,
-                InnerExceptionMessage: ex.InnerException?.Message ?? "No inner exception",
-                StackTrace: ex.StackTrace ?? "No stack trace available",
-                RequestPath: context.Request.Path.ToString() ?? "No request path",
-                RequestQuery: context.Request.QueryString.ToString() ?? "No query string",
-                RequestMethod: context.Request.Method ?? "No request method",
-                Timestamp: DateTime.UtcNow
-            );
         }
 
         /// <summary>
@@ -123,7 +101,7 @@ namespace IdentityServiceApi.Middleware
         /// <returns>
         ///     A task representing the asynchronous operation of writing the error response to the client.
         /// </returns>
-        private static async Task WriteErrorResponse(HttpContext context)
+        private static async Task WriteServerErrorResponse(HttpContext context)
         {
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/json";

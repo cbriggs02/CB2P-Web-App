@@ -1,4 +1,6 @@
-﻿namespace IdentityServiceApi.Interfaces.Utilities
+﻿using System.Collections;
+
+namespace IdentityServiceApi.Interfaces.Utilities
 {
     /// <summary>
     ///     Defines a contract for parameter validation methods.
@@ -37,5 +39,17 @@
         ///     The name of the parameter (used in the exception message).
         /// </param>
         void ValidateObjectNotNull(object parameter, string parameterName);
+
+        /// <summary>
+        ///     Validates that a collection parameter is neither null nor empty.
+        ///     This method ensures that the provided collection contains at least one element.
+        /// </summary>
+        /// <param name="collection">
+        ///     The collection to validate. This parameter must not be null or empty.
+        /// </param>
+        /// <param name="parameterName">
+        ///     The name of the parameter being validated. Used in exception messages to identify the invalid parameter.
+        /// </param>
+        void ValidateCollectionNotEmpty(IEnumerable collection, string parameterName);
     }
 }

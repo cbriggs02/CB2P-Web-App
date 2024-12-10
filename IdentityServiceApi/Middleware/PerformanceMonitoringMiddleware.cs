@@ -5,20 +5,22 @@ namespace IdentityServiceApi.Middleware
 {
     /// <summary>
     ///     Middleware for monitoring the performance of HTTP requests, including request duration and CPU usage.
-    ///     This middleware captures performance metrics for every HTTP request, logs them, and provides insights for performance tuning.
+    ///     This middleware captures performance metrics for every HTTP request, logs them, and provides insights for 
+    ///     performance tuning.
     /// </summary>
     /// <remarks>
     ///     @Author: Christian Briglio
     ///     @Created: 2024
     /// </remarks>
-    public class PerformanceMonitor
+    public class PerformanceMonitoringMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<PerformanceMonitor> _logger;
+        private readonly ILogger<PerformanceMonitoringMiddleware> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly int performanceThreshold = 1000;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PerformanceMonitor"/> class.
+        ///     Initializes a new instance of the <see cref="PerformanceMonitoringMiddleware"/> class.
         /// </summary>
         /// <param name="next">
         ///     The delegate representing the next middleware in the request pipeline.
@@ -32,7 +34,7 @@ namespace IdentityServiceApi.Middleware
         /// <exception cref="ArgumentNullException">
         ///     Thrown if any of the parameters are null.
         /// </exception>
-        public PerformanceMonitor(RequestDelegate next, ILogger<PerformanceMonitor> logger, IServiceScopeFactory scopeFactory)
+        public PerformanceMonitoringMiddleware(RequestDelegate next, ILogger<PerformanceMonitoringMiddleware> logger, IServiceScopeFactory scopeFactory)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -64,7 +66,7 @@ namespace IdentityServiceApi.Middleware
             var cpuUsage = GetCpuUsage();
 
             await CheckPerformance(requestDuration, loggerService);
-            ConsoleLogPerformanceMetrics(context, requestId, requestDuration, cpuUsage);
+            ConsoleLogPerformanceMetrics(context, requestId, requestDuration, cpuUsage); 
         }
 
         /// <summary>
@@ -117,12 +119,11 @@ namespace IdentityServiceApi.Middleware
         /// <returns>
         ///     A task representing the asynchronous operation.
         /// </returns>
-        private static async Task CheckPerformance(long requestDuration, ILoggerService loggerService)
+        private async Task CheckPerformance(long requestDuration, ILoggerService loggerService)
         {
-            const int performanceThreshold = 1000;
-
             if (requestDuration > performanceThreshold)
             {
+                // Log slow performance metrics in DB using audit logger
                 await loggerService.LogSlowPerformance(requestDuration);
             }
 
@@ -145,13 +146,20 @@ namespace IdentityServiceApi.Middleware
         /// </param>
         private void ConsoleLogPerformanceMetrics(HttpContext context, string requestId, long requestDuration, double cpuUsage)
         {
-            _logger.LogInformation(
-                $"Request ID: {requestId}, " +
+            string metrics = $"Request ID: {requestId}, " +
                 $"Request Path: {context.Request.Path}, " +
                 $"Response Status Code: {context.Response.StatusCode}, " +
                 $"Request Duration: {requestDuration} ms, " +
-                $"CPU Usage: {cpuUsage} ms"
-            );
+                $"CPU Usage: {cpuUsage} ms";
+
+            if (requestDuration > performanceThreshold)
+            {
+                _logger.LogWarning(metrics);
+            } 
+            else
+            {
+                _logger.LogInformation(metrics);
+            }
         }
     }
 }
